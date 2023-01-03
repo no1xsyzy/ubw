@@ -84,6 +84,8 @@ class BaseHandler(HandlerInterface):
     def __live_callback(self, client: client_.BLiveClient, command: dict):
         return self._on_live(client, models.LiveMessage.from_command(command['data']))
 
+    def __preparing_callback(self, client: client_.BLiveClient, command: dict):
+        return self._on_live(client, models.PreparingMessage.from_command(command['data']))
 
     # cmd -> 处理回调
     _CMD_CALLBACK_DICT: Dict[
@@ -106,6 +108,12 @@ class BaseHandler(HandlerInterface):
         'SUPER_CHAT_MESSAGE': __super_chat_message_callback,
         # 删除醒目留言
         'SUPER_CHAT_MESSAGE_DELETE': __super_chat_message_delete_callback,
+        # 房间信息改变
+        'ROOM_CHANGE': __room_change_callback,
+        # 开始直播
+        'LIVE': __live_callback,
+        # 直播准备中
+        'PREPARING': __preparing_callback,
     }
     # 忽略其他常见cmd
     for cmd in IGNORED_CMDS:
@@ -167,4 +175,9 @@ class BaseHandler(HandlerInterface):
     async def _on_live(self, client: client_.BLiveClient, message: models.LiveMessage):
         """
         开始直播
+        """
+
+    async def _on_preparing(self, client: client_.BLiveClient, message: models.PreparingMessage):
+        """
+        直播准备中
         """

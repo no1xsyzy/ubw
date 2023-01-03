@@ -8,10 +8,11 @@ from rich import print
 
 import blivedm
 
-ROOM_IDS = [ 81004, 730215 ]
+ROOM_IDS = [81004, 730215]
 
 live_start_times = {}
 csv_write_queues = {}
+
 
 async def main():
     await listen_to_all()
@@ -29,7 +30,7 @@ async def get_live_start_time(room_id, fallback_to_now=False):
 
 async def csv_writer(room_id, start):
     while True:
-        async with aiofiles.open(f"{room_id}_{datetime.fromtimestamp(start).strftime('%Y年%m月%d日%H点')}.csv", mode='w', encoding='utf-8', newline="") as afp:
+        async with aiofiles.open(f"{room_id}_{datetime.fromtimestamp(start).strftime('%Y年%m月%d日%H点%M%S')}.csv", mode='a', encoding='utf-8', newline="") as afp:
             writer = aiocsv.AsyncDictWriter(afp, ['time', 't', 'marker', 'symbol'])
             await writer.writeheader()
             await afp.flush()
@@ -37,7 +38,7 @@ async def csv_writer(room_id, start):
             csv_write_queues[room_id] = queue
             while True:
                 to_write = await queue.get()
-                if to_write == "RESTART":
+                if to_write == 'RESTART':
                     start = get_live_start_time(room_id, True)
                     queue.task_done()
                     break
@@ -59,12 +60,7 @@ async def listen_to_all():
         asyncio.create_task(csv_writer(room_id, script_start))
 
     handler = HashMarkHandler()
-    print(handler._CMD_CALLBACK_DICT)
-    del handler._CMD_CALLBACK_DICT['LIVE']
-    del handler._CMD_CALLBACK_DICT['PREPARING']
-    handler._CMD_CALLBACK_DICT['WATCHED_CHANGE'] = None
-    handler._CMD_CALLBACK_DICT['LIKE_INFO_V3_CLICK'] = None
-    handler._CMD_CALLBACK_DICT['LIKE_INFO_V3_UPDATE'] = None
+    # print(handler._CMD_CALLBACK_DICT)
 
     for client in clients.values():
         client.add_handler(handler)
@@ -75,11 +71,12 @@ async def listen_to_all():
     finally:
         await asyncio.gather(*( client.stop_and_close() for client in clients.values()))
 
+
 class HashMarkHandler(blivedm.BaseHandler):
     async def _on_danmaku(self, client, message):
         if message.msg.startswith("#"):
             room_id = client.room_id
-            time = datetime.fromtimestamp(message.timestamp/1000)
+            time = datetime.fromtimestamp(message.timestamp//1000)
             marker = message.uname
             symbol = message.msg
             if live_start_times[room_id] is not None:
@@ -90,7 +87,13 @@ class HashMarkHandler(blivedm.BaseHandler):
                 print(f"[{room_id}] {symbol} @ {time} by {marker}")
                 await csv_write_queues[room_id].put({'time': time, 't': "", 'marker': marker, 'symbol': symbol})
 
-    # TODO: how to handle live start and live end?
+    async def _on_live(self, client, message):
+        room_id = client.room_id
+        csv_write_queues[room_id].put('RESTART')
+
+    async def _on_preparing(self, client, message):
+        room_id = client.room_id
+        csv_write_queues[room_id].put('RESTART')
 
 
 if __name__ == '__main__':

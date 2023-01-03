@@ -491,7 +491,16 @@ class SuperChatDeleteMessage:
 
 
 class RoomChangeMessage:
-    def __init__(self, title: str, area_id: int, parent_area_id: int, area_name: str, parent_area_name: str, live_key: str, sub_session_key: str):
+    def __init__(
+            self,
+            title: str,
+            area_id: int,
+            parent_area_id: int,
+            area_name: str,
+            parent_area_name: str,
+            live_key: str,
+            sub_session_key: str,
+    ):
         self.title = title
         self.area_id = area_id
         self.parent_area_id = parent_area_id
@@ -504,13 +513,23 @@ class RoomChangeMessage:
     def from_command(cls, data: dict):
         return cls(**data)
 
+
 class LiveMessage:
-    def __init__(self, live_key: str, voice_background: str, sub_session_key: str, live_platform: str, live_model: int, live_time: int, roomid: int):
+    def __init__(
+            self,
+            live_key: str,
+            voice_background: str,
+            sub_session_key: str,
+            live_platform: str,
+            live_model: int,
+            live_time: int,
+            roomid: int,
+    ):
         self.live_key = live_key
         self.voice_background = voice_background
         self.sub_session_key = sub_session_key
         self.live_platform = live_platform
-        self.live_model = livemodel
+        self.live_model = live_model
         self.live_time = live_time
         self.roomid = roomid
 
@@ -518,3 +537,14 @@ class LiveMessage:
     def from_command(cls, data: dict):
         return cls(**data)
 
+
+class PreparingMessage:
+    def __init__(
+            self,
+    ):
+        # TODO
+        ...
+
+    @classmethod
+    def from_command(cls, data: dict):
+        return cls(**data)
