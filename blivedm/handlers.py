@@ -85,7 +85,7 @@ class BaseHandler(HandlerInterface):
         return self._on_live(client, models.LiveMessage.from_command(command['data']))
 
     def __preparing_callback(self, client: client_.BLiveClient, command: dict):
-        return self._on_live(client, models.PreparingMessage.from_command(command['data']))
+        return self._on_preparing(client, models.PreparingMessage(command['roomid']))
 
     # cmd -> 处理回调
     _CMD_CALLBACK_DICT: Dict[

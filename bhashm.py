@@ -39,7 +39,7 @@ async def csv_writer(room_id, start):
             while True:
                 to_write = await queue.get()
                 if to_write == 'RESTART':
-                    start = get_live_start_time(room_id, True)
+                    start = live_start_times[room_id] = get_live_start_time(room_id, True)
                     queue.task_done()
                     break
                 else:

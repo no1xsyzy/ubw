@@ -541,9 +541,9 @@ class LiveMessage:
 class PreparingMessage:
     def __init__(
             self,
+            roomid: int,
     ):
-        # TODO
-        ...
+        self.roomid = roomid
 
     @classmethod
     def from_command(cls, data: dict):
