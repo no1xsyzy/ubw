@@ -87,6 +87,10 @@ class HashMarkHandler(blivedm.BaseHandler):
                 print(f"[{room_id}] {symbol} @ {time} by {marker}")
                 await csv_write_queues[room_id].put({'time': time, 't': "", 'marker': marker, 'symbol': symbol})
 
+
+    async def _on_room_change(self, client, message):
+        print(message)
+
     async def _on_live(self, client, message):
         room_id = client.room_id
         csv_write_queues[room_id].put('RESTART')

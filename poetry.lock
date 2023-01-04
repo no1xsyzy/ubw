@@ -101,6 +101,21 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "pydantic"
+version = "1.10.4"
+description = "Data validation and settings management using python type hints"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+typing-extensions = ">=4.2.0"
+
+[package.extras]
+dotenv = ["python-dotenv (>=0.10.4)"]
+email = ["email-validator (>=1.0.3)"]
+
+[[package]]
 name = "pygments"
 version = "2.14.0"
 description = "Pygments is a syntax highlighting package written in Python."
@@ -150,7 +165,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "19e51af776541c3f313a27c39421a0204fc4c97d31271b2fa5be6cfcb4ca7ca3"
+content-hash = "7b75482df6772a1f9fb68bcadec47e4277b7e0844611d52eaf3b5a8db8972acd"
 
 [metadata.files]
 aiocsv = []
@@ -172,6 +187,7 @@ commonmark = [
 ]
 idna = []
 multidict = []
+pydantic = []
 pygments = []
 rich = []
 typing-extensions = []

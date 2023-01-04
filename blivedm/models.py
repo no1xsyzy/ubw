@@ -2,6 +2,8 @@
 import json
 from typing import *
 
+from pydantic import BaseModel
+
 __all__ = (
     'HeartbeatMessage',
     'DanmakuMessage',
@@ -10,6 +12,10 @@ __all__ = (
     'SuperChatMessage',
     'SuperChatDeleteMessage',
 )
+
+
+class CommandModel(BaseModel):
+    cmd: str
 
 
 class HeartbeatMessage:
@@ -250,301 +256,123 @@ class DanmakuMessage:
             return {}
 
 
-class GiftMessage:
-    """
-    礼物消息
-
-    :param gift_name: 礼物名
-    :param num: 数量
-    :param uname: 用户名
-    :param face: 用户头像URL
-    :param guard_level: 舰队等级，0非舰队，1总督，2提督，3舰长
-    :param uid: 用户ID
-    :param timestamp: 时间戳
-    :param gift_id: 礼物ID
-    :param gift_type: 礼物类型（未知）
-    :param action: 目前遇到的有'喂食'、'赠送'
-    :param price: 礼物单价瓜子数
-    :param rnd: 随机数，可能是去重用的。有时是时间戳+去重ID，有时是UUID
-    :param coin_type: 瓜子类型，'silver'或'gold'，1000金瓜子 = 1元
-    :param total_coin: 总瓜子数
-    :param tid: 可能是事务ID，有时和rnd相同
-    """
-
-    def __init__(
-        self,
-        gift_name: str = None,
-        num: int = None,
-        uname: str = None,
-        face: str = None,
-        guard_level: int = None,
-        uid: int = None,
-        timestamp: int = None,
-        gift_id: int = None,
-        gift_type: int = None,
-        action: str = None,
-        price: int = None,
-        rnd: str = None,
-        coin_type: str = None,
-        total_coin: int = None,
-        tid: str = None,
-    ):
-        self.gift_name = gift_name
-        self.num = num
-        self.uname = uname
-        self.face = face
-        self.guard_level = guard_level
-        self.uid = uid
-        self.timestamp = timestamp
-        self.gift_id = gift_id
-        self.gift_type = gift_type
-        self.action = action
-        self.price = price
-        self.rnd = rnd
-        self.coin_type = coin_type
-        self.total_coin = total_coin
-        self.tid = tid
-
-    @classmethod
-    def from_command(cls, data: dict):
-        return cls(
-            gift_name=data['giftName'],
-            num=data['num'],
-            uname=data['uname'],
-            face=data['face'],
-            guard_level=data['guard_level'],
-            uid=data['uid'],
-            timestamp=data['timestamp'],
-            gift_id=data['giftId'],
-            gift_type=data['giftType'],
-            action=data['action'],
-            price=data['price'],
-            rnd=data['rnd'],
-            coin_type=data['coin_type'],
-            total_coin=data['total_coin'],
-            tid=data['tid'],
-        )
+class GiftMessage(BaseModel):
+    """礼物消息"""
+    giftName: str = None  # 礼物名
+    num: int = None  # 数量
+    uname: str = None  # 用户名
+    face: str = None  # 用户头像URL
+    guard_level: int = None  # 舰队等级，0非舰队，1总督，2提督，3舰长
+    uid: int = None  # 用户ID
+    timestamp: int = None  # 时间戳
+    giftId: int = None  # 礼物ID
+    giftType: int = None  # 礼物类型（未知）
+    action: str = None  # 目前遇到的有'喂食'、'赠送'
+    price: int = None  # 礼物单价瓜子数
+    rnd: str = None  # 随机数，可能是去重用的。有时是时间戳+去重ID，有时是UUID
+    coin_type: str = None  # 瓜子类型，'silver'或'gold'，1000金瓜子 = 1元
+    total_coin: int = None  # 总瓜子数
+    tid: str = None  # 可能是事务ID，有时和rnd相同
 
 
-class GuardBuyMessage:
-    """
-    上舰消息
-
-    :param uid: 用户ID
-    :param username: 用户名
-    :param guard_level: 舰队等级，0非舰队，1总督，2提督，3舰长
-    :param num: 数量
-    :param price: 单价金瓜子数
-    :param gift_id: 礼物ID
-    :param gift_name: 礼物名
-    :param start_time: 开始时间戳，和结束时间戳相同
-    :param end_time: 结束时间戳，和开始时间戳相同
-    """
-
-    def __init__(
-        self,
-        uid: int = None,
-        username: str = None,
-        guard_level: int = None,
-        num: int = None,
-        price: int = None,
-        gift_id: int = None,
-        gift_name: str = None,
-        start_time: int = None,
-        end_time: int = None,
-    ):
-        self.uid: int = uid
-        self.username: str = username
-        self.guard_level: int = guard_level
-        self.num: int = num
-        self.price: int = price
-        self.gift_id: int = gift_id
-        self.gift_name: str = gift_name
-        self.start_time: int = start_time
-        self.end_time: int = end_time
-
-    @classmethod
-    def from_command(cls, data: dict):
-        return cls(
-            uid=data['uid'],
-            username=data['username'],
-            guard_level=data['guard_level'],
-            num=data['num'],
-            price=data['price'],
-            gift_id=data['gift_id'],
-            gift_name=data['gift_name'],
-            start_time=data['start_time'],
-            end_time=data['end_time'],
-        )
+class GiftCommand(CommandModel):
+    cmd: Literal['SEND_GIFT']
+    data: GiftMessage
 
 
-class SuperChatMessage:
-    """
-    醒目留言消息
-
-    :param price: 价格（人民币）
-    :param message: 消息
-    :param message_trans: 消息日文翻译（目前只出现在SUPER_CHAT_MESSAGE_JPN）
-    :param start_time: 开始时间戳
-    :param end_time: 结束时间戳
-    :param time: 剩余时间（约等于 结束时间戳 - 开始时间戳）
-    :param id_: str，醒目留言ID，删除时用
-    :param gift_id: 礼物ID
-    :param gift_name: 礼物名
-    :param uid: 用户ID
-    :param uname: 用户名
-    :param face: 用户头像URL
-    :param guard_level: 舰队等级，0非舰队，1总督，2提督，3舰长
-    :param user_level: 用户等级
-    :param background_bottom_color: 底部背景色，'#rrggbb'
-    :param background_color: 背景色，'#rrggbb'
-    :param background_icon: 背景图标
-    :param background_image: 背景图URL
-    :param background_price_color: 背景价格颜色，'#rrggbb'
-    """
-
-    def __init__(
-        self,
-        price: int = None,
-        message: str = None,
-        message_trans: str = None,
-        start_time: int = None,
-        end_time: int = None,
-        time: int = None,
-        id_: int = None,
-        gift_id: int = None,
-        gift_name: str = None,
-        uid: int = None,
-        uname: str = None,
-        face: str = None,
-        guard_level: int = None,
-        user_level: int = None,
-        background_bottom_color: str = None,
-        background_color: str = None,
-        background_icon: str = None,
-        background_image: str = None,
-        background_price_color: str = None,
-    ):
-        self.price: int = price
-        self.message: str = message
-        self.message_trans: str = message_trans
-        self.start_time: int = start_time
-        self.end_time: int = end_time
-        self.time: int = time
-        self.id: int = id_
-        self.gift_id: int = gift_id
-        self.gift_name: str = gift_name
-        self.uid: int = uid
-        self.uname: str = uname
-        self.face: str = face
-        self.guard_level: int = guard_level
-        self.user_level: int = user_level
-        self.background_bottom_color: str = background_bottom_color
-        self.background_color: str = background_color
-        self.background_icon: str = background_icon
-        self.background_image: str = background_image
-        self.background_price_color: str = background_price_color
-
-    @classmethod
-    def from_command(cls, data: dict):
-        return cls(
-            price=data['price'],
-            message=data['message'],
-            message_trans=data['message_trans'],
-            start_time=data['start_time'],
-            end_time=data['end_time'],
-            time=data['time'],
-            id_=data['id'],
-            gift_id=data['gift']['gift_id'],
-            gift_name=data['gift']['gift_name'],
-            uid=data['uid'],
-            uname=data['user_info']['uname'],
-            face=data['user_info']['face'],
-            guard_level=data['user_info']['guard_level'],
-            user_level=data['user_info']['user_level'],
-            background_bottom_color=data['background_bottom_color'],
-            background_color=data['background_color'],
-            background_icon=data['background_icon'],
-            background_image=data['background_image'],
-            background_price_color=data['background_price_color'],
-        )
+class GuardBuyMessage(BaseModel):
+    """上舰消息"""
+    uid: int = None  # 用户ID
+    username: str = None  # 用户名
+    guard_level: int = None  # 舰队等级，0非舰队，1总督，2提督，3舰长
+    num: int = None  # 数量
+    price: int = None  # 单价金瓜子数
+    gift_id: int = None  # 礼物ID
+    gift_name: str = None  # 礼物名
+    start_time: int = None  # 开始时间戳，和结束时间戳相同
+    end_time: int = None  # 结束时间戳，和开始时间戳相同结束时间戳，和开始时间戳相同
 
 
-class SuperChatDeleteMessage:
-    """
-    删除醒目留言消息
-
-    :param ids: 醒目留言ID数组
-    """
-
-    def __init__(
-        self,
-        ids: List[int] = None,
-    ):
-        self.ids: List[int] = ids
-
-    @classmethod
-    def from_command(cls, data: dict):
-        return cls(
-            ids=data['ids'],
-        )
+class GuardBuyCommand(CommandModel):
+    cmd: Literal['GUARD_BUY']
+    data: GuardBuyMessage
 
 
-class RoomChangeMessage:
-    def __init__(
-            self,
-            title: str,
-            area_id: int,
-            parent_area_id: int,
-            area_name: str,
-            parent_area_name: str,
-            live_key: str,
-            sub_session_key: str,
-    ):
-        self.title = title
-        self.area_id = area_id
-        self.parent_area_id = parent_area_id
-        self.area_name = area_name
-        self.parent_area_name = parent_area_name
-        self.live_key = live_key
-        self.sub_session_key = sub_session_key
-
-    @classmethod
-    def from_command(cls, data: dict):
-        return cls(**data)
+class GiftInfo(BaseModel):
+    gift_id: int = None  # 礼物ID
+    gift_name: str = None  # 礼物名
 
 
-class LiveMessage:
-    def __init__(
-            self,
-            live_key: str,
-            voice_background: str,
-            sub_session_key: str,
-            live_platform: str,
-            live_model: int,
-            live_time: int,
-            roomid: int,
-    ):
-        self.live_key = live_key
-        self.voice_background = voice_background
-        self.sub_session_key = sub_session_key
-        self.live_platform = live_platform
-        self.live_model = live_model
-        self.live_time = live_time
-        self.roomid = roomid
-
-    @classmethod
-    def from_command(cls, data: dict):
-        return cls(**data)
+class UserInfo(BaseModel):
+    uname: str = None  # 用户名
+    face: str = None  # 用户头像URL
+    guard_level: int = None  # 舰队等级，0非舰队，1总督，2提督，3舰长
+    user_level: int = None  # 用户等级
 
 
-class PreparingMessage:
-    def __init__(
-            self,
-            roomid: int,
-    ):
-        self.roomid = roomid
+class SuperChatMessage(BaseModel):
+    """醒目留言消息"""
+    price: int = None  # 价格（人民币）
+    message: str = None  # 消息
+    message_trans: Optional[str] = None  # 消息日文翻译（目前只出现在SUPER_CHAT_MESSAGE_JPN）
+    start_time: int = None  # 开始时间戳
+    end_time: int = None  # 结束时间戳
+    time: int = None  # 剩余时间（约等于 结束时间戳 - 开始时间戳）
+    id: int = None  # 醒目留言ID，删除时用
+    gift: GiftInfo
+    uid: int = None  # 用户ID
+    user_info: UserInfo
+    background_bottom_color: str = None  # 底部背景色，'#rrggbb'
+    background_color: str = None  # 背景色，'#rrggbb'
+    background_icon: str = None  # 背景图标
+    background_image: str = None  # 背景图URL
+    background_price_color: str = None  # 背景价格颜色，'#rrggbb'
 
-    @classmethod
-    def from_command(cls, data: dict):
-        return cls(**data)
+
+class SuperChatCommand(CommandModel):
+    cmd: Literal['SUPER_CHAT_MESSAGE']
+    data: SuperChatMessage
+
+
+class SuperChatDeleteMessage(BaseModel):
+    """删除醒目留言消息"""
+    ids: List[int]  # 醒目留言ID数组
+
+
+class SuperChatDeleteCommand(BaseModel):
+    title: Literal['SUPER_CHAT_MESSAGE_DELETE']
+    data: SuperChatDeleteMessage
+
+
+class RoomChangeMessage(BaseModel):
+    """直播间信息修改"""
+    title: str
+    area_id: int
+    parent_area_id: int
+    area_name: str
+    parent_area_name: str
+    live_key: str
+    sub_session_key: str
+
+
+class RoomChangeCommand(CommandModel):
+    cmd: Literal['ROOM_CHANGE']
+    data: RoomChangeMessage
+
+
+class LiveCommand(CommandModel):
+    """开播"""
+    cmd: Literal['LIVE']
+    live_key: str
+    voice_background: str
+    sub_session_key: str
+    live_platform: str
+    live_model: int
+    live_time: int
+    roomid: int
+
+
+class PreparingCommand(CommandModel):
+    """下播"""
+    cmd: Literal['PREPARING']
+    roomid: int
