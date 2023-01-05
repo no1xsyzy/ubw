@@ -1,7 +1,9 @@
 import asyncio
 from datetime import datetime
+from pathlib import Path, _ignore_error as pathlib_ignore_error
 
 import aiofiles
+import aiofiles.os
 import aiocsv
 import aiohttp
 from rich import print
@@ -29,17 +31,25 @@ async def get_live_start_time(room_id, fallback_to_now=False):
 
 
 async def csv_writer(room_id, start):
+    start = datetime.fromtimestamp(start)
     while True:
-        async with aiofiles.open(f"{room_id}_{datetime.fromtimestamp(start).strftime('%Y年%m月%d日%H点%M%S')}.csv", mode='a', encoding='utf-8', newline="") as afp:
+        filename = f"{room_id}_{start.strftime('%Y年%m月%d日%H点%M%S')}.csv"
+        if await aiofiles.os.path.isfile(filename):
+            mode = 'a'
+        else:
+            mode = 'w'
+
+        async with aiofiles.open(filename, mode=mode, encoding='utf-8', newline="") as afp:
             writer = aiocsv.AsyncDictWriter(afp, ['time', 't', 'marker', 'symbol'])
-            await writer.writeheader()
-            await afp.flush()
+            if mode == 'w':
+                await writer.writeheader()
+                await afp.flush()
             queue = asyncio.Queue()
             csv_write_queues[room_id] = queue
             while True:
                 to_write = await queue.get()
                 if to_write == 'RESTART':
-                    start = live_start_times[room_id] = get_live_start_time(room_id, True)
+                    start = live_start_times[room_id] = datetime.fromtimestamp(await get_live_start_time(room_id, True))
                     queue.task_done()
                     break
                 else:
@@ -67,9 +77,9 @@ async def listen_to_all():
         client.start()
 
     try:
-        await asyncio.gather(*( client.join() for client in clients.values()))
+        await asyncio.gather(*(client.join() for client in clients.values()))
     finally:
-        await asyncio.gather(*( client.stop_and_close() for client in clients.values()))
+        await asyncio.gather(*(client.stop_and_close() for client in clients.values()))
 
 
 class HashMarkHandler(blivedm.BaseHandler):
