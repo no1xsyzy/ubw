@@ -375,3 +375,10 @@ class PreparingCommand(CommandModel):
     """下播"""
     cmd: Literal['PREPARING']
     roomid: int
+
+
+class WarningCommand(ComandModel):
+    """超管警告"""
+    cmd: Literal['WARNING']
+    msg: str
+    roomid: int
