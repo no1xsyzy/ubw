@@ -339,7 +339,7 @@ class SuperChatDeleteMessage(BaseModel):
     ids: List[int]  # 醒目留言ID数组
 
 
-class SuperChatDeleteCommand(BaseModel):
+class SuperChatDeleteCommand(CommandModel):
     title: Literal['SUPER_CHAT_MESSAGE_DELETE']
     data: SuperChatDeleteMessage
 
