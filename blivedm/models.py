@@ -377,8 +377,31 @@ class PreparingCommand(CommandModel):
     roomid: int
 
 
-class WarningCommand(ComandModel):
+class WarningCommand(CommandModel):
     """超管警告"""
     cmd: Literal['WARNING']
     msg: str
     roomid: int
+
+
+class HotRankSettlementData(BaseModel):
+    rank: int  # 排名
+    uname: str  # 主播用户名
+    face: str  # 主播头像
+    timestamp: int  # 达成时间
+    icon: str  # 榜单图标
+    area_name: str  # 榜单名称
+    url: str
+    cache_key: str
+    dm_msg: str  # 文字描述
+    dmscore: Optional[int] = None
+
+
+class HotRankSettlementV2Command(CommandModel):
+    cmd: Literal['HOT_RANK_SETTLEMENT_V2']
+    data: HotRankSettlementData
+
+
+class HotRankSettlementCommand(CommandModel):
+    cmd: Literal['HOT_RANK_SETTLEMENT']
+    data: HotRankSettlementData

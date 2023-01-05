@@ -33,7 +33,9 @@ async def get_live_start_time(room_id, fallback_to_now=False):
 async def csv_writer(room_id, start):
     start = datetime.fromtimestamp(start)
     while True:
-        filename = f"{room_id}_{start.strftime('%Y年%m月%d日%H点%M%S')}.csv"
+        dirname = f"output/{room_id}"
+        await aiofiles.os.makedirs(dirname, exist_ok=True)
+        filename = f"output/{room_id}/{room_id}_{start.strftime('%Y年%m月%d日%H点%M%S')}.csv"
         if await aiofiles.os.path.isfile(filename):
             mode = 'a'
         else:
@@ -103,11 +105,11 @@ class HashMarkHandler(blivedm.BaseHandler):
 
     async def _on_live(self, client, message):
         room_id = client.room_id
-        csv_write_queues[room_id].put('RESTART')
+        await csv_write_queues[room_id].put('RESTART')
 
     async def _on_preparing(self, client, message):
         room_id = client.room_id
-        csv_write_queues[room_id].put('RESTART')
+        await csv_write_queues[room_id].put('RESTART')
 
 
 if __name__ == '__main__':

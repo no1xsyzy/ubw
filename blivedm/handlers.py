@@ -22,6 +22,8 @@ IGNORED_CMDS = (
     'GUARD_HONOR_THOUSAND',
     'HOT_RANK_CHANGED',
     'HOT_RANK_CHANGED_V2',
+    'HOT_RANK_SETTLEMENT',
+    'HOT_RANK_SETTLEMENT_V2',
     'INTERACT_WORD',
     'LIKE_INFO_V3_CLICK',
     'LIKE_INFO_V3_UPDATE',
@@ -95,7 +97,7 @@ class BaseHandler:
                     await callback(client, command)
             else:
                 self._cmd_callbacks[cmd] = None  # ignores
-                print("[%d] unknown cmd `%s`", client.room_id, cmd)
+                print("[%d] unknown cmd `%s`" % (client.room_id, cmd))
                 print(command)
                 from rich.console import Console
                 console = Console()
