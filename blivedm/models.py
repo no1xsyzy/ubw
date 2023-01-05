@@ -368,7 +368,6 @@ class LiveCommand(CommandModel):
     sub_session_key: str
     live_platform: str
     live_model: int
-    live_time: int
     roomid: int
 
 

@@ -84,7 +84,7 @@ class BaseHandler:
         try:
             model: models.CommandModel = parse_obj_as(Union[tuple(models.CommandModel.__subclasses__())], command)
             if hasattr(self, "_on_" + model.cmd.lower()):
-                return getattr(self, "_on_" + model.cmd.lower())(client, model)
+                return await getattr(self, "_on_" + model.cmd.lower())(client, model)
             else:
                 # correctly parsed but no _on_* method, skip.
                 return
