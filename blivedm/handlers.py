@@ -60,14 +60,14 @@ class HandlerInterface(Protocol):
 
 class BaseHandler:
     """
-    一个简单的消息处理器实现，带消息分发和消息类型转换。继承并重写_on_xxx方法即可实现自己的处理器
+    一个简单的消息处理器实现，带消息分发和消息类型转换。继承并重写on_xxx方法即可实现自己的处理器
     """
 
     def __heartbeat_callback(self, client: client_.BLiveClient, command: dict):
-        return self._on_heartbeat(client, models.HeartbeatMessage.from_command(command['data']))
+        return self.on_heartbeat(client, models.HeartbeatMessage.from_command(command['data']))
 
     def __danmu_msg_callback(self, client: client_.BLiveClient, command: dict):
-        return self._on_danmaku(client, models.DanmakuMessage.from_command(command['info']))
+        return self.on_danmaku(client, models.DanmakuMessage.from_command(command['info']))
 
     def __init__(self):
         self._cmd_callbacks = {
@@ -76,6 +76,10 @@ class BaseHandler:
         }
         for ignore in IGNORED_CMDS:
             self._cmd_callbacks[ignore] = None
+        self.__post_init__()
+
+    def __post_init__(self):
+        pass
 
     async def handle(self, client: client_.BLiveClient, command: dict):
         cmd = command.get('cmd', '')
@@ -83,49 +87,56 @@ class BaseHandler:
         if pos != -1:
             cmd = cmd[:pos]
 
-        try:
-            model: models.CommandModel = parse_obj_as(Union[tuple(models.CommandModel.__subclasses__())], command)
-            if hasattr(self, "_on_" + model.cmd.lower()):
-                return await getattr(self, "_on_" + model.cmd.lower())(client, model)
+        if cmd in self._cmd_callbacks:
+            callback = self._cmd_callbacks[cmd]
+            if callback is not None:
+                return await callback(client, command)
             else:
-                # correctly parsed but no _on_* method, skip.
                 return
-        except ValidationError:
-            if cmd in self._cmd_callbacks:
-                callback = self._cmd_callbacks[cmd]
-                if callback is not None:
-                    await callback(client, command)
-            else:
-                self._cmd_callbacks[cmd] = None  # ignores
-                print("[%d] unknown cmd `%s`" % (client.room_id, cmd))
-                print(command)
-                from rich.console import Console
-                console = Console()
-                console.print_exception()
 
-    async def _on_heartbeat(self, client: client_.BLiveClient, message: models.HeartbeatMessage):
+        try:
+            model: models.CommandModel = parse_obj_as(
+                Annotated[Union[tuple(models.CommandModel.__subclasses__())],
+                          Field(discriminator='cmd')],
+                command)
+            if hasattr(self, "on_" + model.cmd.lower()):
+                return await getattr(self, "on_" + model.cmd.lower())(client, model)
+            else:
+                return await self.on_else(client, model)
+        except ValidationError:
+            self._cmd_callbacks[cmd] = None  # ignores more commands
+            print(f"[{client.room_id}] unknown cmd `{cmd}`")
+            print(command)
+            from rich.console import Console
+            console = Console()
+            console.print_exception()
+
+    async def on_else(self, client: client_.BliveClient, model: Union[tuple(models.CommandModel.__subclasses__())]):
+        """其他种类未忽略消息"""
+
+    async def on_heartbeat(self, client: client_.BLiveClient, message: models.HeartbeatMessage):
         """收到心跳包（人气值）"""
 
-    async def _on_danmaku(self, client: client_.BLiveClient, message: models.DanmakuMessage):
+    async def on_danmaku(self, client: client_.BLiveClient, message: models.DanmakuMessage):
         """收到弹幕"""
 
-    async def _on_gift(self, client: client_.BLiveClient, message: models.GiftMessage):
+    async def on_gift(self, client: client_.BLiveClient, message: models.GiftMessage):
         """收到礼物"""
 
-    async def _on_buy_guard(self, client: client_.BLiveClient, message: models.GuardBuyMessage):
+    async def on_buy_guard(self, client: client_.BLiveClient, message: models.GuardBuyMessage):
         """有人上舰"""
 
-    async def _on_super_chat(self, client: client_.BLiveClient, message: models.SuperChatMessage):
+    async def on_super_chat(self, client: client_.BLiveClient, message: models.SuperChatMessage):
         """醒目留言"""
 
-    async def _on_super_chat_delete(self, client: client_.BLiveClient, message: models.SuperChatDeleteMessage):
+    async def on_super_chat_delete(self, client: client_.BLiveClient, message: models.SuperChatDeleteMessage):
         """删除醒目留言"""
 
-    async def _on_room_change(self, client: client_.BLiveClient, message: models.RoomChangeMessage):
+    async def on_room_change(self, client: client_.BLiveClient, message: models.RoomChangeMessage):
         """房间信息改变"""
 
-    async def _on_live(self, client: client_.BLiveClient, message: models.LiveCommand):
+    async def on_live(self, client: client_.BLiveClient, message: models.LiveCommand):
         """开始直播"""
 
-    async def _on_preparing(self, client: client_.BLiveClient, message: models.PreparingCommand):
+    async def on_preparing(self, client: client_.BLiveClient, message: models.PreparingCommand):
         """直播准备中"""
