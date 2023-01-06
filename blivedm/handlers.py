@@ -116,7 +116,7 @@ class BaseHandler:
             console = Console()
             console.print_exception()
 
-    async def on_else(self, client: client_.BliveClient, model: Union[tuple(models.CommandModel.__subclasses__())]):
+    async def on_else(self, client: client_.BLiveClient, model: Union[tuple(models.CommandModel.__subclasses__())]):
         """其他种类未忽略消息"""
 
     async def on_heartbeat(self, client: client_.BLiveClient, message: models.HeartbeatMessage):
