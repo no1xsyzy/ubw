@@ -85,7 +85,7 @@ async def listen_to_all():
 
 
 class HashMarkHandler(blivedm.BaseHandler):
-    async def _on_danmaku(self, client, message):
+    async def on_danmaku(self, client, message):
         if message.msg.startswith("#"):
             room_id = client.room_id
             time = datetime.fromtimestamp(message.timestamp//1000)
@@ -100,14 +100,14 @@ class HashMarkHandler(blivedm.BaseHandler):
                 await csv_write_queues[room_id].put({'time': time, 't': "", 'marker': marker, 'symbol': symbol})
 
 
-    async def _on_room_change(self, client, message):
+    async def on_room_change(self, client, message):
         print(message)
 
-    async def _on_live(self, client, message):
+    async def on_live(self, client, message):
         room_id = client.room_id
         await csv_write_queues[room_id].put('RESTART')
 
-    async def _on_preparing(self, client, message):
+    async def on_preparing(self, client, message):
         room_id = client.room_id
         await csv_write_queues[room_id].put('RESTART')
 
