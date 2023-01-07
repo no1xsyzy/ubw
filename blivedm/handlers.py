@@ -3,7 +3,7 @@ import logging
 from typing import *
 
 from rich import print
-from pydantic import parse_obj_as, ValidationError
+from pydantic import parse_obj_as, ValidationError, Field
 
 from . import client as client_
 from . import models

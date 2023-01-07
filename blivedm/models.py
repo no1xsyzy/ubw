@@ -340,7 +340,7 @@ class SuperChatDeleteMessage(BaseModel):
 
 
 class SuperChatDeleteCommand(CommandModel):
-    title: Literal['SUPER_CHAT_MESSAGE_DELETE']
+    cmd: Literal['SUPER_CHAT_MESSAGE_DELETE']
     data: SuperChatDeleteMessage
 
 
