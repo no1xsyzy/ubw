@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime
+import logging
 from pathlib import Path, _ignore_error as pathlib_ignore_error
 
 import aiofiles
@@ -7,8 +8,18 @@ import aiofiles.os
 import aiocsv
 import aiohttp
 from rich import print
+from rich.logging import RichHandler
 
 import blivedm
+
+logging.basicConfig(
+    level="NOTSET",
+    format="%(message)s",
+    datefmt="[%Y-%m-%d %H:%M:%S]",
+    handlers=[RichHandler(rich_tracebacks=True)]
+)
+
+logger = logging.getLogger('bhashm')
 
 ROOM_IDS = [81004, 730215]
 
@@ -93,15 +104,15 @@ class HashMarkHandler(blivedm.BaseHandler):
             symbol = message.msg
             if live_start_times[room_id] is not None:
                 t = str(time - live_start_times[room_id])
-                print(f"[{room_id}] {symbol} @ {time}({t} from live start) by {marker}")
+                print(f"[{time}] {marker}: {symbol} @ {room_id} ({t} from live start)")
                 await csv_write_queues[room_id].put({'time': time, 't': t, 'marker': marker, 'symbol': symbol})
             else:
-                print(f"[{room_id}] {symbol} @ {time} by {marker}")
+                print(f"[{time}] {marker}: {symbol} @ {room_id}")
                 await csv_write_queues[room_id].put({'time': time, 't': "", 'marker': marker, 'symbol': symbol})
 
 
     async def on_room_change(self, client, message):
-        print(message)
+        logger.info(message)
 
     async def on_live(self, client, message):
         room_id = client.room_id

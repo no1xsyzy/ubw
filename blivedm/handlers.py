@@ -2,7 +2,6 @@
 import logging
 from typing import *
 
-from rich import print
 from pydantic import parse_obj_as, ValidationError, Field
 
 from . import client as client_
@@ -19,6 +18,7 @@ logger = logging.getLogger('blivedm')
 IGNORED_CMDS = (
     'COMBO_SEND',
     'COMMON_NOTICE_DANMAKU',
+    'DANMU_AGGREGATION',
     'ENTRY_EFFECT',
     'FULL_SCREEN_SPECIAL_EFFECT',
     'GIFT_STAR_PROCESS',
@@ -44,6 +44,9 @@ IGNORED_CMDS = (
     'PK_BATTLE_SETTLE_USER',
     'PK_BATTLE_SETTLE_V2',
     'POPULAR_RANK_CHANGED',
+    'POPULARITY_RED_POCKET_NEW',
+    'POPULARITY_RED_POCKET_START',
+    'POPULARITY_RED_POCKET_WINNER_LIST',
     'ROOM_BLOCK_MSG',
     'ROOM_REAL_TIME_MESSAGE_UPDATE',
     'STOP_LIVE_ROOM_LIST',
@@ -111,11 +114,8 @@ class BaseHandler:
                 return await self.on_else(client, model)
         except ValidationError:
             self._cmd_callbacks[cmd] = None  # ignores more commands
-            print(f"[{client.room_id}] unknown cmd `{cmd}`")
-            print(command)
-            from rich.console import Console
-            console = Console()
-            console.print_exception()
+            logger.warning(f"[{client.room_id}] unknown cmd `{cmd}`")
+            logger.exception(command)
 
     async def on_else(self, client: client_.BLiveClient, model: Union[tuple(models.CommandModel.__subclasses__())]):
         """其他种类未忽略消息"""
