@@ -16,6 +16,7 @@ logger = logging.getLogger('blivedm')
 
 # 常见可忽略的cmd
 IGNORED_CMDS = (
+    'AREA_RANK_CHANGED',
     'COMBO_SEND',
     'COMMON_NOTICE_DANMAKU',
     'DANMU_AGGREGATION',
@@ -47,12 +48,16 @@ IGNORED_CMDS = (
     'POPULARITY_RED_POCKET_NEW',
     'POPULARITY_RED_POCKET_START',
     'POPULARITY_RED_POCKET_WINNER_LIST',
-    'ROOM_BLOCK_MSG',
     'ROOM_REAL_TIME_MESSAGE_UPDATE',
+    'ROOM_SKIN_MSG',
     'STOP_LIVE_ROOM_LIST',
     'SUPER_CHAT_MESSAGE_JPN',
     'SYS_MSG',
+    'TRADING_SCORE',
     'USER_TOAST_MSG',
+    'VOICE_JOIN_LIST',
+    'VOICE_JOIN_ROOM_COUNT_INFO',
+    'VOICE_JOIN_SWITCH',
     'WATCHED_CHANGE',
     'WIDGET_BANNER',
 )
@@ -146,3 +151,6 @@ class BaseHandler:
 
     async def on_preparing(self, client: client_.BLiveClient, message: models.PreparingCommand):
         """直播准备中"""
+
+    async def on_room_block_msg(self, client: client_.BLiveClient, message: models.RoomBlockMsgCommand):
+        """观众被封禁"""

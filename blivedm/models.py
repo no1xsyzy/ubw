@@ -405,3 +405,17 @@ class HotRankSettlementV2Command(CommandModel):
 class HotRankSettlementCommand(CommandModel):
     cmd: Literal['HOT_RANK_SETTLEMENT']
     data: HotRankSettlementData
+
+
+class RoomBlockMsg(BaseModel):
+    dmscore: int
+    operator: int
+    uid: int
+    uname: str
+
+
+class RoomBlockCommand(CommandModel):
+    cmd: Literal['ROOM_BLOCK_MSG']
+    data: RoomBlockMsg
+    uid: str
+    uname: str
