@@ -49,7 +49,6 @@ IGNORED_CMDS = (
     'POPULARITY_RED_POCKET_START',
     'POPULARITY_RED_POCKET_WINNER_LIST',
     'ROOM_REAL_TIME_MESSAGE_UPDATE',
-    'ROOM_SKIN_MSG',
     'STOP_LIVE_ROOM_LIST',
     'SUPER_CHAT_MESSAGE_JPN',
     'SYS_MSG',
@@ -152,5 +151,5 @@ class BaseHandler:
     async def on_preparing(self, client: client_.BLiveClient, message: models.PreparingCommand):
         """直播准备中"""
 
-    async def on_room_block_msg(self, client: client_.BLiveClient, message: models.RoomBlockMsgCommand):
+    async def on_room_block_msg(self, client: client_.BLiveClient, message: models.RoomBlockCommand):
         """观众被封禁"""

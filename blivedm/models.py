@@ -419,3 +419,55 @@ class RoomBlockCommand(CommandModel):
     data: RoomBlockMsg
     uid: str
     uname: str
+
+
+class ZipSkin(BaseModel):
+    zip: str
+    md5: str
+
+class WebSkin(BaseModel):
+    zip: str
+    md5: str
+    platform: str
+    version: str
+    headInfoBgPic: str
+    giftControlBgPic: str
+    rankListBgPic: str
+    mainText: str
+    normalText: str
+    highlightContent: str
+    border: str
+    buttonText: str
+
+class SkinConfig(BaseModel):
+    android: Dict[str, ZipSkin]
+    ios: Dict[str, ZipSkin]
+    ipad: Dict[str, ZipSkin]
+    web: Dict[str, WebSkin]
+
+class Scatter(BaseModel):
+    min: int
+    max: int
+
+class RoomSkinCommand(CommandModel):
+    cmd: Literal['ROOM_SKIN_MSG']
+    skin_id: int
+    status: int
+    end_time: int
+    current_time: int
+    only_local: bool
+    skin_config: SkinConfig
+    scatter: Scatter
+
+
+class TradingScoreData(BaseModel):
+    bubble_show_time: int
+    num: int
+    score_id: int
+    uid: int
+    update_time: int
+    update_type: int
+
+class TradingScoreCommand(CommandModel):
+    cmd: Literal['TRADING_SCORE']
+    data: TradingScoreData

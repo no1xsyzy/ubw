@@ -21,7 +21,19 @@ logging.basicConfig(
 
 logger = logging.getLogger('bhashm')
 
-ROOM_IDS = [81004, 730215]
+ROOM_IDS = [
+    81004, # 艾尔莎_Channel
+    730215, # InQβ，脚本作者，测试用
+]
+FAMOUS_PEOPLE = {
+    777964, # 奶茶☆
+    1351379, # 赫萝老师
+    1521415, # 艾尔莎_Channel
+    2351778, # InQβ，脚本作者，测试用
+    5204356, # 仙乐阅
+    431412406, # 虚研社长Official
+    1816182565, # 珞璃Official
+}
 
 live_start_times = {}
 csv_write_queues = {}
@@ -109,17 +121,33 @@ class HashMarkHandler(blivedm.BaseHandler):
             else:
                 print(f"[{time}] {marker}: {symbol} @ {room_id}")
                 await csv_write_queues[room_id].put({'time': time, 't': "", 'marker': marker, 'symbol': symbol})
+        elif message.uid in FAMOUS_PEOPLE:
+            room_id = client.room_id
+            if live_start_times[room_id] is not None:
+                time = datetime.fromtimestamp(message.timestamp//1000)
+                t = str(time - live_start_times[room_id])
+                logger.info(f"[{room_id}] {message.uname}: {message.msg} ({t} from live start)")
+            else:
+                logger.info(f"[{room_id}] {message.uname}: {message.msg}")
 
 
     async def on_room_change(self, client, message):
+        logger.info(f"[{client.room_id}] 直播间信息变更《{message.data.title}》，分区：{message.data.parent_area_name}/{message.data.area_name}")
+
+    async def on_warning(self, client, message):
         logger.info(message)
+
+    async def on_room_block_msg(self, client, message):
+        logger.info(f"[{client.room_id}] 用户 {message.data.uname}（uid={message.data.uid}）被封禁")
 
     async def on_live(self, client, message):
         room_id = client.room_id
+        logger.info(message)
         await csv_write_queues[room_id].put('RESTART')
 
     async def on_preparing(self, client, message):
         room_id = client.room_id
+        logger.info(message)
         await csv_write_queues[room_id].put('RESTART')
 
 
