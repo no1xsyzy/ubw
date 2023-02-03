@@ -476,3 +476,16 @@ class TradingScoreData(BaseModel):
 class TradingScoreCommand(CommandModel):
     cmd: Literal['TRADING_SCORE']
     data: TradingScoreData
+
+
+class RoomAdminsCommand(CommandModel):
+    cmd: Literal['ROOM_ADMINS']
+    uids: List[int]
+
+
+class RoomAdminEntrance(CommandModel):
+    cmd: Literal['room_admin_entrance']
+    dmscore: int
+    level: int
+    msg: str
+    uid: int
