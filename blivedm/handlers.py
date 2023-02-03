@@ -67,6 +67,7 @@ logged_unknown_cmds = set()
 
 class HandlerInterface(Protocol):
     """直播消息处理器接口"""
+
     async def handle(self, client: client_.BLiveClient, command: dict):
         raise NotImplementedError
 
@@ -109,8 +110,9 @@ class BaseHandler:
 
         try:
             model: models.CommandModel = parse_obj_as(
-                Annotated[Union[tuple(models.CommandModel.__subclasses__())],
-                          Field(discriminator='cmd')],
+                Annotated[
+                    Union[tuple(models.CommandModel.__subclasses__())],
+                    Field(discriminator='cmd')],
                 command)
             if hasattr(self, "on_" + model.cmd.lower()):
                 return await getattr(self, "on_" + model.cmd.lower())(client, model)
@@ -142,8 +144,11 @@ class BaseHandler:
     async def on_super_chat_delete(self, client: client_.BLiveClient, message: models.SuperChatDeleteMessage):
         """删除醒目留言"""
 
-    async def on_room_change(self, client: client_.BLiveClient, message: models.RoomChangeMessage):
+    async def on_room_change(self, client: client_.BLiveClient, message: models.RoomChangeCommand):
         """房间信息改变"""
+
+    async def on_warning(self, client, message):
+        """超管警告"""
 
     async def on_live(self, client: client_.BLiveClient, message: models.LiveCommand):
         """开始直播"""

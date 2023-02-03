@@ -1,11 +1,10 @@
 import asyncio
-from datetime import datetime
 import logging
-from pathlib import Path, _ignore_error as pathlib_ignore_error
+from datetime import datetime
 
+import aiocsv
 import aiofiles
 import aiofiles.os
-import aiocsv
 import aiohttp
 from rich import print
 from rich.logging import RichHandler
@@ -22,17 +21,17 @@ logging.basicConfig(
 logger = logging.getLogger('bhashm')
 
 ROOM_IDS = [
-    81004, # 艾尔莎_Channel
-    730215, # InQβ，脚本作者，测试用
+    81004,  # 艾尔莎_Channel
+    730215,  # InQβ，脚本作者，测试用
 ]
 FAMOUS_PEOPLE = {
-    777964, # 奶茶☆
-    1351379, # 赫萝老师
-    1521415, # 艾尔莎_Channel
-    2351778, # InQβ，脚本作者，测试用
-    5204356, # 仙乐阅
-    431412406, # 虚研社长Official
-    1816182565, # 珞璃Official
+    777964,  # 奶茶☆
+    1351379,  # 赫萝老师
+    1521415,  # 艾尔莎_Channel
+    2351778,  # InQβ，脚本作者，测试用
+    5204356,  # 仙乐阅
+    431412406,  # 虚研社长Official
+    1816182565,  # 珞璃Official
 }
 
 live_start_times = {}
@@ -45,7 +44,8 @@ async def main():
 
 async def get_live_start_time(room_id, fallback_to_now=False):
     async with aiohttp.ClientSession() as session:
-        async with session.get(f"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id={room_id}") as resp:
+        async with session.get(
+                f"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id={room_id}") as resp:
             jso = await resp.json()
             live_start_time = jso['data']['room_info']['live_start_time']
             if fallback_to_now and live_start_time == 0:
@@ -111,7 +111,7 @@ class HashMarkHandler(blivedm.BaseHandler):
     async def on_danmaku(self, client, message):
         if message.msg.startswith("#"):
             room_id = client.room_id
-            time = datetime.fromtimestamp(message.timestamp//1000)
+            time = datetime.fromtimestamp(message.timestamp // 1000)
             marker = message.uname
             symbol = message.msg
             if live_start_times[room_id] is not None:
@@ -124,15 +124,17 @@ class HashMarkHandler(blivedm.BaseHandler):
         elif message.uid in FAMOUS_PEOPLE:
             room_id = client.room_id
             if live_start_times[room_id] is not None:
-                time = datetime.fromtimestamp(message.timestamp//1000)
+                time = datetime.fromtimestamp(message.timestamp // 1000)
                 t = str(time - live_start_times[room_id])
                 logger.info(f"[{room_id}] {message.uname}: {message.msg} ({t} from live start)")
             else:
                 logger.info(f"[{room_id}] {message.uname}: {message.msg}")
 
-
     async def on_room_change(self, client, message):
-        logger.info(f"[{client.room_id}] 直播间信息变更《{message.data.title}》，分区：{message.data.parent_area_name}/{message.data.area_name}")
+        title = message.data.title
+        parent_area_name = message.data.parent_area_name
+        area_name = message.data.area_name
+        logger.info(f"[{client.room_id}] 直播间信息变更《{title}》，分区：{parent_area_name}/{area_name}")
 
     async def on_warning(self, client, message):
         logger.info(message)

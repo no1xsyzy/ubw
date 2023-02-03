@@ -2,8 +2,13 @@
 name = "bhashm"
 version = "0.1.0"
 description = ""
-authors = ["Your Name <you@example.com>"]
+authors = ["Xu Siyuan <inqb@protonmail.com>"]
 license = "MIT"
+readme = "README.md"
+packages = [
+    {include = "blivedm"},
+    {include = "bhashm"},
+]
 
 [tool.poetry.dependencies]
 python = "~3.9"

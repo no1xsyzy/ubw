@@ -26,8 +26,8 @@ class HeartbeatMessage:
     """
 
     def __init__(
-        self,
-        popularity: int = None,
+            self,
+            popularity: int = None,
     ):
         self.popularity: int = popularity
 
@@ -84,46 +84,46 @@ class DanmakuMessage:
     """
 
     def __init__(
-        self,
-        mode: int = None,
-        font_size: int = None,
-        color: int = None,
-        timestamp: int = None,
-        rnd: int = None,
-        uid_crc32: str = None,
-        msg_type: int = None,
-        bubble: int = None,
-        dm_type: int = None,
-        emoticon_options: Union[dict, str] = None,
-        voice_config: Union[dict, str] = None,
-        mode_info: dict = None,
+            self,
+            mode: int = None,
+            font_size: int = None,
+            color: int = None,
+            timestamp: int = None,
+            rnd: int = None,
+            uid_crc32: str = None,
+            msg_type: int = None,
+            bubble: int = None,
+            dm_type: int = None,
+            emoticon_options: Union[dict, str] = None,
+            voice_config: Union[dict, str] = None,
+            mode_info: dict = None,
 
-        msg: str = None,
+            msg: str = None,
 
-        uid: int = None,
-        uname: str = None,
-        admin: int = None,
-        vip: int = None,
-        svip: int = None,
-        urank: int = None,
-        mobile_verify: int = None,
-        uname_color: str = None,
+            uid: int = None,
+            uname: str = None,
+            admin: int = None,
+            vip: int = None,
+            svip: int = None,
+            urank: int = None,
+            mobile_verify: int = None,
+            uname_color: str = None,
 
-        medal_level: str = None,
-        medal_name: str = None,
-        runame: str = None,
-        medal_room_id: int = None,
-        mcolor: int = None,
-        special_medal: str = None,
+            medal_level: str = None,
+            medal_name: str = None,
+            runame: str = None,
+            medal_room_id: int = None,
+            mcolor: int = None,
+            special_medal: str = None,
 
-        user_level: int = None,
-        ulevel_color: int = None,
-        ulevel_rank: str = None,
+            user_level: int = None,
+            ulevel_color: int = None,
+            ulevel_rank: str = None,
 
-        old_title: str = None,
-        title: str = None,
+            old_title: str = None,
+            title: str = None,
 
-        privilege_type: int = None,
+            privilege_type: int = None,
     ):
         self.mode: int = mode
         self.font_size: int = font_size
@@ -425,6 +425,7 @@ class ZipSkin(BaseModel):
     zip: str
     md5: str
 
+
 class WebSkin(BaseModel):
     zip: str
     md5: str
@@ -439,15 +440,18 @@ class WebSkin(BaseModel):
     border: str
     buttonText: str
 
+
 class SkinConfig(BaseModel):
     android: Dict[str, ZipSkin]
     ios: Dict[str, ZipSkin]
     ipad: Dict[str, ZipSkin]
     web: Dict[str, WebSkin]
 
+
 class Scatter(BaseModel):
     min: int
     max: int
+
 
 class RoomSkinCommand(CommandModel):
     cmd: Literal['ROOM_SKIN_MSG']
@@ -467,6 +471,7 @@ class TradingScoreData(BaseModel):
     uid: int
     update_time: int
     update_type: int
+
 
 class TradingScoreCommand(CommandModel):
     cmd: Literal['TRADING_SCORE']
