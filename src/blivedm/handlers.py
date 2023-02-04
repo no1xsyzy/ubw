@@ -80,7 +80,7 @@ class BaseHandler:
     def __heartbeat_callback(self, client: client_.BLiveClient, command: dict):
         return self.on_heartbeat(client, models.HeartbeatMessage.from_command(command['data']))
 
-    def __init__(self):
+    def __init__(self, **p):
         self._cmd_callbacks = {
             '_HEARTBEAT': self.__heartbeat_callback,
         }
@@ -124,16 +124,16 @@ class BaseHandler:
     async def on_danmu_msg(self, client: client_.BLiveClient, message: models.DanmakuCommand):
         """收到弹幕"""
 
-    async def on_gift(self, client: client_.BLiveClient, message: models.GiftMessage):
+    async def on_send_gift(self, client: client_.BLiveClient, message: models.GiftCommand):
         """收到礼物"""
 
-    async def on_buy_guard(self, client: client_.BLiveClient, message: models.GuardBuyMessage):
+    async def on_buy_guard(self, client: client_.BLiveClient, message: models.GuardBuyCommand):
         """有人上舰"""
 
-    async def on_super_chat(self, client: client_.BLiveClient, message: models.SuperChatMessage):
+    async def on_super_chat(self, client: client_.BLiveClient, message: models.SuperChatCommand):
         """醒目留言"""
 
-    async def on_super_chat_delete(self, client: client_.BLiveClient, message: models.SuperChatDeleteMessage):
+    async def on_super_chat_delete(self, client: client_.BLiveClient, message: models.SuperChatDeleteCommand):
         """删除醒目留言"""
 
     async def on_room_change(self, client: client_.BLiveClient, message: models.RoomChangeCommand):

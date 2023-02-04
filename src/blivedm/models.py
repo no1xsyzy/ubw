@@ -218,7 +218,7 @@ class GuardBuyMessage(BaseModel):
     gift_id: int  # 礼物ID
     gift_name: str  # 礼物名
     start_time: int  # 开始时间戳，和结束时间戳相同
-    end_time: int  # 结束时间戳，和开始时间戳相同结束时间戳，和开始时间戳相同
+    end_time: int  # 结束时间戳，和开始时间戳相同
 
 
 class GuardBuyCommand(CommandModel):
