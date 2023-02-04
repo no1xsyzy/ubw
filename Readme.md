@@ -9,7 +9,7 @@ Edit `ROOM_IDS` in bashm.py to required room ids, then
 
 ```sh
 poetry install
-poetry run python bhashm.py
+poetry run python -m bhashm
 ```
 
 License

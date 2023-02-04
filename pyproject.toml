@@ -4,16 +4,15 @@ version = "0.1.0"
 description = ""
 authors = ["Xu Siyuan <inqb@protonmail.com>"]
 license = "MIT"
-readme = "README.md"
+readme = "Readme.md"
 packages = [
-    {include = "blivedm"},
-    {include = "bhashm"},
+    {include = "blivedm", from = "src"},
+    {include = "bhashm", from = "src"},
 ]
 
 [tool.poetry.dependencies]
 python = "~3.9"
-aiohttp = "3.7.4"
-Brotli = "1.0.9"
+aiohttp = {version = "^3.8.3", extras = ["speedups"]}
 aiofiles = "^22.1.0"
 aiocsv = "^1.2.3"
 rich = "^13.0.0"
