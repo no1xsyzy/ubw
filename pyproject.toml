@@ -17,6 +17,7 @@ aiofiles = "^22.1.0"
 aiocsv = "^1.2.3"
 rich = "^13.0.0"
 pydantic = "^1.10.4"
+toml = "^0.10.2"
 
 [tool.poetry.dev-dependencies]
 

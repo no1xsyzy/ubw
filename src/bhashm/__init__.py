@@ -20,26 +20,9 @@ logging.basicConfig(
 
 logger = logging.getLogger('bhashm')
 
-ROOM_IDS = [
-    81004,  # 艾尔莎_Channel
-    730215,  # InQβ，脚本作者，测试用
-]
-FAMOUS_PEOPLE = {
-    777964,  # 奶茶☆
-    1351379,  # 赫萝老师
-    1521415,  # 艾尔莎_Channel
-    2351778,  # InQβ，脚本作者，测试用
-    5204356,  # 仙乐阅
-    431412406,  # 虚研社长Official
-    1816182565,  # 珞璃Official
-}
 
 live_start_times = {}
 csv_write_queues = {}
-
-
-async def main():
-    await listen_to_all()
 
 
 async def get_live_start_time(room_id, fallback_to_now=False):
@@ -83,10 +66,10 @@ async def csv_writer(room_id, start):
                     queue.task_done()
 
 
-async def listen_to_all():
+async def listen_to_all(room_ids, famous_people):
     script_start = int(datetime.now().timestamp())
     clients = {}
-    for room_id in ROOM_IDS:
+    for room_id in room_ids:
         clients[room_id] = blivedm.BLiveClient(room_id)
         # start time
         start_time_stamp = await get_live_start_time(room_id)
@@ -95,6 +78,7 @@ async def listen_to_all():
         asyncio.create_task(csv_writer(room_id, script_start))
 
     handler = HashMarkHandler()
+    handler.famous_people = set(famous_people)
     # print(handler._CMD_CALLBACK_DICT)
 
     for client in clients.values():
@@ -121,7 +105,7 @@ class HashMarkHandler(blivedm.BaseHandler):
             else:
                 print(f"[{time}] {marker}: {symbol} @ {room_id}")
                 await csv_write_queues[room_id].put({'time': time, 't': "", 'marker': marker, 'symbol': symbol})
-        elif message.uid in FAMOUS_PEOPLE:
+        elif message.uid in self.famous_people:
             room_id = client.room_id
             if live_start_times[room_id] is not None:
                 time = datetime.fromtimestamp(message.timestamp // 1000)
@@ -151,7 +135,3 @@ class HashMarkHandler(blivedm.BaseHandler):
         room_id = client.room_id
         logger.info(message)
         await csv_write_queues[room_id].put('RESTART')
-
-
-if __name__ == '__main__':
-    asyncio.get_event_loop().run_until_complete(main())
