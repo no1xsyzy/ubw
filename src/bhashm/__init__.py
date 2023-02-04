@@ -20,7 +20,6 @@ logging.basicConfig(
 
 logger = logging.getLogger('bhashm')
 
-
 live_start_times = {}
 csv_write_queues = {}
 
@@ -92,12 +91,16 @@ async def listen_to_all(room_ids, famous_people):
 
 
 class HashMarkHandler(blivedm.BaseHandler):
-    async def on_danmaku(self, client, message):
-        if message.msg.startswith("#"):
+    def __init__(self):
+        super().__init__()
+        self.famous_people = set()
+
+    async def on_danmu_msg(self, client, message):
+        if message.info.msg.startswith("#"):
             room_id = client.room_id
-            time = datetime.fromtimestamp(message.timestamp // 1000)
-            marker = message.uname
-            symbol = message.msg
+            time = datetime.fromtimestamp(message.info.timestamp // 1000)
+            marker = message.info.uname
+            symbol = message.info.msg
             if live_start_times[room_id] is not None:
                 t = str(time - live_start_times[room_id])
                 print(f"[{time}] {marker}: {symbol} @ {room_id} ({t} from live start)")
@@ -105,14 +108,14 @@ class HashMarkHandler(blivedm.BaseHandler):
             else:
                 print(f"[{time}] {marker}: {symbol} @ {room_id}")
                 await csv_write_queues[room_id].put({'time': time, 't': "", 'marker': marker, 'symbol': symbol})
-        elif message.uid in self.famous_people:
+        elif message.info.uid in self.famous_people:
             room_id = client.room_id
             if live_start_times[room_id] is not None:
-                time = datetime.fromtimestamp(message.timestamp // 1000)
+                time = datetime.fromtimestamp(message.info.timestamp // 1000)
                 t = str(time - live_start_times[room_id])
-                logger.info(f"[{room_id}] {message.uname}: {message.msg} ({t} from live start)")
+                logger.info(f"[{room_id}] {message.info.uname}: {message.info.msg} ({t} from live start)")
             else:
-                logger.info(f"[{room_id}] {message.uname}: {message.msg}")
+                logger.info(f"[{room_id}] {message.info.uname}: {message.info.msg}")
 
     async def on_room_change(self, client, message):
         title = message.data.title
@@ -122,6 +125,9 @@ class HashMarkHandler(blivedm.BaseHandler):
 
     async def on_warning(self, client, message):
         logger.info(message)
+
+    async def on_super_chat(self, client, message):
+        logger.info(f"[{client.room_id}] {message.user_info.uname} [¥{message.price}]: {message.message}")
 
     async def on_room_block_msg(self, client, message):
         logger.info(f"[{client.room_id}] 用户 {message.data.uname}（uid={message.data.uid}）被封禁")

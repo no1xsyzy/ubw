@@ -1,6 +1,6 @@
+import asyncio
 import sys
 
-import asyncio
 import toml
 
 from . import listen_to_all
@@ -25,4 +25,7 @@ with open(config, 'r') as f:
     room_ids = cfg['room_ids']
     famous_people = cfg['famous_people']
 
-asyncio.get_event_loop().run_until_complete(listen_to_all(room_ids, famous_people))
+try:
+    asyncio.get_event_loop().run_until_complete(listen_to_all(room_ids, famous_people))
+except KeyboardInterrupt:
+    print("keyboard interrupt", file=sys.stdout)

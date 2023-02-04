@@ -80,20 +80,12 @@ class BaseHandler:
     def __heartbeat_callback(self, client: client_.BLiveClient, command: dict):
         return self.on_heartbeat(client, models.HeartbeatMessage.from_command(command['data']))
 
-    def __danmu_msg_callback(self, client: client_.BLiveClient, command: dict):
-        return self.on_danmaku(client, models.DanmakuMessage.from_command(command['info']))
-
     def __init__(self):
         self._cmd_callbacks = {
             '_HEARTBEAT': self.__heartbeat_callback,
-            'DANMU_MSG': self.__danmu_msg_callback,
         }
         for ignore in IGNORED_CMDS:
             self._cmd_callbacks[ignore] = None
-        self.__post_init__()
-
-    def __post_init__(self):
-        pass
 
     async def handle(self, client: client_.BLiveClient, command: dict):
         cmd = command.get('cmd', '')
@@ -129,7 +121,7 @@ class BaseHandler:
     async def on_heartbeat(self, client: client_.BLiveClient, message: models.HeartbeatMessage):
         """收到心跳包（人气值）"""
 
-    async def on_danmaku(self, client: client_.BLiveClient, message: models.DanmakuMessage):
+    async def on_danmu_msg(self, client: client_.BLiveClient, message: models.DanmakuCommand):
         """收到弹幕"""
 
     async def on_gift(self, client: client_.BLiveClient, message: models.GiftMessage):
