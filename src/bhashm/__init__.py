@@ -119,7 +119,8 @@ class HashMarkHandler(blivedm.BaseHandler):
         logger.info(message)
 
     async def on_super_chat(self, client, message):
-        logger.info(f"[{client.room_id}] {message.user_info.uname} [¥{message.price}]: {message.message}")
+        logger.info(f"[{client.room_id}] {message.data.user_info.uname} [¥{message.data.price}]: "
+                    f"{message.data.message}")
 
     async def on_room_block_msg(self, client, message):
         logger.info(f"[{client.room_id}] 用户 {message.data.uname}（uid={message.data.uid}）被封禁")
