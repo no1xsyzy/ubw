@@ -224,13 +224,38 @@ class GuardBuyCommand(CommandModel):
 class GiftInfo(BaseModel):
     gift_id: int  # 礼物ID
     gift_name: str  # 礼物名
+    num: int
 
 
 class UserInfo(BaseModel):
     uname: str  # 用户名
     face: str  # 用户头像URL
+    face_frame: str
     guard_level: int  # 舰队等级，0非舰队，1总督，2提督，3舰长
+    is_main_vip: int
+    is_svip: int
+    is_vip: int
+    level_color: str
+    manager: int
+    name_color: str
+    title: str
     user_level: int  # 用户等级
+
+
+class MedalInfo(BaseModel):
+    anchor_roomid: int  # 粉丝牌主播房间号
+    anchor_uname: str  # 粉丝牌主播用户名
+    guard_level: int  # 大航海等级
+    icon_id: int
+    is_lighted: int  # 点亮？
+    medal_color: str
+    medal_color_border: int  # rgb?
+    medal_color_end: int  # rgb?
+    medal_color_start: int  # rgb?
+    medal_level: int  # 粉丝牌等级
+    medal_name: str  # 粉丝牌名称
+    special: str
+    target_id: int  # 粉丝牌主播uid
 
 
 class SuperChatMessage(BaseModel):
@@ -238,23 +263,37 @@ class SuperChatMessage(BaseModel):
     price: int  # 价格（人民币）
     message: str  # 消息
     message_trans: Optional[str]  # 消息日文翻译（目前只出现在SUPER_CHAT_MESSAGE_JPN）
-    start_time: int  # 开始时间戳
-    end_time: int  # 结束时间戳
+    trans_mark: int
+
+    start_time: int  # 开始时间戳，秒
+    ts: int  # 秒
+    end_time: int  # 结束时间戳，秒
     time: int  # 剩余时间（约等于 结束时间戳 - 开始时间戳）
+
     id: int  # 醒目留言ID，删除时用
-    gift: GiftInfo
+    token: str
+    is_ranked: int
+    is_send_audit: int
     uid: int  # 用户ID
+    gift: GiftInfo
     user_info: UserInfo
     background_bottom_color: str  # 底部背景色，'#rrggbb'
     background_color: str  # 背景色，'#rrggbb'
+    background_color_start: str  #
+    background_color_end: str  #
     background_icon: str  # 背景图标
     background_image: str  # 背景图URL
     background_price_color: str  # 背景价格颜色，'#rrggbb'
+    message_font_color: str
+    rate: int
+    color_point: float
+    dmscore: int
 
 
 class SuperChatCommand(CommandModel):
     cmd: Literal['SUPER_CHAT_MESSAGE']
     data: SuperChatMessage
+    roomid: int
 
 
 class SuperChatDeleteMessage(BaseModel):

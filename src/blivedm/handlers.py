@@ -118,11 +118,14 @@ class BaseHandler:
                 else:
                     return await self.on_else(client, model)
             except ValidationError:
-                self._cmd_callbacks[cmd] = None  # ignores more commands
-                logger.exception(f"[{client.room_id}] unknown cmd `{cmd}`", command)
+                self._cmd_callbacks[cmd] = self._just_log  # just log more commands
+                logger.exception(f"unknown cmd `{cmd}`: {command=!r}")
         finally:
             ctx_command.reset(tok_command_set)
             ctx_client.reset(tok_client_set)
+
+    async def _just_log(self, client: client_.BLiveClient, command: dict):
+        logger.error(f"just log `{command['cmd']}`: {command=!r}")
 
     async def on_else(self, client: client_.BLiveClient, model: models.CommandModel):
         """未处理且未忽略消息"""
@@ -139,24 +142,20 @@ class BaseHandler:
         """收到礼物"""
         await self.on_else(client, message)
 
-    async def on_buy_guard(self, client: client_.BLiveClient, message: models.GuardBuyCommand):
+    async def on_guard_buy(self, client: client_.BLiveClient, message: models.GuardBuyCommand):
         """有人上舰"""
         await self.on_else(client, message)
 
-    async def on_super_chat(self, client: client_.BLiveClient, message: models.SuperChatCommand):
+    async def on_super_chat_message(self, client: client_.BLiveClient, message: models.SuperChatCommand):
         """醒目留言"""
         await self.on_else(client, message)
 
-    async def on_super_chat_delete(self, client: client_.BLiveClient, message: models.SuperChatDeleteCommand):
+    async def on_super_chat_message_delete(self, client: client_.BLiveClient, message: models.SuperChatDeleteCommand):
         """删除醒目留言"""
         await self.on_else(client, message)
 
     async def on_room_change(self, client: client_.BLiveClient, message: models.RoomChangeCommand):
         """房间信息改变"""
-        await self.on_else(client, message)
-
-    async def on_warning(self, client, message):
-        """超管警告"""
         await self.on_else(client, message)
 
     async def on_live(self, client: client_.BLiveClient, message: models.LiveCommand):
@@ -167,6 +166,30 @@ class BaseHandler:
         """直播准备中"""
         await self.on_else(client, message)
 
+    async def on_warning(self, client, message):
+        """超管警告"""
+        await self.on_else(client, message)
+
+    async def on_hot_rank_settlement_v2(self, client: client_.BLiveClient, message: models.HotRankSettlementV2Command):
+        await self.on_else(client, message)
+
+    async def on_hot_rank_settlement(self, client: client_.BLiveClient, message: models.HotRankSettlementCommand):
+        await self.on_else(client, message)
+
     async def on_room_block_msg(self, client: client_.BLiveClient, message: models.RoomBlockCommand):
         """观众被封禁"""
+        await self.on_else(client, message)
+
+    async def on_room_skin_msg(self, client: client_.BLiveClient, message: models.RoomSkinCommand):
+        await self.on_else(client, message)
+
+    async def on_trading_score(self, client: client_.BLiveClient, message: models.TradingScoreCommand):
+        await self.on_else(client, message)
+
+    async def on_room_admins(self, client: client_.BLiveClient, message: models.RoomAdminsCommand):
+        """房管"""
+        await self.on_else(client, message)
+
+    async def on_room_admin_entrance(self, client: client_.BLiveClient, message: models.RoomAdminEntrance):
+        """新房管"""
         await self.on_else(client, message)

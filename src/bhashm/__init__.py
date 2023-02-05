@@ -125,7 +125,7 @@ class HashMarkHandler(blivedm.BaseHandler):
     async def on_warning(self, client, message):
         logger.info(message)
 
-    async def on_super_chat(self, client, message):
+    async def on_super_chat_message(self, client, message):
         logger.info(f"{message.data.user_info.uname} [¥{message.data.price}]: "
                     f"{message.data.message}")
 
