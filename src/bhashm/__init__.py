@@ -68,8 +68,7 @@ async def listen_to_all(room_ids, famous_people):
         # writer
         asyncio.create_task(csv_writer(room_id, script_start))
 
-    handler = HashMarkHandler()
-    handler.famous_people = set(famous_people)
+    handler = HashMarkHandler(famous_people=famous_people)
     # print(handler._CMD_CALLBACK_DICT)
 
     for client in clients.values():
@@ -83,9 +82,17 @@ async def listen_to_all(room_ids, famous_people):
 
 
 class HashMarkHandler(blivedm.BaseHandler):
-    def __init__(self):
+    def __init__(self, *, famous_people, **p):
         super().__init__()
-        self.famous_people = set()
+        self.famous_people = famous_people
+
+    @property
+    def famous_people(self):
+        return self._famous_people
+
+    @famous_people.setter
+    def famous_people(self, value):
+        self._famous_people = set(value)
 
     async def on_danmu_msg(self, client, message):
         if message.info.msg.startswith("#"):
@@ -95,35 +102,35 @@ class HashMarkHandler(blivedm.BaseHandler):
             symbol = message.info.msg
             if live_start_times[room_id] is not None:
                 t = str(time - live_start_times[room_id])
-                print(f"[{time}] {marker}: {symbol} @ {room_id} ({t} from live start)")
+                logger.info(f"$marker&csv$ {marker}: {symbol} ({t} from live start)")
                 await csv_write_queues[room_id].put({'time': time, 't': t, 'marker': marker, 'symbol': symbol})
             else:
-                print(f"[{time}] {marker}: {symbol} @ {room_id}")
+                logger.info(f"$marker&csv$ {marker}: {symbol}")
                 await csv_write_queues[room_id].put({'time': time, 't': "", 'marker': marker, 'symbol': symbol})
         elif message.info.uid in self.famous_people:
             room_id = client.room_id
             if live_start_times[room_id] is not None:
                 time = datetime.fromtimestamp(message.info.timestamp // 1000)
                 t = str(time - live_start_times[room_id])
-                logger.info(f"[{room_id}] {message.info.uname}: {message.info.msg} ({t} from live start)")
+                logger.info(f"$famous$ {message.info.uname}: {message.info.msg} ({t} from live start)")
             else:
-                logger.info(f"[{room_id}] {message.info.uname}: {message.info.msg}")
+                logger.info(f"$famous$ {message.info.uname}: {message.info.msg}")
 
     async def on_room_change(self, client, message):
         title = message.data.title
         parent_area_name = message.data.parent_area_name
         area_name = message.data.area_name
-        logger.info(f"[{client.room_id}] 直播间信息变更《{title}》，分区：{parent_area_name}/{area_name}")
+        logger.info(f"直播间信息变更《{title}》，分区：{parent_area_name}/{area_name}")
 
     async def on_warning(self, client, message):
         logger.info(message)
 
     async def on_super_chat(self, client, message):
-        logger.info(f"[{client.room_id}] {message.data.user_info.uname} [¥{message.data.price}]: "
+        logger.info(f"{message.data.user_info.uname} [¥{message.data.price}]: "
                     f"{message.data.message}")
 
     async def on_room_block_msg(self, client, message):
-        logger.info(f"[{client.room_id}] 用户 {message.data.uname}（uid={message.data.uid}）被封禁")
+        logger.info(f"用户 {message.data.uname}（uid={message.data.uid}）被封禁")
 
     async def on_live(self, client, message):
         room_id = client.room_id

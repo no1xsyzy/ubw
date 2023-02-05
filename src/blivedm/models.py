@@ -21,18 +21,10 @@ class CommandModel(BaseModel):
         extra = 'forbid'
 
 
-class HeartbeatMessage:
-    """
-    心跳消息
+class HeartbeatMessage(BaseModel):
+    """心跳消息"""
 
-    :param popularity: 人气值
-    """
-
-    def __init__(
-            self,
-            popularity: int = None,
-    ):
-        self.popularity: int = popularity
+    popularity: int  # 人气值
 
     @classmethod
     def from_command(cls, data: dict):
@@ -41,10 +33,13 @@ class HeartbeatMessage:
         )
 
 
+class HeartbeatCommand(CommandModel):
+    cmd: Literal['_HEARTBEAT']
+    data: HeartbeatMessage
+
+
 class DanmakuInfo(BaseModel):
-    """
-    弹幕消息
-    """
+    """弹幕消息"""
 
     mode: int  # 弹幕显示模式（滚动、顶部、底部）
     font_size: int  # 字体尺寸
