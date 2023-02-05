@@ -7,16 +7,8 @@ import aiofiles
 import aiofiles.os
 import aiohttp
 from rich import print
-from rich.logging import RichHandler
 
 import blivedm
-
-logging.basicConfig(
-    level="NOTSET",
-    format="%(message)s",
-    datefmt="[%Y-%m-%d %H:%M:%S]",
-    handlers=[RichHandler(rich_tracebacks=True)]
-)
 
 logger = logging.getLogger('bhashm')
 
