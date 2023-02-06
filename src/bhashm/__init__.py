@@ -6,14 +6,28 @@ import aiocsv
 import aiofiles
 import aiofiles.os
 import aiohttp
-from rich import print
+from rich.markup import escape
 
 import blivedm
-
-logger = logging.getLogger('bhashm')
+from blivedm import ctx_client
 
 live_start_times = {}
 csv_write_queues = {}
+
+
+class RichClientAdapter(logging.LoggerAdapter):
+    def process(self, msg, kwargs):
+        client = ctx_client.get(None)
+        if client is None:
+            room_id = 'NO_ROOM'
+        else:
+            room_id = client.room_id
+        kwargs.setdefault('extra', {})
+        kwargs['extra']['markup'] = True
+        return rf"\[[bright_cyan]{room_id}[/]] {msg}", kwargs
+
+
+logger = RichClientAdapter(logging.getLogger('bhashm'), {})
 
 
 async def get_live_start_time(room_id, fallback_to_now=False):
@@ -95,39 +109,39 @@ class HashMarkHandler(blivedm.BaseHandler):
         self._famous_people = set(value)
 
     async def on_danmu_msg(self, client, message):
-        if message.info.msg.startswith("#"):
-            room_id = client.room_id
-            time = datetime.fromtimestamp(message.info.timestamp // 1000)
-            marker = message.info.uname
-            symbol = message.info.msg
-            if live_start_times[room_id] is not None:
-                t = str(time - live_start_times[room_id])
-                logger.info(f"$marker&csv$ {marker}: {symbol} ({t} from live start)")
-                await csv_write_queues[room_id].put({'time': time, 't': t, 'marker': marker, 'symbol': symbol})
-            else:
-                logger.info(f"$marker&csv$ {marker}: {symbol}")
-                await csv_write_queues[room_id].put({'time': time, 't': "", 'marker': marker, 'symbol': symbol})
+        uname = message.info.uname
+        msg = message.info.msg
+        time = datetime.fromtimestamp(message.info.timestamp // 1000)
+        room_id = client.room_id
+        if live_start_times[room_id] is not None:
+            t = str(time - live_start_times[room_id])
+            live_start_suffix = f" ({t} from live start)"
+        else:
+            t = live_start_suffix = ""
+
+        if msg.startswith("#"):
+            logger.info(f"[blue]marker[/] {uname}: [bright_white]{escape(msg)}[/][bright_green]{live_start_suffix}[/]")
+            await csv_write_queues[room_id].put({'time': time, 't': t, 'marker': uname, 'symbol': msg})
         elif message.info.uid in self.famous_people:
-            room_id = client.room_id
-            if live_start_times[room_id] is not None:
-                time = datetime.fromtimestamp(message.info.timestamp // 1000)
-                t = str(time - live_start_times[room_id])
-                logger.info(f"$famous$ {message.info.uname}: {message.info.msg} ({t} from live start)")
-            else:
-                logger.info(f"$famous$ {message.info.uname}: {message.info.msg}")
+            logger.info(f"[red]famous[/] {uname}: [bright_white]{escape(msg)}[/][bright_green]{live_start_suffix}[/]")
 
     async def on_room_change(self, client, message):
         title = message.data.title
         parent_area_name = message.data.parent_area_name
         area_name = message.data.area_name
-        logger.info(f"直播间信息变更《{title}》，分区：{parent_area_name}/{area_name}")
+        logger.info(f"直播间信息变更《[yellow]{escape(title)}[/]》，分区：{parent_area_name}/{area_name}")
 
     async def on_warning(self, client, message):
         logger.info(message)
 
     async def on_super_chat_message(self, client, message):
-        logger.info(f"{message.data.user_info.uname} [¥{message.data.price}]: "
-                    f"{message.data.message}")
+        uname = message.data.user_info.uname
+        price = message.data.price
+        msg = message.data.message
+        color = message.data.message_font_color
+        bg_color = message.data.background_color
+        logger.info(f"{uname} \\[[bright_cyan]¥{price}[/]]: [{color} on {bg_color}]{msg}[/]")
+        logger.info(message)
 
     async def on_room_block_msg(self, client, message):
         logger.info(f"用户 {message.data.uname}（uid={message.data.uid}）被封禁")

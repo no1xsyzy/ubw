@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import json
+import re
+from datetime import datetime
 from typing import *
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, root_validator
 
 __all__ = (
     'HeartbeatMessage',
@@ -36,6 +38,45 @@ class HeartbeatMessage(BaseModel):
 class HeartbeatCommand(CommandModel):
     cmd: Literal['_HEARTBEAT']
     data: HeartbeatMessage
+
+
+class Color(BaseModel):
+    __root__: Union[str, int]
+
+    @root_validator(pre=True)
+    def parse_color(cls, values):
+        data = values['__root__']
+        if isinstance(data, str) and data.startswith("#"):
+            data = data.lstrip("#")
+            if len(data) == 3:
+                r, g, b = data
+                data = r + r + g + g + b + b
+        elif isinstance(data, int):
+            data = ("000000" + hex(data)[2:])[-6:]
+        if re.match("[0-9a-fA-F]{6}", data):
+            return {'__root__': data}
+        else:
+            raise ValueError(f"`{values['__root__']}` is not a valid color")
+
+    @property
+    def hashcolor(self):
+        return "#" + self.__root__
+
+    @property
+    def contrast_black_or_white(self):
+        return 'black' if max(self.red, self.green, self.blue) > 127 else 'white'
+
+    @property
+    def red(self):
+        return int(self.__root__[:2], 16)
+
+    @property
+    def green(self):
+        return int(self.__root__[2:4], 16)
+
+    @property
+    def blue(self):
+        return int(self.__root__[4:], 16)
 
 
 class DanmakuInfo(BaseModel):
@@ -304,6 +345,7 @@ class SuperChatDeleteMessage(BaseModel):
 class SuperChatDeleteCommand(CommandModel):
     cmd: Literal['SUPER_CHAT_MESSAGE_DELETE']
     data: SuperChatDeleteMessage
+    roomid: int
 
 
 class RoomChangeMessage(BaseModel):
@@ -330,6 +372,7 @@ class LiveCommand(CommandModel):
     sub_session_key: str
     live_platform: str
     live_model: int
+    live_time: datetime
     roomid: int
 
 

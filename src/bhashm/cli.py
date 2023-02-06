@@ -5,28 +5,15 @@ import sys
 import toml
 from rich.logging import RichHandler
 
-from blivedm.handlers import ctx_client
 from . import listen_to_all
 
 
-class InjectingFilter(logging.Filter):
-    def filter(self, record):
-        client = ctx_client.get(None)
-        if client is None:
-            record.room_id = 'NO_ROOM'
-        else:
-            record.room_id = client.room_id
-        return True
-
-
 def main():
-    rich_handler = RichHandler(rich_tracebacks=True)
-    rich_handler.addFilter(InjectingFilter())
     logging.basicConfig(
         level="NOTSET",
-        format="[%(room_id)s] %(message)s",
+        format="%(message)s",
         datefmt="[%Y-%m-%d %H:%M:%S]",
-        handlers=[rich_handler],
+        handlers=[RichHandler(rich_tracebacks=True)],
     )
 
     argi = iter(sys.argv)
