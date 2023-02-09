@@ -193,3 +193,11 @@ class BaseHandler:
     async def on_room_admin_entrance(self, client: client_.BLiveClient, message: models.RoomAdminEntrance):
         """新房管"""
         await self.on_else(client, message)
+
+    async def on_ring_status_change(self, client: client_.BLiveClient, message: models.RingStatusChangeCommand):
+        """未知"""
+        await self.on_else(client, message)
+
+    async def on_ring_status_change_v2(self, client: client_.BLiveClient, message: models.RingStatusChangeCommandV2):
+        """未知"""
+        await self.on_else(client, message)

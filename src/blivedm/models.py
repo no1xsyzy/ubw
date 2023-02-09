@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 import json
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import *
 
 from pydantic import BaseModel, validator, root_validator
 
 __all__ = (
+    'CommandModel',
     'HeartbeatMessage',
     'DanmakuCommand',
     'GiftMessage',
@@ -85,7 +86,7 @@ class DanmakuInfo(BaseModel):
     mode: int  # 弹幕显示模式（滚动、顶部、底部）
     font_size: int  # 字体尺寸
     color: int  # 颜色
-    timestamp: int  # 时间戳（毫秒）
+    timestamp: datetime  # 时间戳（毫秒）
     rnd: int  # 随机数，前端叫作弹幕ID，可能是去重用的
     uid_crc32: str  # 用户ID文本的CRC32
     msg_type: int  # 是否礼物弹幕（节奏风暴）
@@ -228,7 +229,7 @@ class GiftMessage(BaseModel):
     face: str  # 用户头像URL
     guard_level: int  # 舰队等级，0非舰队，1总督，2提督，3舰长
     uid: int  # 用户ID
-    timestamp: int  # 时间戳
+    timestamp: datetime  # 时间戳
     giftId: int  # 礼物ID
     giftType: int  # 礼物类型（未知）
     action: str  # 目前遇到的有'喂食'、'赠送'
@@ -253,8 +254,8 @@ class GuardBuyMessage(BaseModel):
     price: int  # 单价金瓜子数
     gift_id: int  # 礼物ID
     gift_name: str  # 礼物名
-    start_time: int  # 开始时间戳，和结束时间戳相同
-    end_time: int  # 结束时间戳，和开始时间戳相同
+    start_time: datetime  # 开始时间戳，和结束时间戳相同
+    end_time: datetime  # 结束时间戳，和开始时间戳相同
 
 
 class GuardBuyCommand(CommandModel):
@@ -306,10 +307,10 @@ class SuperChatMessage(BaseModel):
     message_trans: Optional[str]  # 消息日文翻译（目前只出现在SUPER_CHAT_MESSAGE_JPN）
     trans_mark: int
 
-    start_time: int  # 开始时间戳，秒
-    ts: int  # 秒
-    end_time: int  # 结束时间戳，秒
-    time: int  # 剩余时间（约等于 结束时间戳 - 开始时间戳）
+    start_time: datetime  # 开始时间戳，秒
+    ts: datetime  # 秒
+    end_time: datetime  # 结束时间戳，秒
+    time: timedelta  # 剩余时间（约等于 结束时间戳 - 开始时间戳）
 
     id: int  # 醒目留言ID，删除时用
     token: str
@@ -372,7 +373,7 @@ class LiveCommand(CommandModel):
     sub_session_key: str
     live_platform: str
     live_model: int
-    live_time: datetime
+    # live_time: datetime
     roomid: int
 
 
@@ -393,7 +394,7 @@ class HotRankSettlementData(BaseModel):
     rank: int  # 排名
     uname: str  # 主播用户名
     face: str  # 主播头像
-    timestamp: int  # 达成时间
+    timestamp: datetime  # 达成时间
     icon: str  # 榜单图标
     area_name: str  # 榜单名称
     url: str
@@ -462,19 +463,19 @@ class RoomSkinCommand(CommandModel):
     cmd: Literal['ROOM_SKIN_MSG']
     skin_id: int
     status: int
-    end_time: int
-    current_time: int
+    end_time: datetime
+    current_time: datetime
     only_local: bool
     skin_config: SkinConfig
     scatter: Scatter
 
 
 class TradingScoreData(BaseModel):
-    bubble_show_time: int
+    bubble_show_time: timedelta
     num: int
     score_id: int
     uid: int
-    update_time: int
+    update_time: datetime
     update_type: int
 
 
@@ -494,3 +495,18 @@ class RoomAdminEntrance(CommandModel):
     level: int
     msg: str
     uid: int
+
+
+class RingStatusChangeData(BaseModel):
+    status: int
+
+
+class RingStatusChangeCommand(CommandModel):
+    cmd: Literal['RING_STATUS_CHANGE']
+    data: RingStatusChangeData
+
+
+class RingStatusChangeCommandV2(CommandModel):
+    cmd: Literal['RING_STATUS_CHANGE_V2']
+    data: RingStatusChangeData
+
