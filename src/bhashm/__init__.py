@@ -12,7 +12,7 @@ import blivedm
 from bilibili import get_info_by_room
 from blivedm import ctx_client
 
-live_start_times: dict[int, Optional[datetime]] = {}
+live_start_times: dict[int, datetime | None] = {}
 csv_write_queues = {}
 
 
@@ -31,7 +31,7 @@ class RichClientAdapter(logging.LoggerAdapter):
 logger = RichClientAdapter(logging.getLogger('bhashm'), {})
 
 
-async def get_live_start_time(room_id: int, fallback_to_now=False) -> Optional[datetime]:
+async def get_live_start_time(room_id: int, fallback_to_now=False) -> datetime | None:
     live_start_time = (await get_info_by_room(room_id)).room_info.live_start_time
 
     if live_start_time is None and fallback_to_now:

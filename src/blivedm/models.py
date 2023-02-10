@@ -298,7 +298,7 @@ class SuperChatMessage(BaseModel):
     """醒目留言消息"""
     price: int  # 价格（人民币）
     message: str  # 消息
-    message_trans: Optional[str]  # 消息日文翻译（目前只出现在SUPER_CHAT_MESSAGE_JPN）
+    message_trans: str | None  # 消息日文翻译（目前只出现在SUPER_CHAT_MESSAGE_JPN）
     trans_mark: int
 
     start_time: datetime  # 开始时间戳，秒
@@ -367,7 +367,7 @@ class LiveCommand(CommandModel):
     sub_session_key: str
     live_platform: str
     live_model: int
-    live_time: Optional[datetime] = None
+    live_time: datetime | None = None
     roomid: int
 
 
@@ -394,7 +394,7 @@ class HotRankSettlementData(BaseModel):
     url: str
     cache_key: str
     dm_msg: str  # 文字描述
-    dmscore: Optional[int] = None
+    dmscore: int | None = None
 
 
 class HotRankSettlementV2Command(CommandModel):

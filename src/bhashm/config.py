@@ -13,9 +13,9 @@ class Output(str, Enum):
 
 
 class Fetch(BaseModel):
-    output: Optional[list[Output]] = None
-    prefix: Optional[list[str]] = None
-    uids: Optional[list[int]] = None
+    output: list[Output] | None = None
+    prefix: list[str] | None = None
+    uids: list[int] | None = None
     reverse: bool = False
     skip: int = 0
     types: list[str] = Field(default_factory=lambda: ['danmu_msg'])

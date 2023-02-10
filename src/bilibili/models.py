@@ -11,14 +11,14 @@ class Response(GenericModel, Generic[DataV]):
     code: int
     message: str
     ttl: int
-    data: Optional[DataV]
+    data: DataV | None
 
 
 class RoomInfo(BaseModel):
     room_id: int
     short_id: int
     uid: int
-    live_start_time: Optional[datetime]
+    live_start_time: datetime | None
 
     @validator('live_start_time', pre=True)
     def live_start_time_zero_means_none(cls, v):
