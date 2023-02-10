@@ -29,12 +29,6 @@ class HeartbeatMessage(BaseModel):
 
     popularity: int  # 人气值
 
-    @classmethod
-    def from_command(cls, data: dict):
-        return cls(
-            popularity=data['popularity'],
-        )
-
 
 class HeartbeatCommand(CommandModel):
     cmd: Literal['_HEARTBEAT']
@@ -277,9 +271,9 @@ class UserInfo(BaseModel):
     is_main_vip: int
     is_svip: int
     is_vip: int
-    level_color: str
+    level_color: Color
     manager: int
-    name_color: str
+    name_color: Color
     title: str
     user_level: int  # 用户等级
 
@@ -290,10 +284,10 @@ class MedalInfo(BaseModel):
     guard_level: int  # 大航海等级
     icon_id: int
     is_lighted: int  # 点亮？
-    medal_color: str
-    medal_color_border: int  # rgb?
-    medal_color_end: int  # rgb?
-    medal_color_start: int  # rgb?
+    medal_color: Color
+    medal_color_border: Color  # rgb?
+    medal_color_end: Color  # rgb?
+    medal_color_start: Color  # rgb?
     medal_level: int  # 粉丝牌等级
     medal_name: str  # 粉丝牌名称
     special: str
@@ -319,14 +313,14 @@ class SuperChatMessage(BaseModel):
     uid: int  # 用户ID
     gift: GiftInfo
     user_info: UserInfo
-    background_bottom_color: str  # 底部背景色，'#rrggbb'
-    background_color: str  # 背景色，'#rrggbb'
-    background_color_start: str  #
-    background_color_end: str  #
-    background_icon: str  # 背景图标
-    background_image: str  # 背景图URL
-    background_price_color: str  # 背景价格颜色，'#rrggbb'
-    message_font_color: str
+    background_bottom_color: Color  # 底部背景色，'#rrggbb'
+    background_color: Color  # 背景色，'#rrggbb'
+    background_color_start: Color  #
+    background_color_end: Color  #
+    background_icon: Color  # 背景图标
+    background_image: Color  # 背景图URL
+    background_price_color: Color  # 背景价格颜色，'#rrggbb'
+    message_font_color: Color
     rate: int
     color_point: float
     dmscore: int
@@ -509,4 +503,3 @@ class RingStatusChangeCommand(CommandModel):
 class RingStatusChangeCommandV2(CommandModel):
     cmd: Literal['RING_STATUS_CHANGE_V2']
     data: RingStatusChangeData
-

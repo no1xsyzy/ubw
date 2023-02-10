@@ -6,10 +6,10 @@ from typing import Optional
 import aiocsv
 import aiofiles
 import aiofiles.os
-import aiohttp
 from rich.markup import escape
 
 import blivedm
+from bilibili import get_info_by_room
 from blivedm import ctx_client
 
 live_start_times: dict[int, Optional[datetime]] = {}
@@ -32,17 +32,11 @@ logger = RichClientAdapter(logging.getLogger('bhashm'), {})
 
 
 async def get_live_start_time(room_id: int, fallback_to_now=False) -> Optional[datetime]:
-    async with aiohttp.ClientSession() as session:
-        async with session.get(
-                f"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id={room_id}") as resp:
-            jso = await resp.json()
-            live_start_time: int = jso['data']['room_info']['live_start_time']
-            if live_start_time == 0:
-                if fallback_to_now:
-                    return datetime.now(timezone(timedelta(seconds=8*3600)))
-                else:
-                    return None
-            return datetime.fromtimestamp(live_start_time, timezone(timedelta(seconds=8*3600)))
+    live_start_time = (await get_info_by_room(room_id)).room_info.live_start_time
+
+    if live_start_time is None and fallback_to_now:
+        return datetime.now(timezone(timedelta(seconds=8 * 3600)))
+    return live_start_time
 
 
 async def csv_writer(room_id: int, start: datetime):
@@ -76,7 +70,7 @@ async def csv_writer(room_id: int, start: datetime):
 
 
 async def listen_to_all(room_ids: list[int], famous_people: list[int]):
-    script_start = datetime.now(timezone(timedelta(seconds=8*3600)))
+    script_start = datetime.now(timezone(timedelta(seconds=8 * 3600)))
     clients = {}
     for room_id in room_ids:
         clients[room_id] = blivedm.BLiveClient(room_id)
