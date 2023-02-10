@@ -373,7 +373,7 @@ class LiveCommand(CommandModel):
     sub_session_key: str
     live_platform: str
     live_model: int
-    # live_time: datetime
+    live_time: Optional[datetime] = None
     roomid: int
 
 
