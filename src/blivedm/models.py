@@ -73,6 +73,9 @@ class Color(BaseModel):
     def blue(self):
         return int(self.__root__[4:], 16)
 
+    def __str__(self):
+        return "#" + self.__root__
+
 
 class DanmakuInfo(BaseModel):
     """弹幕消息"""

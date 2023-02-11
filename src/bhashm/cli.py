@@ -13,7 +13,9 @@ def main():
         level="NOTSET",
         format="%(message)s",
         datefmt="[%Y-%m-%d %H:%M:%S]",
-        handlers=[RichHandler(rich_tracebacks=True)],
+        handlers=[RichHandler(rich_tracebacks=True,
+                              tracebacks_show_locals=True,
+                              tracebacks_suppress=['logging', 'rich'])],
     )
 
     argi = iter(sys.argv)
