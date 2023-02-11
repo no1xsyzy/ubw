@@ -4,16 +4,29 @@ import re
 from datetime import datetime, timedelta
 from typing import *
 
-from pydantic import BaseModel, validator, root_validator
+from pydantic import BaseModel, validator, root_validator, Field
 
 __all__ = (
     'CommandModel',
-    'HeartbeatMessage',
+    'HeartbeatCommand',
     'DanmakuCommand',
-    'GiftMessage',
-    'GuardBuyMessage',
-    'SuperChatMessage',
-    'SuperChatDeleteMessage',
+    'GiftCommand',
+    'GuardBuyCommand',
+    'SuperChatCommand',
+    'SuperChatDeleteCommand',
+    'RoomChangeCommand',
+    'LiveCommand',
+    'PreparingCommand',
+    'WarningCommand',
+    'HotRankSettlementV2Command',
+    'HotRankSettlementCommand',
+    'RoomBlockCommand',
+    'RoomSkinCommand',
+    'TradingScoreCommand',
+    'RoomAdminsCommand',
+    'RoomAdminEntrance',
+    'RingStatusChangeCommand',
+    'RingStatusChangeCommandV2',
 )
 
 
@@ -506,3 +519,6 @@ class RingStatusChangeCommand(CommandModel):
 class RingStatusChangeCommandV2(CommandModel):
     cmd: Literal['RING_STATUS_CHANGE_V2']
     data: RingStatusChangeData
+
+
+AnnotatedCommandModel = Annotated[Union[tuple(CommandModel.__subclasses__())], Field(discriminator='cmd')]

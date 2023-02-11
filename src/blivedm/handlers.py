@@ -105,11 +105,7 @@ class BaseHandler:
                     return
 
             try:
-                model: models.CommandModel = parse_obj_as(
-                    Annotated[
-                        Union[tuple(models.CommandModel.__subclasses__())],
-                        Field(discriminator='cmd')],
-                    command)
+                model: models.CommandModel = parse_obj_as(models.AnnotatedCommandModel, command)
                 ctx_command.reset(tok_command_set)
                 tok_command_set = ctx_command.set(model)
                 cmd = model.cmd.lower().strip("_")
