@@ -317,8 +317,8 @@ class SuperChatMessage(BaseModel):
     background_color: Color  # 背景色，'#rrggbb'
     background_color_start: Color  #
     background_color_end: Color  #
-    background_icon: Color  # 背景图标
-    background_image: Color  # 背景图URL
+    background_icon: str  # 背景图标
+    background_image: str  # 背景图URL
     background_price_color: Color  # 背景价格颜色，'#rrggbb'
     message_font_color: Color
     rate: int
