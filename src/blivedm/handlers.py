@@ -93,10 +93,13 @@ class BaseHandler:
         tok_command_set = ctx_command.set(command)
         try:
             cmd = command.get('cmd', '')
-            pos = cmd.find(':')  # 2019-5-29 B站弹幕升级新增了参数
+
+            # 2019-5-29 B站弹幕升级新增了参数
+            pos = cmd.find(':')
             if pos != -1:
                 cmd = cmd[:pos]
 
+            # 手工指定回调
             if cmd in self._cmd_callbacks:
                 callback = self._cmd_callbacks[cmd]
                 if callback is not None:
