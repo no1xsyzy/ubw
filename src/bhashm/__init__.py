@@ -144,8 +144,10 @@ class HashMarkHandler(blivedm.BaseHandler):
 
     async def on_live(self, client, message):
         room_id = client.room_id
+        logger.info("直播开始")
         await csv_write_queues[room_id].put('RESTART')
 
     async def on_preparing(self, client, message):
         room_id = client.room_id
+        logger.info("直播结束")
         await csv_write_queues[room_id].put('RESTART')
