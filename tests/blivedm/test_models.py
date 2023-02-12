@@ -106,3 +106,19 @@ def test_super_chat_message():
         }
     )
     assert isinstance(c, models.SuperChatCommand)
+
+
+def test_live_multi_view_change():
+    c = parse_obj_as(
+        models.AnnotatedCommandModel,
+        {
+            'cmd': 'LIVE_MULTI_VIEW_CHANGE',
+            'data': {
+                'scatter': {
+                    'max': 120,
+                    'min': 5
+                }
+            }
+        }
+    )
+    assert isinstance(c, models.LiveMultiViewChangeCommand)

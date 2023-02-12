@@ -521,4 +521,18 @@ class RingStatusChangeCommandV2(CommandModel):
     data: RingStatusChangeData
 
 
+class LiveMultiViewChangeScatter(BaseModel):
+    max: int
+    min: int
+
+
+class LiveMultiViewChangeData(BaseModel):
+    scatter: LiveMultiViewChangeScatter
+
+
+class LiveMultiViewChangeCommand(CommandModel):
+    cmd: Literal['LIVE_MULTI_VIEW_CHANGE']
+    data: LiveMultiViewChangeData
+
+
 AnnotatedCommandModel = Annotated[Union[tuple(CommandModel.__subclasses__())], Field(discriminator='cmd')]
