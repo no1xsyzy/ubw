@@ -27,6 +27,7 @@ __all__ = (
     'RoomAdminEntrance',
     'RingStatusChangeCommand',
     'RingStatusChangeCommandV2',
+    'LiveMultiViewChangeCommand',
 )
 
 
@@ -40,7 +41,8 @@ class CommandModel(BaseModel):
 class HeartbeatMessage(BaseModel):
     """心跳消息"""
 
-    popularity: int  # 人气值
+    popularity: int
+    """人气值"""
 
 
 class HeartbeatCommand(CommandModel):
@@ -93,45 +95,78 @@ class Color(BaseModel):
 class DanmakuInfo(BaseModel):
     """弹幕消息"""
 
-    mode: int  # 弹幕显示模式（滚动、顶部、底部）
-    font_size: int  # 字体尺寸
-    color: int  # 颜色
-    timestamp: datetime  # 时间戳（毫秒）
-    rnd: int  # 随机数，前端叫作弹幕ID，可能是去重用的
-    uid_crc32: str  # 用户ID文本的CRC32
-    msg_type: int  # 是否礼物弹幕（节奏风暴）
-    bubble: int  # 右侧评论栏气泡
-    dm_type: int  # 弹幕类型，0文本，1表情，2语音
-    emoticon_options: dict  # 表情参数
-    voice_config: dict  # 语音参数
-    mode_info: dict  # 一些附加参数
+    mode: int
+    """弹幕显示模式（滚动、顶部、底部）"""
+    font_size: int
+    """字体尺寸"""
+    color: int
+    """颜色"""
+    timestamp: datetime
+    """时间戳（毫秒）"""
+    rnd: int
+    """随机数，前端叫作弹幕ID，可能是去重用的"""
+    uid_crc32: str
+    """用户ID文本的CRC32"""
+    msg_type: int
+    """是否礼物弹幕（节奏风暴）"""
+    bubble: int
+    """右侧评论栏气泡"""
+    dm_type: int
+    """弹幕类型，0文本，1表情，2语音"""
+    emoticon_options: dict
+    """表情参数"""
+    voice_config: dict
+    """语音参数"""
+    mode_info: dict
+    """一些附加参数"""
 
-    msg: str  # 弹幕内容
+    msg: str
+    """弹幕内容"""
 
-    uid: int  # 用户ID
-    uname: str  # 用户名
-    admin: int  # 是否房管
-    vip: int  # 是否月费老爷
-    svip: int  # 是否年费老爷
-    urank: int  # 用户身份，用来判断是否正式会员，猜测非正式会员为5000，正式会员为10000
-    mobile_verify: int  # 是否绑定手机
-    uname_color: str  # 用户名颜色
+    uid: int
+    """用户ID"""
+    uname: str
+    """用户名"""
+    admin: int
+    """是否房管"""
+    vip: int
+    """是否月费老爷"""
+    svip: int
+    """是否年费老爷"""
+    urank: int
+    """用户身份，用来判断是否正式会员，猜测非正式会员为5000，正式会员为10000"""
+    mobile_verify: int
+    """是否绑定手机"""
+    uname_color: str
+    """用户名颜色"""
 
-    medal_level: str  # 勋章等级
-    medal_name: str  # 勋章名
-    runame: str  # 勋章房间主播名
-    medal_room_id: int  # 勋章房间ID
-    mcolor: int  # 勋章颜色
-    special_medal: str  # 特殊勋章
+    medal_level: str
+    """勋章等级"""
+    medal_name: str
+    """勋章名"""
+    runame: str
+    """勋章房间主播名"""
+    medal_room_id: int
+    """勋章房间ID"""
+    mcolor: int
+    """勋章颜色"""
+    special_medal: str
+    """特殊勋章"""
 
-    user_level: int  # 用户等级
-    ulevel_color: int  # 用户等级颜色
-    ulevel_rank: str  # 用户等级排名，>50000时为'>50000'
+    user_level: int
+    """用户等级"""
+    ulevel_color: int
+    """用户等级颜色"""
+    ulevel_rank: str
+    """用户等级排名，>50000时为'>50000'"""
 
-    old_title: str  # 旧头衔
-    title: str  # 头衔
+    old_title: str
+    """旧头衔"""
+    title: str
+    """头衔"""
 
-    privilege_type: int  # 舰队类型，0非舰队，1总督，2提督，3舰长
+    privilege_type: int
+    """舰队类型，0非舰队，1总督，2提督，3舰长"""
 
     @validator('emoticon_options', pre=True)
     def emoticon_options_dict(cls, v):
@@ -233,21 +268,36 @@ class DanmakuCommand(CommandModel):
 
 class GiftMessage(BaseModel):
     """礼物消息"""
-    giftName: str  # 礼物名
-    num: int  # 数量
-    uname: str  # 用户名
-    face: str  # 用户头像URL
-    guard_level: int  # 舰队等级，0非舰队，1总督，2提督，3舰长
-    uid: int  # 用户ID
-    timestamp: datetime  # 时间戳
-    giftId: int  # 礼物ID
-    giftType: int  # 礼物类型（未知）
-    action: str  # 目前遇到的有'喂食'、'赠送'
-    price: int  # 礼物单价瓜子数
-    rnd: str  # 随机数，可能是去重用的。有时是时间戳+去重ID，有时是UUID
-    coin_type: str  # 瓜子类型，'silver'或'gold'，1000金瓜子 = 1元
-    total_coin: int  # 总瓜子数
-    tid: str  # 可能是事务ID，有时和rnd相同
+    giftName: str
+    """礼物名"""
+    num: int
+    """数量"""
+    uname: str
+    """用户名"""
+    face: str
+    """用户头像URL"""
+    guard_level: int
+    """舰队等级，0非舰队，1总督，2提督，3舰长"""
+    uid: int
+    """用户ID"""
+    timestamp: datetime
+    """时间戳"""
+    giftId: int
+    """礼物ID"""
+    giftType: int
+    """礼物类型（未知）"""
+    action: str
+    """目前遇到的有'喂食'、'赠送'"""
+    price: int
+    """礼物单价瓜子数"""
+    rnd: str
+    """随机数，可能是去重用的。有时是时间戳+去重ID，有时是UUID"""
+    coin_type: str
+    """瓜子类型，'silver'或'gold'，1000金瓜子 = 1元"""
+    total_coin: int
+    """总瓜子数"""
+    tid: str
+    """可能是事务ID，有时和rnd相同"""
 
 
 class GiftCommand(CommandModel):
@@ -257,15 +307,24 @@ class GiftCommand(CommandModel):
 
 class GuardBuyMessage(BaseModel):
     """上舰消息"""
-    uid: int  # 用户ID
-    username: str  # 用户名
-    guard_level: int  # 舰队等级，0非舰队，1总督，2提督，3舰长
-    num: int  # 数量
-    price: int  # 单价金瓜子数
-    gift_id: int  # 礼物ID
-    gift_name: str  # 礼物名
-    start_time: datetime  # 开始时间戳，和结束时间戳相同
-    end_time: datetime  # 结束时间戳，和开始时间戳相同
+    uid: int
+    """用户ID"""
+    username: str
+    """用户名"""
+    guard_level: int
+    """舰队等级，0非舰队，1总督，2提督，3舰长"""
+    num: int
+    """数量"""
+    price: int
+    """单价金瓜子数"""
+    gift_id: int
+    """礼物ID"""
+    gift_name: str
+    """礼物名"""
+    start_time: datetime
+    """开始时间戳，和结束时间戳相同"""
+    end_time: datetime
+    """结束时间戳，和开始时间戳相同"""
 
 
 class GuardBuyCommand(CommandModel):
@@ -274,16 +333,21 @@ class GuardBuyCommand(CommandModel):
 
 
 class GiftInfo(BaseModel):
-    gift_id: int  # 礼物ID
-    gift_name: str  # 礼物名
+    gift_id: int
+    """礼物ID"""
+    gift_name: str
+    """礼物名"""
     num: int
 
 
 class UserInfo(BaseModel):
-    uname: str  # 用户名
-    face: str  # 用户头像URL
+    uname: str
+    """用户名"""
+    face: str
+    """用户头像URL"""
     face_frame: str
-    guard_level: int  # 舰队等级，0非舰队，1总督，2提督，3舰长
+    guard_level: int
+    """舰队等级，0非舰队，1总督，2提督，3舰长"""
     is_main_vip: int
     is_svip: int
     is_vip: int
@@ -291,51 +355,73 @@ class UserInfo(BaseModel):
     manager: int
     name_color: Color
     title: str
-    user_level: int  # 用户等级
+    user_level: int
+    """用户等级"""
 
 
 class MedalInfo(BaseModel):
-    anchor_roomid: int  # 粉丝牌主播房间号
-    anchor_uname: str  # 粉丝牌主播用户名
-    guard_level: int  # 大航海等级
+    anchor_roomid: int
+    """粉丝牌主播房间号"""
+    anchor_uname: str
+    """粉丝牌主播用户名"""
+    guard_level: int
+    """大航海等级"""
     icon_id: int
-    is_lighted: int  # 点亮？
+    is_lighted: int
+    """点亮？"""
     medal_color: Color
-    medal_color_border: Color  # rgb?
-    medal_color_end: Color  # rgb?
-    medal_color_start: Color  # rgb?
-    medal_level: int  # 粉丝牌等级
-    medal_name: str  # 粉丝牌名称
+    medal_color_border: Color
+    medal_color_end: Color
+    medal_color_start: Color
+    medal_level: int
+    """粉丝牌等级"""
+    medal_name: str
+    """粉丝牌名称"""
     special: str
-    target_id: int  # 粉丝牌主播uid
+    target_id: int
+    """粉丝牌主播uid"""
 
 
 class SuperChatMessage(BaseModel):
     """醒目留言消息"""
-    price: int  # 价格（人民币）
-    message: str  # 消息
-    message_trans: str | None  # 消息日文翻译（目前只出现在SUPER_CHAT_MESSAGE_JPN）
+    price: int
+    """价格（人民币）"""
+    message: str
+    """消息"""
+    message_trans: str | None
+    """消息日文翻译（目前只出现在SUPER_CHAT_MESSAGE_JPN）"""
     trans_mark: int
 
-    start_time: datetime  # 开始时间戳，秒
-    ts: datetime  # 秒
-    end_time: datetime  # 结束时间戳，秒
-    time: timedelta  # 剩余时间（约等于 结束时间戳 - 开始时间戳）
+    start_time: datetime
+    """开始时间戳"""
+    ts: datetime
+    """似乎与开始时间戳相同"""
+    end_time: datetime
+    """结束时间戳，秒"""
+    time: timedelta
+    """剩余时间（约等于 结束时间戳 - 开始时间戳）"""
 
-    id: int  # 醒目留言ID，删除时用
+    id: int
+    """醒目留言ID，删除时用"""
     token: str
     is_ranked: int
     is_send_audit: int
-    uid: int  # 用户ID
+    uid: int
+    """用户ID"""
     gift: GiftInfo
     user_info: UserInfo
-    background_bottom_color: Color  # 底部背景色，'#rrggbb'
-    background_color: Color  # 背景色，'#rrggbb'
-    background_color_start: Color  #
-    background_color_end: Color  #
-    background_icon: str  # 背景图标
-    background_image: str  # 背景图URL
-    background_price_color: Color  # 背景价格颜色，'#rrggbb'
+    background_bottom_color: Color
+    """底部背景色"""
+    background_color: Color
+    """背景色"""
+    background_color_start: Color
+    background_color_end: Color
+    background_icon: str
+    """背景图标"""
+    background_image: str
+    """背景图URL"""
+    background_price_color: Color
+    """背景价格颜色"""
     message_font_color: Color
     rate: int
     color_point: float
@@ -350,7 +436,8 @@ class SuperChatCommand(CommandModel):
 
 class SuperChatDeleteMessage(BaseModel):
     """删除醒目留言消息"""
-    ids: list[int]  # 醒目留言ID数组
+    ids: list[int]
+    """醒目留言ID数组"""
 
 
 class SuperChatDeleteCommand(CommandModel):
@@ -401,15 +488,22 @@ class WarningCommand(CommandModel):
 
 
 class HotRankSettlementData(BaseModel):
-    rank: int  # 排名
-    uname: str  # 主播用户名
-    face: str  # 主播头像
-    timestamp: datetime  # 达成时间
-    icon: str  # 榜单图标
-    area_name: str  # 榜单名称
+    rank: int
+    """排名"""
+    uname: str
+    """主播用户名"""
+    face: str
+    """主播头像"""
+    timestamp: datetime
+    """达成时间"""
+    icon: str
+    """榜单图标"""
+    area_name: str
+    """榜单名称"""
     url: str
     cache_key: str
-    dm_msg: str  # 文字描述
+    dm_msg: str
+    """文字描述"""
     dmscore: int | None = None
 
 
