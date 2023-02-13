@@ -137,7 +137,7 @@ class HashMarkHandler(blivedm.BaseHandler):
         price = message.data.price
         msg = message.data.message
         color = message.data.message_font_color
-        logger.info(f"{uname} \\[[bright_cyan]¥{price}[/]]: [{color}]{msg}[/]")
+        logger.info(f"{uname} \\[[bright_cyan]¥{price}[/]]: [{color}]{escape(msg)}[/]")
 
     async def on_room_block_msg(self, client, message):
         logger.info(f"用户 {message.data.uname}（uid={message.data.uid}）被封禁")
