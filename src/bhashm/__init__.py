@@ -1,7 +1,6 @@
 import asyncio
 import logging
 from datetime import datetime, timezone, timedelta
-from typing import Optional
 
 import aiocsv
 import aiofiles
@@ -112,14 +111,20 @@ class HashMarkHandler(blivedm.BaseHandler):
         time = message.info.timestamp
         room_id = client.room_id
         if live_start_times[room_id] is not None:
-            t = str(time - live_start_times[room_id])
+            t = str(time - live_start_times[room_id]).split(".")[0]
             live_start_suffix = f" ({t} from live start)"
         else:
             t = live_start_suffix = ""
 
         if msg.startswith("#"):
             logger.info(f"[blue]marker[/] {uname}: [bright_white]{escape(msg)}[/][bright_green]{live_start_suffix}[/]")
-            await csv_write_queues[room_id].put({'time': time, 't': t, 'marker': uname, 'symbol': msg})
+            await csv_write_queues[room_id].put({
+                'time': (
+                    time.astimezone(timezone(timedelta(seconds=8 * 3600)))
+                    .replace(tzinfo=None)
+                    .isoformat(sep=" ", timespec='seconds')),
+                't': t, 'marker': uname, 'symbol': msg
+            })
         elif message.info.uid in self.famous_people:
             logger.info(f"[red]famous[/] {uname}: [bright_white]{escape(msg)}[/][bright_green]{live_start_suffix}[/]")
 
