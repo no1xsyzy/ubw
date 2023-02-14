@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import re
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import *
 
 from pydantic import BaseModel, validator, root_validator, Field
@@ -9,6 +9,7 @@ from pydantic import BaseModel, validator, root_validator, Field
 
 class CommandModel(BaseModel):
     cmd: str
+    ct: datetime = Field(default_factory=lambda: datetime.now(timezone(timedelta(seconds=8 * 3600))))
 
     class Config:
         extra = 'forbid'
