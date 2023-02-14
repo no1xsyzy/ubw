@@ -6,30 +6,6 @@ from typing import *
 
 from pydantic import BaseModel, validator, root_validator, Field
 
-__all__ = (
-    'CommandModel',
-    'HeartbeatCommand',
-    'DanmakuCommand',
-    'GiftCommand',
-    'GuardBuyCommand',
-    'SuperChatCommand',
-    'SuperChatDeleteCommand',
-    'RoomChangeCommand',
-    'LiveCommand',
-    'PreparingCommand',
-    'WarningCommand',
-    'HotRankSettlementV2Command',
-    'HotRankSettlementCommand',
-    'RoomBlockCommand',
-    'RoomSkinCommand',
-    'TradingScoreCommand',
-    'RoomAdminsCommand',
-    'RoomAdminEntrance',
-    'RingStatusChangeCommand',
-    'RingStatusChangeCommandV2',
-    'LiveMultiViewChangeCommand',
-)
-
 
 class CommandModel(BaseModel):
     cmd: str
@@ -630,3 +606,5 @@ class LiveMultiViewChangeCommand(CommandModel):
 
 
 AnnotatedCommandModel = Annotated[Union[tuple(CommandModel.__subclasses__())], Field(discriminator='cmd')]
+
+__all__ = ('CommandModel', *(cmdm.__name__ for cmdm in CommandModel.__subclasses__()), 'AnnotatedCommandModel')
