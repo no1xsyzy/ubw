@@ -1,23 +1,11 @@
-import asyncio
-import logging
 import sys
 
 import toml
-from rich.logging import RichHandler
 
-from . import listen_to_all
+from . import go_with
 
 
-def main():
-    logging.basicConfig(
-        level="NOTSET",
-        format="%(message)s",
-        datefmt="[%Y-%m-%d %H:%M:%S]",
-        handlers=[RichHandler(rich_tracebacks=True,
-                              tracebacks_show_locals=True,
-                              tracebacks_suppress=['logging', 'rich'])],
-    )
-
+def go_with_argv():
     argi = iter(sys.argv)
 
     _ = next(argi)
@@ -48,7 +36,4 @@ def main():
     if not room_ids:
         sys.exit("no room_ids, this may be due to a config mistake")
 
-    try:
-        asyncio.get_event_loop().run_until_complete(listen_to_all(room_ids, famous_people))
-    except KeyboardInterrupt:
-        print("keyboard interrupt", file=sys.stdout)
+    go_with(famous_people, room_ids)

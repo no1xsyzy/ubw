@@ -1,23 +1,23 @@
 import asyncio
 import logging
+import sys
 from datetime import datetime, timezone, timedelta
 
 import aiocsv
 import aiofiles
 import aiofiles.os
+from rich.logging import RichHandler
 from rich.markup import escape
 
 import blivedm
 from bilibili import get_info_by_room
-from blivedm import ctx_client
 
 live_start_times: dict[int, datetime | None] = {}
-csv_write_queues = {}
 
 
 class RichClientAdapter(logging.LoggerAdapter):
     def process(self, msg, kwargs):
-        client = ctx_client.get(None)
+        client = blivedm.ctx_client.get(None)
         if client is None:
             room_id = 'NO_ROOM'
         else:
@@ -38,64 +38,67 @@ async def get_live_start_time(room_id: int, fallback_to_now=False) -> datetime |
     return live_start_time
 
 
-async def csv_writer(room_id: int, start: datetime):
-    start = start
-    while True:
-        dirname = f"output/{room_id}"
-        await aiofiles.os.makedirs(dirname, exist_ok=True)
-        filename = f"output/{room_id}/{room_id}_{start.strftime('%Y年%m月%d日%H点%M%S')}.csv"
-        if await aiofiles.os.path.isfile(filename):
-            mode = 'a'
-        else:
-            mode = 'w'
+def create_csv_writer(room_id: int):
+    start = datetime.now(timezone(timedelta(seconds=8 * 3600)))
+    queue = asyncio.Queue()
 
-        async with aiofiles.open(filename, mode=mode, encoding='utf-8', newline="") as afp:
-            writer = aiocsv.AsyncDictWriter(afp, ['time', 't', 'marker', 'symbol'])
-            if mode == 'w':
-                await writer.writeheader()
-                await afp.flush()
-            queue = asyncio.Queue()
-            csv_write_queues[room_id] = queue
-            while True:
-                to_write = await queue.get()
-                if to_write == 'RESTART':
-                    start = live_start_times[room_id] = await get_live_start_time(room_id, True)
-                    queue.task_done()
-                    break
-                else:
-                    await writer.writerow(to_write)
+    async def task():
+        nonlocal start
+        while True:
+            dirname = f"output/{room_id}"
+            await aiofiles.os.makedirs(dirname, exist_ok=True)
+            filename = f"output/{room_id}/{room_id}_{start.strftime('%Y年%m月%d日%H点%M%S')}.csv"
+            if await aiofiles.os.path.isfile(filename):
+                mode = 'a'
+            else:
+                mode = 'w'
+
+            async with aiofiles.open(filename, mode=mode, encoding='utf-8', newline="") as afp:
+                writer = aiocsv.AsyncDictWriter(afp, ['time', 't', 'marker', 'symbol'])
+                if mode == 'w':
+                    await writer.writeheader()
                     await afp.flush()
-                    queue.task_done()
+
+                while True:
+                    to_write = await queue.get()
+                    if to_write == 'RESTART':
+                        start = live_start_times[room_id] = await get_live_start_time(room_id, True)
+                        queue.task_done()
+                        break
+                    else:
+                        await writer.writerow(to_write)
+                        await afp.flush()
+                        queue.task_done()
+
+    asyncio.create_task(task())
+    return queue
 
 
 async def listen_to_all(room_ids: list[int], famous_people: list[int]):
-    script_start = datetime.now(timezone(timedelta(seconds=8 * 3600)))
-    clients = {}
+    clients = []
     for room_id in room_ids:
-        clients[room_id] = blivedm.BLiveClient(room_id)
+        client = blivedm.BLiveClient(room_id)
         # start time
         start_time_stamp = await get_live_start_time(room_id)
         live_start_times[room_id] = start_time_stamp
         # writer
-        asyncio.create_task(csv_writer(room_id, script_start))
-
-    handler = HashMarkHandler(famous_people=famous_people)
-    # print(handler._CMD_CALLBACK_DICT)
-
-    for client in clients.values():
+        q = create_csv_writer(room_id)
+        handler = HashMarkHandler(famous_people=famous_people, csv_queue=q)
         client.add_handler(handler)
         client.start()
+        clients.append(client)
 
     try:
-        await asyncio.gather(*(client.join() for client in clients.values()))
+        await asyncio.gather(*(client.join() for client in clients))
     finally:
-        await asyncio.gather(*(client.stop_and_close() for client in clients.values()))
+        await asyncio.gather(*(client.stop_and_close() for client in clients))
 
 
 class HashMarkHandler(blivedm.BaseHandler):
-    def __init__(self, *, famous_people, **p):
-        super().__init__()
+    def __init__(self, *, famous_people, csv_queue, **p):
+        super().__init__(**p)
         self.famous_people = famous_people
+        self.csv_queue = csv_queue
 
     @property
     def famous_people(self):
@@ -118,7 +121,7 @@ class HashMarkHandler(blivedm.BaseHandler):
 
         if msg.startswith("#"):
             logger.info(f"[blue]marker[/] {uname}: [bright_white]{escape(msg)}[/][bright_green]{live_start_suffix}[/]")
-            await csv_write_queues[room_id].put({
+            await self.csv_queue.put({
                 'time': (
                     time.astimezone(timezone(timedelta(seconds=8 * 3600)))
                     .replace(tzinfo=None)
@@ -148,11 +151,25 @@ class HashMarkHandler(blivedm.BaseHandler):
         logger.info(f"用户 {message.data.uname}（uid={message.data.uid}）被封禁")
 
     async def on_live(self, client, message):
-        room_id = client.room_id
         logger.info("直播开始")
-        await csv_write_queues[room_id].put('RESTART')
+        await self.csv_queue.put('RESTART')
 
     async def on_preparing(self, client, message):
-        room_id = client.room_id
         logger.info("直播结束")
-        await csv_write_queues[room_id].put('RESTART')
+        await self.csv_queue.put('RESTART')
+
+
+def go_with(famous_people, room_ids):
+    logging.basicConfig(
+        level="NOTSET",
+        format="%(message)s",
+        datefmt="[%Y-%m-%d %H:%M:%S]",
+        handlers=[RichHandler(rich_tracebacks=True,
+                              tracebacks_show_locals=True,
+                              tracebacks_suppress=['logging', 'rich'])],
+    )
+
+    try:
+        asyncio.run(listen_to_all(room_ids, famous_people))
+    except KeyboardInterrupt:
+        print("keyboard interrupt", file=sys.stdout)
