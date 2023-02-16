@@ -62,6 +62,7 @@ IGNORED_CMDS = (
     'VOICE_JOIN_SWITCH',
     'WATCHED_CHANGE',
     'WIDGET_BANNER',
+    'WIDGET_GIFT_STAR_PROCESS',
 )
 
 ctx_client = ContextVar[client_.BLiveClient]('client')
