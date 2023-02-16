@@ -118,14 +118,15 @@ class BaseHandler:
                 else:
                     return await self.on_else(client, model)
             except ValidationError:
-                self._cmd_callbacks[cmd] = self._just_log  # just log more commands
+                # self._cmd_callbacks[cmd] = self._just_log  # just log more commands
                 logger.exception(f"unknown cmd `{cmd}`: {command=!r}")
         finally:
             ctx_command.reset(tok_command_set)
             ctx_client.reset(tok_client_set)
 
     async def _just_log(self, client: client_.BLiveClient, command: dict):
-        logger.error(f"just log `{command['cmd']}`: {command=!r}")
+        """just log"""
+        # logger.error(f"just log `{command['cmd']}`: {command=!r}")
 
     async def on_else(self, client: client_.BLiveClient, model: models.CommandModel):
         """未处理且未忽略消息"""

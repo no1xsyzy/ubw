@@ -10,36 +10,52 @@ def test_danmu_msg():
             'cmd': 'DANMU_MSG',
             'info': [
                 [
-                    0, 4, 25, 14893055, 1676125072976, 1676124883, 0, "98095d8b", 0, 0, 5,
-                    "#1453BAFF,#4C2263A2,#3353BAFF",
-                    0,
-                    "{}", "{}",
+                    0, 4, 25, 14893055, 1676125072976, 1676124883, 0, "98095d8b", 0, 0, 5, "#1453BAFF,#4C2263A2,#3353BAFF", 0, "{}", "{}",
                     {
                         "mode": 0, "show_player_type": 0,
                         "extra": "{\"send_from_me\":false,\"mode\":0,\"color\":14893055,\"dm_type\":0,\"font_size\":25,\"player_mode\":4,\"show_player_type\":0,\"content\":\"？\",\"user_hash\":\"2550750603\",\"emoticon_unique\":\"\",\"bulge_display\":0,\"recommend_score\":0,\"main_state_dm_color\":\"\",\"objective_state_dm_color\":\"\",\"direction\":0,\"pk_direction\":0,\"quartet_direction\":0,\"anniversary_crowd\":0,\"yeah_space_type\":\"\",\"yeah_space_url\":\"\",\"jump_to_url\":\"\",\"space_type\":\"\",\"space_url\":\"\",\"animation\":{},\"emots\":null}"
                     },
-                    {
-                        "activity_identity": "", "activity_source": 0, "not_show": 0
-                    }
+                    { "activity_identity": "", "activity_source": 0, "not_show": 0 }
                 ],
                 "？",
                 [2351778, "橘枳橼", 0, 0, 0, 10000, 1, "#00D1F1"],
                 [13, "降智了", "弱智光环", 8765806, 12478086, "", 0, 12478086, 12478086, 12478086, 0, 1, 531251],
                 [23, 0, 5805790, ">50000", 2],
                 ["", ""],
-                0,
-                3,
-                None,
+                0, 3, None,
                 {"ts": 1676125072, "ct": "1E12C41B"},
-                0,
-                0,
-                None,
-                None,
-                0,
-                105,
+                0, 0, None, None, 0, 105,
             ],
         }
     )
+    assert isinstance(c, models.DanmakuCommand)
+
+    c = parse_obj_as(
+        models.AnnotatedCommandModel,
+        {
+            'cmd': 'DANMU_MSG',
+            'info': [
+                [
+                    0, 1, 25, 16777215, 1676564740293, -793983239, 0, '507d1d44', 0, 0, 0, '', 0, '{}', '{}',
+                    {
+                        'mode': 0, 'show_player_type': 0,
+                        'extra': '{"send_from_me":false,"mode":0,"color":16777215,"dm_type":0,"font_size":25,"player_mode":1,"show_player_type":0,"content":"[妙]","user_hash":"1350376772","emoticon_unique":"","bulge_display":0,"recommend_score":1,"main_state_dm_color":"","objective_state_dm_color":"","direction":0,"pk_direction":0,"quartet_direction":0,"anniversary_crowd":0,"yeah_space_type":"","yeah_space_url":"","jump_to_url":"","space_type":"","space_url":"","animation":{},"emots":{"[妙]":{"emoticon_id":210,"emoji":"[妙]","descript":"[妙]","url":"http://i0.hdslb.com/bfs/live/08f735d950a0fba267dda140673c9ab2edf6410d.png","width":20,"height":20,"emoticon_unique":"emoji_210","count":1}},"is_audited":false}'
+                    },
+                    { 'activity_identity': '', 'activity_source': 0, 'not_show': 0 }
+                ],
+                '[妙]',
+                [1753368819, '撸喵日常', 0, 0, 0, 10000, 1, ''],
+                [11, '煤球怪', '踏雪寻梅3124', 666816, 9272486, '', 0, 12632256, 12632256, 12632256, 0, 0, 17393811],
+                [1, 0, 9868950, '>50000', 0],
+                ['', ''],
+                0, 0, None,
+                {'ts': 1676564740, 'ct': '9571FBCC'},
+                0, 0, None, None, 0, 42
+            ],
+            'dm_v2': 'CPmNs4X9/////wESDzgxMDA0LTc5Mzk4MzIzORgBIBko////BzIINTA3ZDFkNDQ6BVvlppldQMXxrtjlMFD5jbOF/f////8BagB6YwoFW+WmmV0SWgoJZW1vamlfMjEwEklodHRwOi8vaTAuaGRzbGIuY29tL2Jmcy9saXZlLzA4ZjczNWQ5NTBhMGZiYTI2N2RkYTE0MDY3M2M5YWIyZWRmNjQxMGQucG5nMBQ4FJIBAA=='
+        }
+    )
+
     assert isinstance(c, models.DanmakuCommand)
 
 

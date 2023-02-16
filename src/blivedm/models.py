@@ -180,6 +180,7 @@ class DanmakuInfo(BaseModel):
 class DanmakuCommand(CommandModel):
     cmd: Literal['DANMU_MSG']
     info: DanmakuInfo
+    dm_v2: str | None = None
 
     @validator('info', pre=True)
     def parse_dankamu_info(cls, v):
