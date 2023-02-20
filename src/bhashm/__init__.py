@@ -30,24 +30,18 @@ class RichClientAdapter(logging.LoggerAdapter):
 logger = RichClientAdapter(logging.getLogger('bhashm'), {})
 
 
-async def get_live_start_time(room_id: int, fallback_to_now=False) -> datetime | None:
-    live_start_time = (await get_info_by_room(room_id)).room_info.live_start_time
-
-    if live_start_time is None and fallback_to_now:
-        return datetime.now(timezone(timedelta(seconds=8 * 3600)))
-    return live_start_time
+async def get_live_start_time(room_id: int) -> datetime | None:
+    return (await get_info_by_room(room_id)).room_info.live_start_time
 
 
 def create_csv_writer(room_id: int):
-    start = datetime.now(timezone(timedelta(seconds=8 * 3600)))
     queue = asyncio.Queue()
 
     async def task():
-        nonlocal start
         while True:
             dirname = f"output/{room_id}"
             await aiofiles.os.makedirs(dirname, exist_ok=True)
-            filename = f"output/{room_id}/{room_id}_{start.strftime('%Y年%m月%d日%H点%M%S')}.csv"
+            filename = f"output/{room_id}/{room_id}_{datetime.now(timezone(timedelta(seconds=8 * 3600))).strftime('%Y年%m月%d日%H点%M%S')}.csv"
             if await aiofiles.os.path.isfile(filename):
                 mode = 'a'
             else:
@@ -62,7 +56,7 @@ def create_csv_writer(room_id: int):
                 while True:
                     to_write = await queue.get()
                     if to_write == 'RESTART':
-                        start = live_start_times[room_id] = await get_live_start_time(room_id, True)
+                        live_start_times[room_id] = await get_live_start_time(room_id)
                         queue.task_done()
                         break
                     else:
