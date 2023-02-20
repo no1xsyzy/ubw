@@ -2,8 +2,6 @@ import asyncio
 import logging
 import sys
 import weakref
-from datetime import datetime
-from typing import *
 
 try:
     from tinyflux import TinyFlux, Point
@@ -26,7 +24,7 @@ class BliveTinyFluxHandler(blivedm.BaseHandler):
             return
         btf.add_point(Point(
             measurement=f"{btf.room_id}_DANMAKU",
-            time=datetime.fromtimestamp(message.info.timestamp // 1000),
+            time=message.info.timestamp,
             tags={
                 "uname": message.info.uname,
                 "uid": str(message.info.uid),
@@ -41,7 +39,7 @@ class BliveTinyFluxHandler(blivedm.BaseHandler):
             return
         btf.add_point(Point(
             measurement=f"{btf.room_id}_GIFT",
-            time=datetime.fromtimestamp(message.data.timestamp // 1000),
+            time=message.data.timestamp,
             tags={
                 "uname": message.data.uname,
                 "uid": str(message.data.uid),
@@ -52,13 +50,13 @@ class BliveTinyFluxHandler(blivedm.BaseHandler):
             }
         ))
 
-    async def on_buy_guard(self, client, message):
+    async def on_guard_buy(self, client, message):
         btf = self.btfwf()
         if btf is None:
             return
         btf.add_point(Point(
             measurement=f"{btf.room_id}_GUARD",
-            time=message.data.start_time // 1000,
+            time=message.data.start_time,
             tags={
                 "uname": message.data.username,
                 "uid": str(message.data.uid),
@@ -69,13 +67,13 @@ class BliveTinyFluxHandler(blivedm.BaseHandler):
             },
         ))
 
-    async def on_super_chat(self, client, message):
+    async def on_super_chat_message(self, client, message):
         btf = self.btfwf()
         if btf is None:
             return
         btf.add_point(Point(
             measurement=f"{btf.room_id}_SC",
-            time=message.data.start_time // 1000,
+            time=message.data.start_time,
             tags={
                 "uname": message.data.user_info.uname,
                 "uid": str(message.data.uid),
