@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from typing import *
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, Field
 from pydantic.generics import GenericModel
 
 DataV = TypeVar('DataV')
@@ -29,6 +29,7 @@ class RoomInfo(BaseModel):
 
 class InfoByRoom(BaseModel):
     room_info: RoomInfo
+    ct: datetime = Field(default_factory=lambda: datetime.now(timezone(timedelta(seconds=8 * 3600))))
 
 
 class Host(BaseModel):
