@@ -158,9 +158,12 @@ def go_with(famous_people, room_ids):
         level="NOTSET",
         format="%(message)s",
         datefmt="[%Y-%m-%d %H:%M:%S]",
-        handlers=[RichHandler(rich_tracebacks=True,
-                              tracebacks_show_locals=True,
-                              tracebacks_suppress=['logging', 'rich'])],
+        handlers=[RichHandler(
+            rich_tracebacks=True,
+            tracebacks_show_locals=True,
+            tracebacks_suppress=['logging', 'rich'],
+            show_path=False,
+        )],
     )
 
     try:
