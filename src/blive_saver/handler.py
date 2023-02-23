@@ -54,42 +54,36 @@ class BliveTinyFluxHandler(blivedm.BaseHandler):
             db.insert(message.dict())
 
     async def on_send_gift(self, client, message):
-        logger.info(f"[{self.room_id}] {message.data.uname} ({message.data.uid})"
-                    f">>> {message.data.giftName}x{message.data.num} ({message.data.price}{message.data.coin_type})")
         async with self.db as db:
             db.insert(message.dict())
 
     async def on_guard_buy(self, client, message):
-        logger.info(f"[{self.room_id}] {message.data.username} ({message.data.uid})"
-                    f"<<< {message.data.gift_name}x{message.data.num} ({message.data.price}gold)")
         async with self.db as db:
             db.insert(message.dict())
 
     async def on_super_chat_message(self, client, message):
-        logger.info(f"[{self.room_id}] {message.data.user_info.uname} ({message.data.uid})"
-                    f"[¥{message.data.price}]: {message.data.message}")
         async with self.db as db:
             db.insert(message.dict())
 
     async def on_room_change(self, client, message):
-        logger.info(f"直播间信息变更《{message.data.title}》，分区: {message.data.parent_area_name}/{message.data.area_name}")
         async with self.db as db:
             db.insert(message.dict())
 
     async def on_live(self, client, message):
-        logger.info("直播开始")
         if not self._living:
             await self.m_new_shard()
 
     async def on_preparing(self, client, message):
-        logger.info("直播结束")
         if self._living:
             await self.m_new_shard()
 
     async def on_room_block_msg(self, client, message):
-        logger.info(f"用户被封禁: {message.data.uname} ({message.data.uid})")
         async with self.db as db:
-            db.db.insert(message.dict())
+            db.insert(message.dict())
+
+    async def on_warning(self, client, message):
+        async with self.db as db:
+            db.insert(message.dict())
 
     async def m_new_shard(self):
         self.__dict__.pop('shard_start', None)
