@@ -10,12 +10,13 @@ def test_danmu_msg():
             'cmd': 'DANMU_MSG',
             'info': [
                 [
-                    0, 4, 25, 14893055, 1676125072976, 1676124883, 0, "98095d8b", 0, 0, 5, "#1453BAFF,#4C2263A2,#3353BAFF", 0, "{}", "{}",
+                    0, 4, 25, 14893055, 1676125072976, 1676124883, 0, "98095d8b", 0, 0, 5,
+                    "#1453BAFF,#4C2263A2,#3353BAFF", 0, "{}", "{}",
                     {
                         "mode": 0, "show_player_type": 0,
                         "extra": "{\"send_from_me\":false,\"mode\":0,\"color\":14893055,\"dm_type\":0,\"font_size\":25,\"player_mode\":4,\"show_player_type\":0,\"content\":\"？\",\"user_hash\":\"2550750603\",\"emoticon_unique\":\"\",\"bulge_display\":0,\"recommend_score\":0,\"main_state_dm_color\":\"\",\"objective_state_dm_color\":\"\",\"direction\":0,\"pk_direction\":0,\"quartet_direction\":0,\"anniversary_crowd\":0,\"yeah_space_type\":\"\",\"yeah_space_url\":\"\",\"jump_to_url\":\"\",\"space_type\":\"\",\"space_url\":\"\",\"animation\":{},\"emots\":null}"
                     },
-                    { "activity_identity": "", "activity_source": 0, "not_show": 0 }
+                    {"activity_identity": "", "activity_source": 0, "not_show": 0}
                 ],
                 "？",
                 [2351778, "橘枳橼", 0, 0, 0, 10000, 1, "#00D1F1"],
@@ -41,7 +42,7 @@ def test_danmu_msg():
                         'mode': 0, 'show_player_type': 0,
                         'extra': '{"send_from_me":false,"mode":0,"color":16777215,"dm_type":0,"font_size":25,"player_mode":1,"show_player_type":0,"content":"[妙]","user_hash":"1350376772","emoticon_unique":"","bulge_display":0,"recommend_score":1,"main_state_dm_color":"","objective_state_dm_color":"","direction":0,"pk_direction":0,"quartet_direction":0,"anniversary_crowd":0,"yeah_space_type":"","yeah_space_url":"","jump_to_url":"","space_type":"","space_url":"","animation":{},"emots":{"[妙]":{"emoticon_id":210,"emoji":"[妙]","descript":"[妙]","url":"http://i0.hdslb.com/bfs/live/08f735d950a0fba267dda140673c9ab2edf6410d.png","width":20,"height":20,"emoticon_unique":"emoji_210","count":1}},"is_audited":false}'
                     },
-                    { 'activity_identity': '', 'activity_source': 0, 'not_show': 0 }
+                    {'activity_identity': '', 'activity_source': 0, 'not_show': 0}
                 ],
                 '[妙]',
                 [1753368819, '撸喵日常', 0, 0, 0, 10000, 1, ''],
@@ -138,3 +139,95 @@ def test_live_multi_view_change():
         }
     )
     assert isinstance(c, models.LiveMultiViewChangeCommand)
+
+
+def test_anchor_lot_start():
+    c = parse_obj_as(
+        models.AnnotatedCommandModel,
+        {
+            'cmd': 'ANCHOR_LOT_START',
+            'data': {
+                'asset_icon': 'https://i0.hdslb.com/bfs/live/627ee2d9e71c682810e7dc4400d5ae2713442c02.png',
+                'asset_icon_webp': 'https://i0.hdslb.com/bfs/live/b47453a0d42f30673b6d030159a96d07905d677a.webp',
+                'award_image': '',
+                'award_name': '白象方便面整箱',
+                'award_num': 1,
+                'award_type': 0,
+                'cur_gift_num': 0,
+                'current_time': 1677154113,
+                'danmu': '不是白象我不吃',
+                'danmu_new': [{
+                    'danmu': '不是白象我不吃',
+                    'danmu_view': '',
+                    'reject': False
+                }],
+                'danmu_type': 0,
+                'gift_id': 0,
+                'gift_name': '',
+                'gift_num': 1,
+                'gift_price': 0,
+                'goaway_time': 180,
+                'goods_id': -99998,
+                'id': 3940775,
+                'is_broadcast': 1,
+                'join_type': 0,
+                'lot_status': 0,
+                'max_time': 300,
+                'require_text': '至少成为主播的舰长',
+                'require_type': 3,
+                'require_value': 3,
+                'room_id': 81004,
+                'send_gift_ensure': 0,
+                'show_panel': 1,
+                'start_dont_popup': 0,
+                'status': 1,
+                'time': 299,
+                'url': 'https://live.bilibili.com/p/html/live-lottery/anchor-join.html?is_live_half_webview=1&hybrid_biz=live-lottery-anchor&hybrid_half_ui=1,5,100p,100p,000000,0,30,0,0,1;2,5,100p,100p,000000,0,30,0,0,1;3,5,100p,100p,000000,0,30,0,0,1;4,5,100p,100p,000000,0,30,0,0,1;5,5,100p,100p,000000,0,30,0,0,1;6,5,100p,100p,000000,0,30,0,0,1;7,5,100p,100p,000000,0,30,0,0,1;8,5,100p,100p,000000,0,30,0,0,1',
+                'web_url': 'https://live.bilibili.com/p/html/live-lottery/anchor-join.html'
+            }
+        }
+
+    )
+    assert isinstance(c, models.AnchorLotStartCommand)
+
+
+def test_anchor_lot_award():
+    c = parse_obj_as(
+        models.AnnotatedCommandModel,
+        {
+            'cmd': 'ANCHOR_LOT_AWARD',
+            'data': {
+                'award_dont_popup': 1,
+                'award_image': '',
+                'award_name': '白象方便面整箱',
+                'award_num': 1,
+                'award_type': 0,
+                'award_users': [{
+                    'uid': 1728860,
+                    'uname': '街巷角落の黑猫',
+                    'face': 'https://i2.hdslb.com/bfs/face/fd3055766c289a77d83d036457a8f886a70bbbed.jpg',
+                    'level': 46,
+                    'color': 16746162,
+                    'num': 1
+                }],
+                'id': 3940775,
+                'lot_status': 2,
+                'url': 'https://live.bilibili.com/p/html/live-lottery/anchor-join.html?is_live_half_webview=1&hybrid_biz=live-lottery-anchor&hybrid_half_ui=1,5,100p,100p,000000,0,30,0,0,1;2,5,100p,100p,000000,0,30,0,0,1;3,5,100p,100p,000000,0,30,0,0,1;4,5,100p,100p,000000,0,30,0,0,1;5,5,100p,100p,000000,0,30,0,0,1;6,5,100p,100p,000000,0,30,0,0,1;7,5,100p,100p,000000,0,30,0,0,1;8,5,100p,100p,000000,0,30,0,0,1',
+                'web_url': 'https://live.bilibili.com/p/html/live-lottery/anchor-join.html'
+            }
+        }
+    )
+    assert isinstance(c, models.AnchorLotAwardCommand)
+
+
+def test_anchor_lot_end():
+    c = parse_obj_as(
+        models.AnnotatedCommandModel,
+        {
+            'cmd': 'ANCHOR_LOT_END',
+            'data': {
+                'id': 3940879
+            }
+        }
+    )
+    assert isinstance(c, models.AnchorLotEndCommand)
