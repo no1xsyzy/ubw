@@ -231,3 +231,18 @@ def test_anchor_lot_end():
         }
     )
     assert isinstance(c, models.AnchorLotEndCommand)
+
+
+def test_anchor_lot_checkstatus():
+    c = parse_obj_as(
+        models.AnnotatedCommandModel,
+        {
+            'cmd': 'ANCHOR_LOT_CHECKSTATUS',
+            'data': {
+                'id': 3941001,
+                'status': 4,
+                'uid': 1521415
+            }
+        }
+    )
+    assert isinstance(c, models.AnchorLotCheckStatusCommand)
