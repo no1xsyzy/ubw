@@ -14,11 +14,28 @@ class Response(GenericModel, Generic[DataV]):
     data: DataV | None
 
 
+class BaseInfo(BaseModel):
+    uname: str
+    face: str
+    gender: str
+
+
+class AnchorInfo(BaseModel):
+    base_info: BaseInfo
+
 class RoomInfo(BaseModel):
     room_id: int
     short_id: int
     uid: int
     live_start_time: datetime | None
+    title: str
+    cover: str
+    area_id: int
+    area_name: str
+    parent_area_id: int
+    parent_area_name: str
+    keyframe: str
+    """关键帧URL"""
 
     @validator('live_start_time', pre=True)
     def live_start_time_zero_means_none(cls, v):
