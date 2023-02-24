@@ -8,7 +8,7 @@ try:
     from tinydb import TinyDB, Query
     from tinydb.storages import JSONStorage
     from tinydb_serialization import SerializationMiddleware as _SyncSerializationMiddleware
-    from tinydb_serialization.serializers import DateTimeSerializer
+    from tinydb_serialization.serializers import DateTimeSerializer, Serializer
     from aiotinydb import AIOTinyDB, AIOJSONStorage
     from aiotinydb.middleware import AIOMiddleware
 except ImportError as e:
@@ -22,6 +22,16 @@ logger = logging.getLogger('blive_saver')
 
 class SerializationMiddleware(_SyncSerializationMiddleware, AIOMiddleware):
     pass
+
+
+class TimeDeltaSerializer(Serializer):
+    OBJ_CLASS = timedelta
+
+    def encode(self, obj):
+        return str(obj.total_seconds())
+
+    def decode(self, s):
+        return timedelta(seconds=float(s))
 
 
 class BliveTinyFluxHandler(blivedm.BaseHandler):
@@ -44,6 +54,7 @@ class BliveTinyFluxHandler(blivedm.BaseHandler):
         # you need serialization for each TinyDB instance, or it will always write to last instance
         serialization = SerializationMiddleware(AIOJSONStorage)
         serialization.register_serializer(DateTimeSerializer(), 'TinyDate')
+        serialization.registar_serializer(TimeDeltaSerializer(), 'timedelta')
         db = AIOTinyDB(fname, storage=serialization)
         return db
 
