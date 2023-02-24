@@ -526,7 +526,7 @@ class WebSkin(BaseModel):
     normalText: str
     highlightContent: str
     border: str
-    buttonText: str
+    buttonText: str | None = None
 
 
 class SkinConfig(BaseModel):

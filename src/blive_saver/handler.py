@@ -54,7 +54,7 @@ class BliveTinyFluxHandler(blivedm.BaseHandler):
         # you need serialization for each TinyDB instance, or it will always write to last instance
         serialization = SerializationMiddleware(AIOJSONStorage)
         serialization.register_serializer(DateTimeSerializer(), 'TinyDate')
-        serialization.registar_serializer(TimeDeltaSerializer(), 'timedelta')
+        serialization.register_serializer(TimeDeltaSerializer(), 'timedelta')
         db = AIOTinyDB(fname, storage=serialization)
         return db
 
