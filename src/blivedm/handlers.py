@@ -119,7 +119,7 @@ class BaseHandler:
                     return await self.on_else(client, model)
             except ValidationError:
                 # self._cmd_callbacks[cmd] = self._just_log  # just log more commands
-                logger.exception(f"unknown cmd `{cmd}`: {command=!r}")
+                logger.exception(f"unknown cmd `{cmd}`: {command}")
         finally:
             ctx_command.reset(tok_command_set)
             ctx_client.reset(tok_client_set)

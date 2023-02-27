@@ -7,6 +7,11 @@ from typing import *
 from pydantic import BaseModel, validator, root_validator, Field
 
 
+class Scatter(BaseModel):
+    min: int
+    max: int
+
+
 class CommandModel(BaseModel):
     cmd: str
     ct: datetime = Field(default_factory=lambda: datetime.now(timezone(timedelta(seconds=8 * 3600))))
@@ -456,6 +461,7 @@ class PreparingCommand(CommandModel):
     """下播"""
     cmd: Literal['PREPARING']
     roomid: int
+    scatter: Scatter
 
 
 class WarningCommand(CommandModel):
@@ -534,11 +540,6 @@ class SkinConfig(BaseModel):
     ios: Dict[str, ZipSkin]
     ipad: Dict[str, ZipSkin]
     web: Dict[str, WebSkin]
-
-
-class Scatter(BaseModel):
-    min: int
-    max: int
 
 
 class RoomSkinCommand(CommandModel):
