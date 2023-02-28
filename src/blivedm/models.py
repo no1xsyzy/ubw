@@ -461,7 +461,7 @@ class PreparingCommand(CommandModel):
     """下播"""
     cmd: Literal['PREPARING']
     roomid: int
-    scatter: Scatter
+    scatter: Scatter | None = None
 
 
 class WarningCommand(CommandModel):
