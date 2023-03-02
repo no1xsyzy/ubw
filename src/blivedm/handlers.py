@@ -26,7 +26,7 @@ IGNORED_CMDS = (
     'ENTRY_EFFECT',
     'FULL_SCREEN_SPECIAL_EFFECT',
     'GIFT_STAR_PROCESS',
-    'GUARD_HONOR_THOUSAND',
+    # 'GUARD_HONOR_THOUSAND',
     'HOT_RANK_CHANGED',
     'HOT_RANK_CHANGED_V2',
     'HOT_RANK_SETTLEMENT',
@@ -35,7 +35,7 @@ IGNORED_CMDS = (
     'LIKE_INFO_V3_CLICK',
     'LIKE_INFO_V3_UPDATE',
     'LIVE_INTERACTIVE_GAME',
-    'NOTICE_MSG',
+    # 'NOTICE_MSG',
     'ONLINE_RANK_COUNT',
     'ONLINE_RANK_TOP3',
     'ONLINE_RANK_V2',
@@ -54,13 +54,13 @@ IGNORED_CMDS = (
     'ROOM_REAL_TIME_MESSAGE_UPDATE',
     'STOP_LIVE_ROOM_LIST',
     'SUPER_CHAT_MESSAGE_JPN',
-    'SYS_MSG',
-    'TRADING_SCORE',
-    'USER_TOAST_MSG',
+    # 'SYS_MSG',
+    # 'TRADING_SCORE',
+    # 'USER_TOAST_MSG',
     'VOICE_JOIN_LIST',
     'VOICE_JOIN_ROOM_COUNT_INFO',
     'VOICE_JOIN_SWITCH',
-    'WATCHED_CHANGE',
+    # 'WATCHED_CHANGE',
     'WIDGET_BANNER',
     'WIDGET_GIFT_STAR_PROCESS',
 )
@@ -118,8 +118,7 @@ class BaseHandler:
                 else:
                     return await self.on_else(client, model)
             except ValidationError:
-                # self._cmd_callbacks[cmd] = self._just_log  # just log more commands
-                logger.exception(f"unknown cmd `{cmd}`: {command}")
+                self.on_unknown_cmd(self, client, command)
         finally:
             ctx_command.reset(tok_command_set)
             ctx_client.reset(tok_client_set)
@@ -127,6 +126,9 @@ class BaseHandler:
     async def _just_log(self, client: client_.BLiveClient, command: dict):
         """just log"""
         # logger.error(f"just log `{command['cmd']}`: {command=!r}")
+
+    async def on_unknown_cmd(self, client: client_.BLiveClient, command: dict):
+        logger.warning(f"unknown cmd {command.get('cmd', None)!r} {command}")
 
     async def on_else(self, client: client_.BLiveClient, model: models.CommandModel):
         """未处理且未忽略消息"""

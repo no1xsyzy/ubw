@@ -102,6 +102,13 @@ class HashMarkHandler(blivedm.BaseHandler):
     def famous_people(self, value):
         self._famous_people = set(value)
 
+    async def on_unknown_cmd(self, client, command):
+        # in bhashm, locals are automatically logged
+        import json
+        logger.warning(f"unknown cmd {command.get('cmd', None)!r}")
+        async with aiofiles.open(f"output/unknown_cmd/{command.get('cmd', '__no_cmd')}.json", mode='a', encoding='utf-8') as afp:
+            await afp.write(json.dumps(command, indent=2))
+
     async def on_danmu_msg(self, client, message):
         uname = message.info.uname
         msg = message.info.msg
