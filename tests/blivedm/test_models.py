@@ -59,6 +59,95 @@ def test_danmu_msg():
 
     assert isinstance(c, models.DanmakuCommand)
 
+    c = parse_obj_as(
+        models.AnnotatedCommandModel,
+        {
+            "cmd": "DANMU_MSG",
+            "info": [
+                [
+                    0,
+                    1,
+                    25,
+                    16777215,
+                    1677755311033,
+                    1677742170,
+                    0,
+                    "98095d8b",
+                    0,
+                    0,
+                    0,
+                    "",
+                    0,
+                    "{}",
+                    "{}",
+                    {
+                        "mode": 0,
+                        "show_player_type": 0,
+                        "extra": "{\"send_from_me\":false,\"mode\":0,\"color\":16777215,\"dm_type\":0,\"font_size\":25,\"player_mode\":1,\"show_player_type\":0,\"content\":\"test\",\"user_hash\":\"2550750603\",\"emoticon_unique\":\"\",\"bulge_display\":0,\"recommend_score\":3,\"main_state_dm_color\":\"\",\"objective_state_dm_color\":\"\",\"direction\":0,\"pk_direction\":0,\"quartet_direction\":0,\"anniversary_crowd\":0,\"yeah_space_type\":\"\",\"yeah_space_url\":\"\",\"jump_to_url\":\"\",\"space_type\":\"\",\"space_url\":\"\",\"animation\":{},\"emots\":null,\"is_audited\":false}"
+                    },
+                    {
+                        "activity_identity": "",
+                        "activity_source": 0,
+                        "not_show": 0
+                    }
+                ],
+                "test",
+                [
+                    2351778,
+                    "\u6a58\u67b3\u6a7c",
+                    0,
+                    0,
+                    0,
+                    10000,
+                    1,
+                    ""
+                ],
+                [
+                    14,
+                    "\u964d\u667a\u4e86",
+                    "\u5f31\u667a\u5149\u73af",
+                    8765806,
+                    12478086,
+                    "",
+                    0,
+                    12478086,
+                    12478086,
+                    12478086,
+                    0,
+                    1,
+                    531251
+                ],
+                [
+                    23,
+                    0,
+                    5805790,
+                    ">50000",
+                    0
+                ],
+                [
+                    "title-634-1",
+                    "title-634-1"
+                ],
+                0,
+                0,
+                None,
+                {
+                    "ts": 1677755311,
+                    "ct": "2202F6FD"
+                },
+                0,
+                0,
+                None,
+                None,
+                0,
+                210
+            ],
+            "dm_v2": ""
+        }
+    )
+
+    assert isinstance(c, models.DanmakuCommand)
+
 
 def test_super_chat_message():
     c = parse_obj_as(

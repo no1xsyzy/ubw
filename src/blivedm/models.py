@@ -74,6 +74,75 @@ class Color(BaseModel):
         return "#" + self.__root__
 
 
+def strange_dict(cls, v):
+    try:
+        if not isinstance(v, dict):
+            v = json.loads(v)
+        if not v:
+            return {}
+        return v
+    except (json.JSONDecodeError, TypeError):
+        return {}
+
+
+class DanmakuInfoEmoticonOptions(BaseModel):
+    bulge_display: int | None = None
+    emoticon_unique: str | None = None
+    height: int | None = None
+    in_player_area: int | None = None
+    is_dynamic: int | None = None
+    url: str | None = None
+    width: int | None = None
+
+
+class DanmakuInfoModeInfoExtraEmot(BaseModel):
+    emoticon_id: int | None = None
+    emoji: str | None = None
+    descript: str | None = None
+    url: str | None = None
+    width: int | None = None
+    height: int | None = None
+    emoticon_unique: str | None = None
+    count: int | None = None
+
+
+class DanmakuInfoModeInfoExtra(BaseModel):
+    send_from_me: bool | None = None
+    mode: int | None = None
+    color: Color | None = None
+    dm_type: int | None = None
+    font_size: int | None = None
+    player_mode: int | None = None
+    show_player_type: int | None = None
+    content: str | None = None
+    user_hash: str | None = None
+    emoticon_unique: str | None = None
+    bulge_display: int | None = None
+    recommend_score: int | None = None
+    main_state_dm_color: str | None = None
+    objective_state_dm_color: str | None = None
+    direction: int | None = None
+    pk_direction: int | None = None
+    quartet_direction: int | None = None
+    anniversary_crowd: int | None = None
+    yeah_space_type: str | None = None
+    yeah_space_url: str | None = None
+    jump_to_url: str | None = None
+    space_type: str | None = None
+    space_url: str | None = None
+    animation: dict | None = None
+    emots: dict[str, DanmakuInfoModeInfoExtraEmot] | None = None
+    is_audited: bool | None = None
+
+
+class DanmakuInfoModeInfo(BaseModel):
+    mode: int | None = None
+    show_player_type: int | None = None
+    extra: DanmakuInfoModeInfoExtra | None = None
+
+    validate_extra = validator('extra', pre=True, allow_reuse=True)(strange_dict)
+
+
 class DanmakuInfo(BaseModel):
     """弹幕消息"""
 
@@ -95,11 +164,11 @@ class DanmakuInfo(BaseModel):
     """右侧评论栏气泡"""
     dm_type: int
     """弹幕类型，0文本，1表情，2语音"""
-    emoticon_options: dict
+    emoticon_options: DanmakuInfoEmoticonOptions
     """表情参数"""
     voice_config: dict
     """语音参数"""
-    mode_info: dict
+    mode_info: DanmakuInfoModeInfo
     """一些附加参数"""
 
     msg: str
@@ -150,36 +219,9 @@ class DanmakuInfo(BaseModel):
     privilege_type: int
     """舰队类型，0非舰队，1总督，2提督，3舰长"""
 
-    @validator('emoticon_options', pre=True)
-    def emoticon_options_dict(cls, v):
-        """
-        示例：
-        {'bulge_display': 0, 'emoticon_unique': 'official_13', 'height': 60, 'in_player_area': 1, 'is_dynamic': 1,
-         'url': 'https://i0.hdslb.com/bfs/live/a98e35996545509188fe4d24bd1a56518ea5af48.png', 'width': 183}
-        """
-        if isinstance(v, dict):
-            return v
-        try:
-            return json.loads(v)
-        except (json.JSONDecodeError, TypeError):
-            return {}
+    validate_emoticon_options = validator('emoticon_options', pre=True, allow_reuse=True)(strange_dict)
 
-    @validator('voice_config', pre=True)
-    def voice_config_dict(cls, v) -> dict:
-        """
-        示例：
-        {'voice_url': 'https%3A%2F%2Fboss.hdslb.com%2Flive-dm-voice%2Fb5b26e48b556915cbf3312a59d3bb2561627725945.wav
-         %3FX-Amz-Algorithm%3DAWS4-HMAC-SHA256%26X-Amz-Credential%3D2663ba902868f12f%252F20210731%252Fshjd%252Fs3%25
-         2Faws4_request%26X-Amz-Date%3D20210731T100545Z%26X-Amz-Expires%3D600000%26X-Amz-SignedHeaders%3Dhost%26
-         X-Amz-Signature%3D114e7cb5ac91c72e231c26d8ca211e53914722f36309b861a6409ffb20f07ab8',
-         'file_format': 'wav', 'text': '汤，下午好。', 'file_duration': 1}
-        """
-        if isinstance(v, dict):
-            return v
-        try:
-            return json.loads(v)
-        except (json.JSONDecodeError, TypeError):
-            return {}
+    validate_voice_config = validator('voice_config', pre=True, allow_reuse=True)(strange_dict)
 
 
 class DanmakuCommand(CommandModel):
@@ -206,14 +248,18 @@ class DanmakuCommand(CommandModel):
                 special_medal = 0
 
             return {
+                # .0.0
                 "mode": v[0][1],
                 "font_size": v[0][2],
                 "color": v[0][3],
                 "timestamp": v[0][4],
                 "rnd": v[0][5],
+                # .0.6
                 "uid_crc32": v[0][7],
+                # .0.8
                 "msg_type": v[0][9],
                 "bubble": v[0][10],
+                # .0.11
                 "dm_type": v[0][12],
                 "emoticon_options": v[0][13],
                 "voice_config": v[0][14],
@@ -765,6 +811,114 @@ class NoticeMsgCommand(CommandModel):
     scatter: Scatter
     marquee_id: str
     notice_type: int
+
+
+class OnlineRankCountData(BaseModel):
+    count: int
+
+
+class OnlineRankCountCommand(CommandModel):
+    cmd: Literal['ONLINE_RANK_COUNT']
+    data: OnlineRankCountData
+
+
+class FansMedal(BaseModel):
+    anchor_roomid: int
+    guard_level: int
+    icon_id: int
+    is_lighted: int
+    medal_color: Color
+    medal_color_border: Color
+    medal_color_end: Color
+    medal_color_start: Color
+    medal_level: int
+    medal_name: str
+    score: int
+    special: str
+    target_id: int
+
+
+class Contribution(BaseModel):
+    grade: int
+
+
+class InteractWordData(BaseModel):
+    contribution: Contribution
+    core_user_type: int
+    dmscore: int
+    fans_medal: FansMedal
+    identities: list[int]
+    is_spread: int
+    msg_type: int
+    privilege_type: int
+    score: datetime
+    spread_desc: str
+    spread_info: str
+    tail_icon: int
+    timestamp: datetime
+    trigger_time: datetime
+    uid: int
+    uname: str
+    uname_color: str
+
+
+class InteractWordCommand(CommandModel):
+    cmd: Literal['INTERACT_WORD']
+    data: InteractWordData
+
+
+class EntryEffectData(BaseModel):
+    id: int
+    uid: int
+    target_id: int
+    mock_effect: int
+    face: str
+    privilege_type: int
+    copy_writing: str
+    copy_color: Color
+    priority: int
+    basemap_url: str
+    show_avatar: int
+    effective_time: int
+    web_basemap_url: str
+    web_effective_time: int
+    web_effect_close: int
+    web_close_time: int
+    business: int
+    copy_writing_v2: str
+    icon_list: list
+    max_delay_time: int
+    trigger_time: datetime
+    identities: int
+    effect_silent_time: int
+    effective_time_new: int
+    web_dynamic_url_webp: str
+    web_dynamic_url_apng: str
+    mobile_dynamic_url_webp: str
+
+
+class EntryEffectCommand(CommandModel):
+    cmd: Literal['ENTRY_EFFECT']
+    data: EntryEffectData
+
+
+class StopLiveRoomListData(BaseModel):
+    room_id_list: list[int]
+
+
+class StopLiveRoomListCommand(CommandModel):
+    cmd: Literal['STOP_LIVE_ROOM_LIST']
+    data: StopLiveRoomListData
+
+
+class GuardHonorThousandData(BaseModel):
+    add: list[int]
+    del_: list[int] = Field(alias='del')
+
+
+class GuardHonorThousandCommand(CommandModel):
+    cmd: Literal['GUARD_HONOR_THOUSAND']
+    data: GuardHonorThousandData
 
 
 AnnotatedCommandModel = Annotated[Union[tuple(CommandModel.__subclasses__())], Field(discriminator='cmd')]

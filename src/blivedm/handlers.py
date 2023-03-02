@@ -23,20 +23,15 @@ IGNORED_CMDS = (
     'COMBO_SEND',
     'COMMON_NOTICE_DANMAKU',
     'DANMU_AGGREGATION',
-    'ENTRY_EFFECT',
     'FULL_SCREEN_SPECIAL_EFFECT',
     'GIFT_STAR_PROCESS',
-    # 'GUARD_HONOR_THOUSAND',
     'HOT_RANK_CHANGED',
     'HOT_RANK_CHANGED_V2',
     'HOT_RANK_SETTLEMENT',
     'HOT_RANK_SETTLEMENT_V2',
-    'INTERACT_WORD',
     'LIKE_INFO_V3_CLICK',
     'LIKE_INFO_V3_UPDATE',
     'LIVE_INTERACTIVE_GAME',
-    # 'NOTICE_MSG',
-    'ONLINE_RANK_COUNT',
     'ONLINE_RANK_TOP3',
     'ONLINE_RANK_V2',
     'PK_BATTLE_END',
@@ -52,15 +47,12 @@ IGNORED_CMDS = (
     'POPULARITY_RED_POCKET_START',
     'POPULARITY_RED_POCKET_WINNER_LIST',
     'ROOM_REAL_TIME_MESSAGE_UPDATE',
-    'STOP_LIVE_ROOM_LIST',
     'SUPER_CHAT_MESSAGE_JPN',
     # 'SYS_MSG',
-    # 'TRADING_SCORE',
     # 'USER_TOAST_MSG',
     'VOICE_JOIN_LIST',
     'VOICE_JOIN_ROOM_COUNT_INFO',
     'VOICE_JOIN_SWITCH',
-    # 'WATCHED_CHANGE',
     'WIDGET_BANNER',
     'WIDGET_GIFT_STAR_PROCESS',
 )
@@ -104,8 +96,10 @@ class BaseHandler:
             if cmd in self._cmd_callbacks:
                 callback = self._cmd_callbacks[cmd]
                 if callback is not None:
+                    logger.debug(f"got a {cmd}, processed with {callback.__name__}")
                     return await callback(client, command)
                 else:
+                    logger.debug(f"got a {cmd}, processed with ignore")
                     return
 
             try:
@@ -114,12 +108,17 @@ class BaseHandler:
                 tok_command_set = ctx_command.set(model)
                 cmd = model.cmd.lower().strip("_")
                 if hasattr(self, f'on_{cmd}'):
-                    return await getattr(self, f'on_{cmd}')(client, model)
+                    callback = getattr(self, f'on_{cmd}')
+                    logger.debug(f"got a {cmd}, processed with {callback.__qualname__}")
+                    return await callback(client, model)
                 else:
+                    logger.debug(f"got a {cmd}, processed with {self.on_else.__qualname__}")
                     return await self.on_else(client, model)
             except ValidationError:
+                logger.debug(f"got a {cmd}, processed with {self.on_unknown_cmd.__qualname__}")
                 await self.on_unknown_cmd(client, command)
         except Exception:
+            logger.debug(f"got a {command.get('cmd', '')}, and error in processing")
             logger.exception(f"Error command: {command!r}")
         finally:
             ctx_command.reset(tok_command_set)
