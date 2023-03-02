@@ -731,6 +731,17 @@ class WidgetGiftStarProcessCommand(CommandModel):
     data: WidgetGiftStarProcessData
 
 
+class WatchedChangeData(BaseModel):
+    num: int
+    text_small: str
+    text_large: str
+
+
+class WatchedChangeCommand(CommandModel):
+    cmd: Literal['WATCHED_CHANGE']
+    data: WatchedChangeData
+
+
 AnnotatedCommandModel = Annotated[Union[tuple(CommandModel.__subclasses__())], Field(discriminator='cmd')]
 
 __all__ = ('CommandModel', *(cmdm.__name__ for cmdm in CommandModel.__subclasses__()), 'AnnotatedCommandModel')

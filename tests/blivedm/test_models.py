@@ -285,3 +285,19 @@ def test_widget_gift_star_process():
         }
     )
     assert isinstance(c, models.WidgetGiftStarProcessCommand)
+
+
+def test_watched_change():
+    c = parse_obj_as(
+        models.AnnotatedCommandModel,
+        {
+            'cmd': 'WATCHED_CHANGE',
+            'data': {
+                'num': 122,
+                'text_small': '122',
+                'text_large': '122人看过'
+            }
+        }
+    )
+
+    assert isinstance(c, models.WatchedChangeCommand)
