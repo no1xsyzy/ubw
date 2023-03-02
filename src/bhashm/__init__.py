@@ -105,8 +105,9 @@ class HashMarkHandler(blivedm.BaseHandler):
     async def on_unknown_cmd(self, client, command):
         # in bhashm, locals are automatically logged
         import json
-        logger.warning(f"unknown cmd {command.get('cmd', None)!r}")
-        async with aiofiles.open(f"output/unknown_cmd/{command.get('cmd', '__no_cmd')}.json", mode='a', encoding='utf-8') as afp:
+        cmd = command.get('cmd', None)
+        logger.warning(f"unknown cmd {cmd}")
+        async with aiofiles.open(f"output/unknown_cmd/{cmd}.json", mode='a', encoding='utf-8') as afp:
             await afp.write(json.dumps(command, indent=2))
 
     async def on_danmu_msg(self, client, message):
@@ -159,6 +160,11 @@ class HashMarkHandler(blivedm.BaseHandler):
         logger.info("直播结束")
         await self.csv_queue.put('RESTART')
 
+    async def on_notice_msg(self, client, model):
+        if model.msg_type in {1, 2}:
+            return
+        logger.info(f"[{model.msg_type}] {escape(model.msg_common)}")
+
 
 def go_with(famous_people, room_ids):
     logging.basicConfig(
@@ -166,8 +172,8 @@ def go_with(famous_people, room_ids):
         format="%(message)s",
         datefmt="[%Y-%m-%d %H:%M:%S]",
         handlers=[RichHandler(
-            rich_tracebacks=True,
-            tracebacks_show_locals=True,
+            # rich_tracebacks=True,
+            # tracebacks_show_locals=True,
             tracebacks_suppress=['logging', 'rich'],
             show_path=False,
         )],

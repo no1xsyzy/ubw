@@ -3,7 +3,7 @@ import logging
 from contextvars import ContextVar
 from typing import *
 
-from pydantic import parse_obj_as, ValidationError, Field
+from pydantic import parse_obj_as, ValidationError
 
 from . import client as client_
 from . import models
@@ -118,17 +118,15 @@ class BaseHandler:
                 else:
                     return await self.on_else(client, model)
             except ValidationError:
-                self.on_unknown_cmd(self, client, command)
+                await self.on_unknown_cmd(client, command)
+        except Exception:
+            logger.exception(f"Error command: {command!r}")
         finally:
             ctx_command.reset(tok_command_set)
             ctx_client.reset(tok_client_set)
 
-    async def _just_log(self, client: client_.BLiveClient, command: dict):
-        """just log"""
-        # logger.error(f"just log `{command['cmd']}`: {command=!r}")
-
     async def on_unknown_cmd(self, client: client_.BLiveClient, command: dict):
-        logger.warning(f"unknown cmd {command.get('cmd', None)!r} {command}")
+        logger.warning(f"unknown cmd {command.get('cmd', None)} {command}")
 
     async def on_else(self, client: client_.BLiveClient, model: models.CommandModel):
         """未处理且未忽略消息"""
@@ -204,3 +202,7 @@ class BaseHandler:
     async def on_ring_status_change_v2(self, client: client_.BLiveClient, message: models.RingStatusChangeCommandV2):
         """未知"""
         await self.on_else(client, message)
+
+    async def on_notice_msg(self, client: client_.BLiveClient, model: models.NoticeMsgCommand):
+        """未知"""
+        await self.on_else(client, model)

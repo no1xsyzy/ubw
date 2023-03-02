@@ -247,6 +247,7 @@ def test_anchor_lot_checkstatus():
     )
     assert isinstance(c, models.AnchorLotCheckStatusCommand)
 
+
 def test_widget_gift_star_process():
     c = parse_obj_as(
         models.AnnotatedCommandModel,
@@ -261,20 +262,20 @@ def test_widget_gift_star_process():
                     'completed_num': 21,
                     'target_num': 100
                 },
-                {
-                    'gift_id': 32611,
-                    'gift_img': 'https://s1.hdslb.com/bfs/live/d157e6ded1e472f2788e6826f34398e065a0881a.png',
-                    'gift_name': '礼物星球',
-                    'completed_num': 14,
-                    'target_num': 60
-                },
-                {
-                    'gift_id': 32612,
-                    'gift_img': 'https://s1.hdslb.com/bfs/live/dfaa7627f8aebccfb3a680dfd940ff7c1d1a341e.png',
-                    'gift_name': '礼物星球',
-                    'completed_num': 0,
-                    'target_num': 2
-                }],
+                    {
+                        'gift_id': 32611,
+                        'gift_img': 'https://s1.hdslb.com/bfs/live/d157e6ded1e472f2788e6826f34398e065a0881a.png',
+                        'gift_name': '礼物星球',
+                        'completed_num': 14,
+                        'target_num': 60
+                    },
+                    {
+                        'gift_id': 32612,
+                        'gift_img': 'https://s1.hdslb.com/bfs/live/dfaa7627f8aebccfb3a680dfd940ff7c1d1a341e.png',
+                        'gift_name': '礼物星球',
+                        'completed_num': 0,
+                        'target_num': 2
+                    }],
                 'finished': False,
                 'ddl_timestamp': 1676822400,
                 'version': 1676486693573,
@@ -301,3 +302,105 @@ def test_watched_change():
     )
 
     assert isinstance(c, models.WatchedChangeCommand)
+
+
+def test_notice_msg():
+    c = parse_obj_as(
+        models.AnnotatedCommandModel,
+        {
+            'cmd': 'NOTICE_MSG',
+            'id': 742,
+            'name': '3D小电视飞船专用',
+            'full': {
+                'head_icon': 'https://i0.hdslb.com/bfs/live/3ac21ee1dc5ea72e5b310c9cddcd6c9bc746d8c8.gif',
+                'tail_icon': 'https://i0.hdslb.com/bfs/live/822da481fdaba986d738db5d8fd469ffa95a8fa1.webp',
+                'head_icon_fa': 'https://i0.hdslb.com/bfs/live/3ac21ee1dc5ea72e5b310c9cddcd6c9bc746d8c8.gif',
+                'tail_icon_fa': 'https://i0.hdslb.com/bfs/live/38cb2a9f1209b16c0f15162b0b553e3b28d9f16f.png',
+                'head_icon_fan': 1,
+                'tail_icon_fan': 4,
+                'background': '#6097FFFF',
+                'color': '#FFFFFF',
+                'highlight': '#FFE600', 'time': 15
+            },
+            'half': {
+                'head_icon': 'https://i0.hdslb.com/bfs/live/3ac21ee1dc5ea72e5b310c9cddcd6c9bc746d8c8.gif',
+                'tail_icon': '',
+                'background': '#6097FFFF',
+                'color': '#FFFFFFFF',
+                'highlight': '#FFE600',
+                'time': 15
+            },
+            'side': {
+                'head_icon': '',
+                'background': '',
+                'color': '',
+                'highlight': '',
+                'border': ''
+            },
+            'roomid': 26223227,
+            'real_roomid': 26223227,
+            'msg_common': '<%叭个毕加索%>投喂<%阿斯忒芮雪%>1个小电视飞船，向着浩瀚星辰出发！',
+            'msg_self': '<%叭个毕加索%>投喂<%阿斯忒芮雪%>1个小电视飞船，向着浩瀚星辰出发！',
+            'link_url': 'https://live.bilibili.com/26223227?broadcast_type=0&is_room_feed=1&from=28003&extra_jump_from=28003&live_lottery_type=1',
+            'msg_type': 2,
+            'shield_uid': -1,
+            'business_id': '32122',
+            'scatter': {'min': 0, 'max': 0},
+            'marquee_id': '',
+            'notice_type': 0
+        }
+    )
+
+    assert isinstance(c, models.NoticeMsgCommand)
+
+    c= parse_obj_as(
+        models.AnnotatedCommandModel,
+        {
+            "cmd": "NOTICE_MSG",
+            "id": 505,
+            "name": "\u5927\u4e71\u6597\u8fde\u80dc\u4eba\u6c14\u7ea2\u5305",
+            "full": {
+                "head_icon": "https://i0.hdslb.com/bfs/live/ab106f494f4cc0c94fb78ed46144c72f6db000f6.webp",
+                "tail_icon": "https://i0.hdslb.com/bfs/live/822da481fdaba986d738db5d8fd469ffa95a8fa1.webp",
+                "head_icon_fa": "https://i0.hdslb.com/bfs/live/ab106f494f4cc0c94fb78ed46144c72f6db000f6.webp",
+                "tail_icon_fa": "https://i0.hdslb.com/bfs/live/38cb2a9f1209b16c0f15162b0b553e3b28d9f16f.png",
+                "head_icon_fan": 1,
+                "tail_icon_fan": 4,
+                "background": "#b6272b",
+                "color": "#FFFFFFFF",
+                "highlight": "#FDFF2FFF",
+                "time": 15
+            },
+            "half": {
+                "head_icon": "https://i0.hdslb.com/bfs/live/ab106f494f4cc0c94fb78ed46144c72f6db000f6.webp",
+                "tail_icon": "",
+                "background": "#b6272b",
+                "color": "#FFFFFFFF",
+                "highlight": "#FDFF2FFF",
+                "time": 15
+            },
+            "side": {
+                "head_icon": "",
+                "background": "",
+                "color": "",
+                "highlight": "",
+                "border": ""
+            },
+            "roomid": 23703544,
+            "real_roomid": 23703544,
+            "msg_common": "<%\u5f71\u6f5eKagami%>\u7684\u76f4\u64ad\u95f4\u53d1\u653e\u4e86\u4ef7\u503c<%100\u5143%>\u7684\u7ea2\u5305\uff0c\u5feb\u6765\u62a2\u9e2d\uff01",
+            "msg_self": "\u606d\u559c<%\u5f71\u6f5eKagami%>\u83b7\u5f97\u5927\u4e71\u6597\u8fde\u80dc\u5956\u52b1\uff0c\u76f4\u64ad\u95f4\u53d1\u653e\u4ef7\u503c<%100\u5143%>\u7684\u7ea2\u5305\uff0c\u5feb\u6765\u62a2\u9e2d\uff01",
+            "link_url": "https://live.bilibili.com/23703544?broadcast_type=0&is_room_feed=1&from=28003&extra_jump_from=28003&live_lottery_type=1",
+            "msg_type": 2,
+            "shield_uid": -1,
+            "business_id": "19",
+            "scatter": {
+                "min": 0,
+                "max": 0
+            },
+            "marquee_id": "",
+            "notice_type": 0
+        }
+    )
+
+    assert isinstance(c, models.NoticeMsgCommand)

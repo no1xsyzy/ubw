@@ -742,6 +742,31 @@ class WatchedChangeCommand(CommandModel):
     data: WatchedChangeData
 
 
+class NoticeMsgCommand(CommandModel):
+    cmd: Literal['NOTICE_MSG']
+    id: int
+
+    name: str
+    msg_type: int
+    """1:人气榜第一名
+    2:3D小电视飞船专用
+    2:大乱斗连胜人气红包"""
+
+    full: dict
+    half: dict
+    side: dict
+    roomid: int
+    real_roomid: int
+    msg_common: str
+    msg_self: str
+    link_url: str
+    shield_uid: int
+    business_id: str
+    scatter: Scatter
+    marquee_id: str
+    notice_type: int
+
+
 AnnotatedCommandModel = Annotated[Union[tuple(CommandModel.__subclasses__())], Field(discriminator='cmd')]
 
 __all__ = ('CommandModel', *(cmdm.__name__ for cmdm in CommandModel.__subclasses__()), 'AnnotatedCommandModel')
