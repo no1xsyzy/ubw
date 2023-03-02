@@ -246,3 +246,42 @@ def test_anchor_lot_checkstatus():
         }
     )
     assert isinstance(c, models.AnchorLotCheckStatusCommand)
+
+def test_widget_gift_star_process():
+    c = parse_obj_as(
+        models.AnnotatedCommandModel,
+        {
+            'cmd': 'WIDGET_GIFT_STAR_PROCESS',
+            'data': {
+                'start_date': 20230213,
+                'process_list': [{
+                    'gift_id': 32609,
+                    'gift_img': 'https://s1.hdslb.com/bfs/live/15313516b3ec0875d67130f18c0a53c582e76531.png',
+                    'gift_name': '礼物星球',
+                    'completed_num': 21,
+                    'target_num': 100
+                },
+                {
+                    'gift_id': 32611,
+                    'gift_img': 'https://s1.hdslb.com/bfs/live/d157e6ded1e472f2788e6826f34398e065a0881a.png',
+                    'gift_name': '礼物星球',
+                    'completed_num': 14,
+                    'target_num': 60
+                },
+                {
+                    'gift_id': 32612,
+                    'gift_img': 'https://s1.hdslb.com/bfs/live/dfaa7627f8aebccfb3a680dfd940ff7c1d1a341e.png',
+                    'gift_name': '礼物星球',
+                    'completed_num': 0,
+                    'target_num': 2
+                }],
+                'finished': False,
+                'ddl_timestamp': 1676822400,
+                'version': 1676486693573,
+                'reward_gift': 32268,
+                'reward_gift_img': 'https://s1.hdslb.com/bfs/live/7ca35670d343096c4bd9cd6d5491aa8a5305f82c.png',
+                'reward_gift_name': '礼物星球'
+            }
+        }
+    )
+    assert isinstance(c, models.WidgetGiftStarProcessCommand)
