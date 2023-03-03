@@ -49,8 +49,8 @@ class BliveTinyFluxHandler(blivedm.BaseHandler):
 
     @cached_property
     def db(self):
-        fname = f"output/{self.room_id}/{self.shard_start.strftime('%Y年%m月%d日%H点%M%S')}.json"
-        logger.info(f"[{self.room_id}] creating db: {fname}")
+        fname = f"output/blive_saver/{self.room_id}/{self.shard_start.strftime('%Y年%m月%d日%H点%M%S')}.json"
+        logger.debug(f"[{self.room_id}] creating db: {fname}")
         # you need serialization for each TinyDB instance, or it will always write to last instance
         serialization = SerializationMiddleware(AIOJSONStorage)
         serialization.register_serializer(DateTimeSerializer(), 'TinyDate')

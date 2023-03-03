@@ -39,9 +39,9 @@ def create_csv_writer(room_id: int):
 
     async def task():
         while True:
-            dirname = f"output/{room_id}"
+            dirname = f"output/bhashm/{room_id}"
             await aiofiles.os.makedirs(dirname, exist_ok=True)
-            filename = f"output/{room_id}/{room_id}_{datetime.now(timezone(timedelta(seconds=8 * 3600))).strftime('%Y年%m月%d日%H点%M%S')}.csv"
+            filename = f"{dirname}/{room_id}_{datetime.now(timezone(timedelta(seconds=8 * 3600))).strftime('%Y年%m月%d日%H点%M%S')}.csv"
             if await aiofiles.os.path.isfile(filename):
                 mode = 'a'
             else:
@@ -107,6 +107,7 @@ class HashMarkHandler(blivedm.BaseHandler):
         import json
         cmd = command.get('cmd', None)
         logger.warning(f"unknown cmd {cmd}")
+        await aiofiles.os.makedirs("output/unknown_cmd", exist_ok=True)
         async with aiofiles.open(f"output/unknown_cmd/{cmd}.json", mode='a', encoding='utf-8') as afp:
             await afp.write(json.dumps(command, indent=2))
 
