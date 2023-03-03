@@ -168,7 +168,7 @@ class HashMarkHandler(blivedm.BaseHandler):
 
 def go_with(famous_people, room_ids):
     logging.basicConfig(
-        level="NOTSET",
+        level=logging.INFO,
         format="%(message)s",
         datefmt="[%Y-%m-%d %H:%M:%S]",
         handlers=[RichHandler(
