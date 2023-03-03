@@ -9,7 +9,6 @@ from bilibili.models import Response, InfoByRoom
 ROOM_INIT_URL = 'https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom'
 DANMAKU_SERVER_CONF_URL = 'https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo'
 
-
 RETURN_VAR = TypeVar('RETURN_VAR')
 
 
@@ -27,13 +26,17 @@ def auto_session(func: Callable[[...], RETURN_VAR]):
         if session is not None:
             await session.close()
         return result
+
     return wrapper
 
 
+_Type = TypeVar('_Type')
+
+
 @auto_session
-async def get_info_by_room(room_id: int, *, session: aiohttp.ClientSession) -> InfoByRoom:
+async def get_info_by_room(room_id: int, type_: Type[_Type] = InfoByRoom, *, session: aiohttp.ClientSession) -> _Type:
     async with session.get(ROOM_INIT_URL, params={'room_id': room_id}) as res:
-        data = parse_obj_as(Response[InfoByRoom], await res.json())
+        data = parse_obj_as(Response[type_], await res.json())
         if data.code == 0:
             return data.data
         else:
