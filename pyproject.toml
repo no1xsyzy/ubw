@@ -8,6 +8,7 @@ readme = "Readme.md"
 packages = [
     {include = "blivedm", from = "src"},
     {include = "bilibili", from = "src"},
+    {include = "blive_dumpraw", from = "src"},
     {include = "blive_saver", from = "src"},
     {include = "bhashm", from = "src"},
 ]
