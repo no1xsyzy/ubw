@@ -7,6 +7,19 @@ from typing import *
 from pydantic import BaseModel, validator, root_validator, Field
 
 
+class Summary(BaseModel):
+    t: datetime
+    msg: str | None = None
+    user: tuple[int, str] | None = None
+    room_id: int | None = None
+    price: int = 0
+    raw: BaseModel | None = None
+
+
+class Summarizer(Protocol):
+    def summarize(self) -> Summary: ...
+
+
 class Scatter(BaseModel):
     min: int
     max: int
@@ -229,6 +242,14 @@ class DanmakuCommand(CommandModel):
     info: DanmakuInfo
     dm_v2: str | None = None
 
+    def summarize(self) -> Summary:
+        return Summary(
+            t=self.info.timestamp,
+            msg=self.info.msg,
+            user=(self.info.uid, self.info.uname),
+            raw=self,
+        )
+
     @validator('info', pre=True)
     def parse_dankamu_info(cls, v):
         if isinstance(v, list):
@@ -333,6 +354,15 @@ class GiftCommand(CommandModel):
     cmd: Literal['SEND_GIFT']
     data: GiftMessage
 
+    def summarize(self) -> Summary:
+        return Summary(
+            t=self.data.timestamp,
+            msg=f"{self.data.action} {self.data.giftName}x{self.data.num}",
+            user=(self.data.uid, self.data.uname),
+            price=self.data.price if self.data.coin_type == 'gold' else 0,
+            raw=self,
+        )
+
 
 class GuardBuyMessage(BaseModel):
     """上舰消息"""
@@ -359,6 +389,16 @@ class GuardBuyMessage(BaseModel):
 class GuardBuyCommand(CommandModel):
     cmd: Literal['GUARD_BUY']
     data: GuardBuyMessage
+
+    def summarize(self) -> Summary:
+        return Summary(
+            t=self.data.start_time,
+            msg=f"{self.data.gift_name}x{self.data.num}",
+            user=(self.data.uid, self.data.username),
+            room_id=0,
+            price=self.data.price,
+            raw=self,
+        )
 
 
 class GiftInfo(BaseModel):
@@ -462,6 +502,16 @@ class SuperChatCommand(CommandModel):
     data: SuperChatMessage
     roomid: int
 
+    def summarize(self) -> Summary:
+        return Summary(
+            t=self.data.start_time,
+            msg=self.data.message,
+            user=(self.data.uid, self.data.user_info.uname),
+            room_id=self.roomid,
+            price=self.data.price,
+            raw=self,
+        )
+
 
 class SuperChatDeleteMessage(BaseModel):
     """删除醒目留言消息"""
@@ -490,6 +540,14 @@ class RoomChangeCommand(CommandModel):
     cmd: Literal['ROOM_CHANGE']
     data: RoomChangeMessage
 
+    def summarize(self) -> Summary:
+        return Summary(
+            t=self.ct,
+            msg=f"直播间信息变更《{self.data.title}》，分区：{self.data.parent_area_name}/{self.data.area_name}",
+            user=None,
+            raw=self,
+        )
+
 
 class LiveCommand(CommandModel):
     """开播"""
@@ -502,6 +560,15 @@ class LiveCommand(CommandModel):
     live_time: datetime | None = None
     roomid: int
 
+    def summarize(self) -> Summary:
+        return Summary(
+            t=self.live_time or self.ct,
+            msg=f"开播了",
+            user=None,
+            room_id=self.roomid,
+            raw=self,
+        )
+
 
 class PreparingCommand(CommandModel):
     """下播"""
@@ -509,12 +576,28 @@ class PreparingCommand(CommandModel):
     roomid: int
     scatter: Scatter | None = None
 
+    def summarize(self) -> Summary:
+        return Summary(
+            t=self.ct,
+            msg=f"下播了",
+            room_id=self.roomid,
+            raw=self,
+        )
+
 
 class WarningCommand(CommandModel):
     """超管警告"""
     cmd: Literal['WARNING']
     msg: str
     roomid: int
+
+    def summarize(self) -> Summary:
+        return Summary(
+            t=self.ct,
+            msg=self.msg,
+            room_id=self.roomid,
+            raw=self,
+        )
 
 
 class HotRankSettlementData(BaseModel):
@@ -541,10 +624,24 @@ class HotRankSettlementV2Command(CommandModel):
     cmd: Literal['HOT_RANK_SETTLEMENT_V2']
     data: HotRankSettlementData
 
+    def summarize(self) -> Summary:
+        return Summary(
+            t=self.data.timestamp,
+            msg=self.data.dm_msg,
+            raw=self,
+        )
+
 
 class HotRankSettlementCommand(CommandModel):
     cmd: Literal['HOT_RANK_SETTLEMENT']
     data: HotRankSettlementData
+
+    def summarize(self) -> Summary:
+        return Summary(
+            t=self.data.timestamp,
+            msg=self.data.dm_msg,
+            raw=self,
+        )
 
 
 class RoomBlockMsg(BaseModel):
@@ -559,6 +656,14 @@ class RoomBlockCommand(CommandModel):
     data: RoomBlockMsg
     uid: str
     uname: str
+
+    def summarize(self) -> Summary:
+        return Summary(
+            t=self.ct,
+            msg=f"用户 {self.data.uname}（uid={self.data.uid}）被封禁",
+            user=(self.data.uid, self.data.uname),
+            raw=self,
+        )
 
 
 class ZipSkin(BaseModel):
@@ -811,6 +916,14 @@ class NoticeMsgCommand(CommandModel):
     scatter: Scatter
     marquee_id: str
     notice_type: int
+
+    def summarize(self) -> Summary:
+        return Summary(
+            t=self.ct,
+            msg=self.msg_common,
+            room_id=self.real_roomid,
+            raw=self,
+        )
 
 
 class OnlineRankCountData(BaseModel):
