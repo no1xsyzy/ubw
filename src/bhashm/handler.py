@@ -162,4 +162,9 @@ class HashMarkHandler(blivedm.BaseHandler):
     async def on_notice_msg(self, client, model):
         if model.msg_type in {1, 2}:
             return
-        logger.info(f"[{model.msg_type}] {escape(model.msg_common)}")
+        if model.msg_common.strip():
+            logger.info(f"[{model.msg_type}] {escape(model.msg_common)}")
+        if model.msg_self.strip():
+            logger.info(f"[{model.msg_type}] {escape(model.msg_self)}")
+        else:
+            logger.info(model)
