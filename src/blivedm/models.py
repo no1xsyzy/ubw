@@ -903,19 +903,22 @@ class NoticeMsgCommand(CommandModel):
     2:3D小电视飞船专用
     2:大乱斗连胜人气红包"""
 
-    full: dict
-    half: dict
-    side: dict
-    roomid: int
-    real_roomid: int
     msg_common: str
     msg_self: str
+
+    full: dict
+    half: dict
+    side: dict = {}
+
+    roomid: int
+    real_roomid: int
     link_url: str
-    shield_uid: int
-    business_id: str
-    scatter: Scatter
-    marquee_id: str
-    notice_type: int
+
+    shield_uid: int | None = None
+    business_id: str | None = None
+    scatter: Scatter | None = None
+    marquee_id: str | None = None
+    notice_type: int | None = None
 
     def summarize(self) -> Summary:
         return Summary(
@@ -1032,6 +1035,53 @@ class GuardHonorThousandData(BaseModel):
 class GuardHonorThousandCommand(CommandModel):
     cmd: Literal['GUARD_HONOR_THOUSAND']
     data: GuardHonorThousandData
+
+
+class SysMsgCommand(CommandModel):
+    cmd: Literal['SYS_MSG']
+    msg: str
+    url: str
+
+
+class UserToastMsgData(BaseModel):
+    anchor_show: bool
+    color: Color
+    dmscore: int
+    effect_id: int
+    end_time: datetime
+    face_effect_id: int
+    gift_id: int
+    guard_level: int
+    is_show: int
+    num: int
+    op_type: int
+    payflow_id: str
+    price: int
+    """金瓜子"""
+    role_name: str
+    room_effect_id: int
+    start_time: datetime
+    svga_block: int
+    target_guard_count: int
+    toast_msg: str
+    uid: int
+    unit: str
+    user_show: bool
+    username: str
+
+
+class UserToastMsgCommand(CommandModel):
+    cmd: Literal['USER_TOAST_MSG']
+    data: UserToastMsgData
+
+    def summarize(self):
+        return Summary(
+            t=self.data.start_time,
+            msg=self.data.toast_msg,
+            user=(self.data.uid, self.data.username),
+            price=self.data.price // 1000,
+            raw=self,
+        )
 
 
 AnnotatedCommandModel = Annotated[Union[tuple(CommandModel.__subclasses__())], Field(discriminator='cmd')]
