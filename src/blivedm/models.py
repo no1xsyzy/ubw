@@ -923,7 +923,7 @@ class NoticeMsgCommand(CommandModel):
     def summarize(self) -> Summary:
         return Summary(
             t=self.ct,
-            msg=self.msg_common,
+            msg=self.msg_common.strip() or self.msg_self.strip() or repr(self),
             room_id=self.real_roomid,
             raw=self,
         )
