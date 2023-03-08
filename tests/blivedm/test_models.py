@@ -442,7 +442,7 @@ def test_notice_msg():
 
     assert isinstance(c, models.NoticeMsgCommand)
 
-    c= parse_obj_as(
+    c = parse_obj_as(
         models.AnnotatedCommandModel,
         {
             "cmd": "NOTICE_MSG",
