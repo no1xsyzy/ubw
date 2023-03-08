@@ -73,7 +73,8 @@ class BaseHandler:
     一个简单的消息处理器实现，带消息分发和消息类型转换。继承并重写on_xxx方法即可实现自己的处理器
     """
 
-    CmdCallback = Callable[[client_.BLiveClient, Union[models.CommandModel, dict]], Coroutine[None, None, None]]
+    CmdCallback = Callable[[client_.BLiveClient, Union[
+        models.CommandModel, dict]], Coroutine[None, None, None]]
     _cmd_callbacks: dict[str, Union[None, CmdCallback]]
 
     def __init__(self, **p):
@@ -190,7 +191,7 @@ class BaseHandler:
         """房管"""
         await self.on_else(client, message)
 
-    async def on_room_admin_entrance(self, client: client_.BLiveClient, message: models.RoomAdminEntrance):
+    async def on_room_admin_entrance(self, client: client_.BLiveClient, message: models.RoomAdminEntranceCommand):
         """新房管"""
         await self.on_else(client, message)
 
