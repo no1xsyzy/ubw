@@ -4,6 +4,8 @@ from ._base import *
 class CommonNoticeDanmakuSegment(BaseModel):
     font_color: Color
     font_color_dark: Color
+    highlight_font_color: Color | None = None
+    highlight_font_color_dark: Color | None = None
     text: str
     type: int
 
@@ -14,10 +16,10 @@ class CommonNoticeDanmakuStyle(BaseModel):
 
 
 class CommonNoticeDanmakuData(BaseModel):
-    biz_id: int
+    biz_id: int | None = None
     content_segments: list[CommonNoticeDanmakuSegment]
-    danmaku_style: CommonNoticeDanmakuStyle
-    danmaku_uri: str
+    danmaku_style: CommonNoticeDanmakuStyle | None = None
+    danmaku_uri: str | None = None
     dmscore: int
     terminals: list[int]
 
