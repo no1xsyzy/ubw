@@ -134,7 +134,7 @@ class BaseHandler:
     async def on_else(self, client: client_.BLiveClient, model: models.CommandModel):
         """未处理且未忽略消息"""
         if isinstance(model, models.Summarizer):
-            return self.on_summary(client, model.summarize())
+            return await self.on_summary(client, model.summarize())
 
     async def on_heartbeat(self, client: client_.BLiveClient, message: models.HeartbeatCommand):
         """收到心跳包（人气值）"""
