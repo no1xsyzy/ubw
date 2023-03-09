@@ -4,6 +4,7 @@ from typing import Annotated, Union
 from ._base import *
 from .anchor_lot import AnchorLotStartCommand, AnchorLotCheckStatusCommand, AnchorLotEndCommand, AnchorLotAwardCommand
 from .area_rank_changed import AreaRankChangedCommand
+from .common_notice_danmaku import CommonNoticeDanmakuCommand
 from .danmu_msg import DanmakuCommand
 from .entry_effect import EntryEffectCommand
 from .guard_buy import GuardBuyCommand
