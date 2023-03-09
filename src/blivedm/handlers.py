@@ -128,8 +128,13 @@ class BaseHandler:
     async def on_unknown_cmd(self, client: client_.BLiveClient, command: dict):
         logger.warning(f"unknown cmd {command.get('cmd', None)} {command}")
 
+    async def on_summary(self, client: client_.BLiveClient, model: models.Summary):
+        """可摘要消息"""
+
     async def on_else(self, client: client_.BLiveClient, model: models.CommandModel):
         """未处理且未忽略消息"""
+        if isinstance(model, models.Summarizer):
+            return self.on_summary(client, model.summarize())
 
     async def on_heartbeat(self, client: client_.BLiveClient, message: models.HeartbeatCommand):
         """收到心跳包（人气值）"""

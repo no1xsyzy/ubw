@@ -109,6 +109,12 @@ class HashMarkHandler(blivedm.BaseHandler):
         async with aiofiles.open(f"output/unknown_cmd/{cmd}.json", mode='a', encoding='utf-8') as afp:
             await afp.write(json.dumps(command, indent=2))
 
+    async def on_summary(self, client, summary):
+        line = f"{summary.user[1]}(uid={summary.user[0]}): {escape(summary.msg)}"
+        if summary.price:
+            line += rf" \[{summary.price}]"
+        logger.info(line)
+
     async def on_danmu_msg(self, client, message):
         uname = message.info.uname
         msg = message.info.msg
