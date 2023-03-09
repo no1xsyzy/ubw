@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, root_validator, validator, Field
 __all__ = (
     'BaseModel', 'CommandModel', 'datetime', 'timedelta', 'timezone', 'Literal',
     'Summary', 'Summarizer',
-    'Scatter', 'strange_dict', 'Color', 'validator', 'Field',
+    'Scatter', 'strange_dict', 'Color', 'validator', 'Field', 'MedalInfo',
 )
 
 
@@ -90,3 +90,26 @@ def strange_dict(cls, v):
         return v
     except (json.JSONDecodeError, TypeError):
         return {}
+
+
+class MedalInfo(BaseModel):
+    anchor_roomid: int
+    """粉丝牌主播房间号"""
+    anchor_uname: str
+    """粉丝牌主播用户名"""
+    guard_level: int
+    """大航海等级"""
+    icon_id: int
+    is_lighted: int
+    """点亮？"""
+    medal_color: Color
+    medal_color_border: Color
+    medal_color_end: Color
+    medal_color_start: Color
+    medal_level: int
+    """粉丝牌等级"""
+    medal_name: str
+    """粉丝牌名称"""
+    special: str
+    target_id: int
+    """粉丝牌主播uid"""
