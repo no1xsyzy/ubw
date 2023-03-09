@@ -24,6 +24,7 @@ from .room_skin_msg import RoomSkinCommand
 from .send_gift import GiftCommand
 from .special_gift import SpecialGiftCommand
 from .stop_live_room_list import StopLiveRoomListCommand
+from .super_chat_entrance import SuperChatEntranceCommand
 from .super_chat_message import SuperChatCommand
 from .super_chat_message_delete import SuperChatDeleteCommand
 from .sys_msg import SysMsgCommand
