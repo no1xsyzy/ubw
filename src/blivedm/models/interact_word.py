@@ -29,6 +29,7 @@ class InteractWordData(BaseModel):
     identities: list[int]
     is_spread: int
     msg_type: int
+    """1=进入，2=关注，3=分享，4=特别关注，5=互相关注"""
     privilege_type: int
     score: datetime
     spread_desc: str
@@ -44,3 +45,19 @@ class InteractWordData(BaseModel):
 class InteractWordCommand(CommandModel):
     cmd: Literal['INTERACT_WORD']
     data: InteractWordData
+
+    def summarize(self):
+        msg = {
+            1: '进入',
+            2: '关注',
+            3: '分享',
+            4: '特别关注',
+            5: '互相关注',
+        }.get(self.data.msg_type, "msg_type=" + str(self.data.msg_type))
+
+        return Summary(
+            t=self.data.timestamp,
+            msg=msg,
+            user=(self.data.uid, self.data.uname),
+            raw=self,
+        )
