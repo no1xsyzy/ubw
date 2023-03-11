@@ -5,6 +5,7 @@ from datetime import datetime, timezone, timedelta
 import aiocsv
 import aiofiles
 import aiofiles.os
+import sentry_sdk
 from rich.markup import escape
 
 import blivedm
@@ -108,6 +109,12 @@ class HashMarkHandler(blivedm.BaseHandler):
         await aiofiles.os.makedirs("output/unknown_cmd", exist_ok=True)
         async with aiofiles.open(f"output/unknown_cmd/{cmd}.json", mode='a', encoding='utf-8') as afp:
             await afp.write(json.dumps(command, indent=2))
+        sentry_sdk.capture_event(
+            event={'level': 'warning', 'message': f"unknown cmd {cmd}"},
+            user={'id': client.room_id},
+            contexts={'command': {'command': command}},
+            tags={'module': 'bhashm', 'unknown_cmd': "yes", 'cmd': cmd, 'room_id': client.room_id},
+        )
 
     async def on_summary(self, client, summary):
         line = f"{summary.user[1]}(uid={summary.user[0]}): {escape(summary.msg)}"

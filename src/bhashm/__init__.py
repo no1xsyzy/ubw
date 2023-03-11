@@ -2,9 +2,15 @@ import asyncio
 import logging
 import sys
 
+import sentry_sdk
 from rich.logging import RichHandler
 
 from bhashm.handler import listen_to_all
+
+sentry_sdk.init(
+    dsn="https://f6bcb89a35fb438f81eb2d7679c5ded0@o4504791466835968.ingest.sentry.io/4504791473127424",
+    traces_sample_rate=1.0,
+)
 
 
 def go_with(famous_people, room_ids):
