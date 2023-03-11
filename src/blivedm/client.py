@@ -89,13 +89,13 @@ class BLiveClient:
     """
 
     def __init__(
-        self,
-        room_id,
-        uid=0,
-        session: Optional[aiohttp.ClientSession] = None,
-        heartbeat_interval=30,
-        ssl: Union[bool, ssl_.SSLContext] = True,
-        loop: Optional[asyncio.BaseEventLoop] = None,
+            self,
+            room_id,
+            uid=0,
+            session: Optional[aiohttp.ClientSession] = None,
+            heartbeat_interval=30,
+            ssl: Union[bool, ssl_.SSLContext] = True,
+            loop: Optional[asyncio.BaseEventLoop] = None,
     ):
         # 用来init_room的临时房间ID，可以用短ID
         self._tmp_room_id = room_id
@@ -367,9 +367,9 @@ class BLiveClient:
                 # 连接
                 host_server = self._host_server_list[retry_count % len(self._host_server_list)]
                 async with self._session.ws_connect(
-                    f"wss://{host_server['host']}:{host_server['wss_port']}/sub",
-                    receive_timeout=self._heartbeat_interval + 5,
-                    ssl=self._ssl
+                        f"wss://{host_server['host']}:{host_server['wss_port']}/sub",
+                        receive_timeout=self._heartbeat_interval + 5,
+                        ssl=self._ssl
                 ) as websocket:
                     self._websocket = websocket
                     await self._on_ws_connect()
