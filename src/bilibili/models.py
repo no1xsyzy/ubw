@@ -23,6 +23,7 @@ class BaseInfo(BaseModel):
 class AnchorInfo(BaseModel):
     base_info: BaseInfo
 
+
 class RoomInfo(BaseModel):
     room_id: int
     short_id: int
