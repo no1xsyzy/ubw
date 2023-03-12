@@ -9,7 +9,6 @@ from . import client as client_
 from . import models
 
 __all__ = (
-    'HandlerInterface',
     'BaseHandler',
     'ctx_client',
     'ctx_command',
@@ -59,13 +58,6 @@ IGNORED_CMDS = (
 
 ctx_client = ContextVar[client_.BLiveClient]('client')
 ctx_command = ContextVar[Union[dict, models.CommandModel]]('command')
-
-
-class HandlerInterface(Protocol):
-    """直播消息处理器接口"""
-
-    async def handle(self, client: client_.BLiveClient, command: dict):
-        raise NotImplementedError
 
 
 class BaseHandler:
