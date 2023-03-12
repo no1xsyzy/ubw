@@ -28,6 +28,15 @@ class HalfNotice(BaseModel):
     time: int
 
 
+class SideNotice(BaseModel):
+    background: str
+    border: str
+    color: str
+    highlight: str
+
+    head_icon: str
+
+
 class NoticeMsgCommandBase(CommandModel):
     cmd: Literal['NOTICE_MSG']
     msg_type: int
@@ -39,6 +48,23 @@ class NoticeMsgCommand1(NoticeMsgCommandBase):
 
 class NoticeMsgCommand2(NoticeMsgCommandBase):
     msg_type: Literal[2]
+
+    msg_common: str
+    msg_self: str
+    roomid: int
+    real_roomid: int
+    notice_type: int
+    shield_uid: int
+    id: int
+    name: str
+    business_id: int
+    marquee_id: int
+
+    side: SideNotice
+    full: FullNotice
+    half: HalfNotice
+
+    scatter: Scatter
 
 
 class NoticeMsgCommand6(NoticeMsgCommandBase):
