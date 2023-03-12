@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-from typing import Annotated, Union
 
 from ._base import *
 from .anchor_lot import AnchorLotStartCommand, AnchorLotCheckStatusCommand, AnchorLotEndCommand, AnchorLotAwardCommand
 from .area_rank_changed import AreaRankChangedCommand
 from .combo_send import ComboSendCommand
 from .common_notice_danmaku import CommonNoticeDanmakuCommand
+from .danmu_aggregation import DanmuAggregationCommand
 from .danmu_msg import DanmakuCommand
 from .entry_effect import EntryEffectCommand
 from .gift_star_process import GiftStarProcessCommand
@@ -38,9 +38,81 @@ from .warning import WarningCommand
 from .watched_change import WatchedChangeCommand
 from .widget_gift_star_process import WidgetGiftStarProcessCommand
 
-AnnotatedCommandModel = Annotated[Union[tuple(CommandModel.__subclasses__())], Field(discriminator='cmd')]
+AnnotatedCommandModel = Annotated[Union[
+    AnchorLotStartCommand, AnchorLotCheckStatusCommand, AnchorLotEndCommand, AnchorLotAwardCommand,
+    AreaRankChangedCommand,
+    ComboSendCommand,
+    CommonNoticeDanmakuCommand,
+    DanmuAggregationCommand,
+    DanmakuCommand,
+    EntryEffectCommand,
+    GiftStarProcessCommand,
+    GuardBuyCommand,
+    GuardHonorThousandCommand,
+    HeartbeatCommand,
+    HotRankSettlementCommand, HotRankSettlementV2Command,
+    InteractWordCommand,
+    LiveCommand,
+    LiveMultiViewChangeCommand,
+    NoticeMsgCommand,
+    OnlineRankCountCommand,
+    PreparingCommand,
+    RingStatusChangeCommand, RingStatusChangeCommandV2,
+    RoomAdminEntranceCommand,
+    RoomAdminsCommand,
+    RoomBlockCommand,
+    RoomChangeCommand,
+    RoomSkinCommand,
+    GiftCommand,
+    SpecialGiftCommand,
+    StopLiveRoomListCommand,
+    SuperChatEntranceCommand,
+    SuperChatCommand,
+    SuperChatDeleteCommand,
+    SysMsgCommand,
+    TradingScoreCommand,
+    UserToastMsgCommand,
+    WarningCommand,
+    WatchedChangeCommand,
+    WidgetGiftStarProcessCommand
+], Field(discriminator='cmd')]
 
 __all__ = (
-    *(cmdm.__name__ for cmdm in CommandModel.__subclasses__()),
+    'AnchorLotStartCommand', 'AnchorLotCheckStatusCommand', 'AnchorLotEndCommand', 'AnchorLotAwardCommand',
+    'AreaRankChangedCommand',
+    'ComboSendCommand',
+    'CommonNoticeDanmakuCommand',
+    'DanmuAggregationCommand',
+    'DanmakuCommand',
+    'EntryEffectCommand',
+    'GiftStarProcessCommand',
+    'GuardBuyCommand',
+    'GuardHonorThousandCommand',
+    'HeartbeatCommand',
+    'HotRankSettlementCommand', 'HotRankSettlementV2Command',
+    'InteractWordCommand',
+    'LiveCommand',
+    'LiveMultiViewChangeCommand',
+    'NoticeMsgCommand',
+    'OnlineRankCountCommand',
+    'PreparingCommand',
+    'RingStatusChangeCommand', 'RingStatusChangeCommandV2',
+    'RoomAdminEntranceCommand',
+    'RoomAdminsCommand',
+    'RoomBlockCommand',
+    'RoomChangeCommand',
+    'RoomSkinCommand',
+    'GiftCommand',
+    'SpecialGiftCommand',
+    'StopLiveRoomListCommand',
+    'SuperChatEntranceCommand',
+    'SuperChatCommand',
+    'SuperChatDeleteCommand',
+    'SysMsgCommand',
+    'TradingScoreCommand',
+    'UserToastMsgCommand',
+    'WarningCommand',
+    'WatchedChangeCommand',
+    'WidgetGiftStarProcessCommand',
     'AnnotatedCommandModel', 'Summary', 'Summarizer', 'CommandModel',
 )

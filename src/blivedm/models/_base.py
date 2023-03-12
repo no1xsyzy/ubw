@@ -1,12 +1,12 @@
 import json
 import re
 from datetime import datetime, timezone, timedelta
-from typing import runtime_checkable, Protocol, Union, Literal
+from typing import Annotated, runtime_checkable, Protocol, Union, Literal
 
 from pydantic import BaseModel, Field, root_validator, validator, Field
 
 __all__ = (
-    'BaseModel', 'CommandModel', 'datetime', 'timedelta', 'timezone', 'Literal',
+    'BaseModel', 'CommandModel', 'datetime', 'timedelta', 'timezone', 'Literal', 'Annotated', 'Union',
     'Summary', 'Summarizer',
     'Scatter', 'strange_dict', 'Color', 'validator', 'Field', 'MedalInfo',
 )

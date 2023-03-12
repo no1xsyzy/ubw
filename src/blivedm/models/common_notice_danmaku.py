@@ -1,18 +1,40 @@
+from typing import Any
+
 from ._base import *
 
 
-class CommonNoticeDanmakuSegment(BaseModel):
-    font_color: Color
-    font_color_dark: Color
-    highlight_font_color: Color | None = None
-    highlight_font_color_dark: Color | None = None
-    text: str
+class CommonNoticeDanmakuSegmentBase(BaseModel):
     type: int
+    text: str
+
+    background_color: Any = None
+    background_color_dark: Any = None
+    font_bold: Any = None
+    font_color: Any = None
+    font_color_dark: Any = None
+    highlight_font_color: Any = None
+    highlight_font_color_dark: Any = None
+    img_height: Any = None
+    img_width: Any = None
+    img_url: Any = None
+
+
+class CommonNoticeDanmakuSegment1(CommonNoticeDanmakuSegmentBase):
+    type: Literal[1]
+
+
+class CommonNoticeDanmakuSegment3(CommonNoticeDanmakuSegmentBase):
+    type: Literal[3]
+    uri: str
+
+
+CommonNoticeDanmakuSegment = Annotated[
+    CommonNoticeDanmakuSegment1 | CommonNoticeDanmakuSegment3, Field(discriminator='type')]
 
 
 class CommonNoticeDanmakuStyle(BaseModel):
-    background_color: Color | None
-    background_color_dark: Color | None
+    background_color: Color
+    background_color_dark: Color
 
 
 class CommonNoticeDanmakuData(BaseModel):

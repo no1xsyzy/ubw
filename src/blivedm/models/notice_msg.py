@@ -1,32 +1,58 @@
 from ._base import *
 
 
-class NoticeMsgCommand(CommandModel):
-    cmd: Literal['NOTICE_MSG']
-    id: int
+class FullNotice(BaseModel):
+    background: str
+    color: str
+    highlight: str
 
-    name: str
+    head_icon: str
+    head_icon_fa: str
+    head_icon_fan: int
+
+    tail_icon: str
+    tail_icon_fa: str
+    tail_icon_fan: int
+
+    time: int
+
+
+class HalfNotice(BaseModel):
+    background: str
+    color: str
+    highlight: str
+
+    head_icon: str
+    tail_icon: str
+
+    time: int
+
+
+class NoticeMsgCommandBase(CommandModel):
+    cmd: Literal['NOTICE_MSG']
     msg_type: int
-    """1:人气榜第一名
-    2:3D小电视飞船专用
-    2:大乱斗连胜人气红包"""
+
+
+class NoticeMsgCommand1(NoticeMsgCommandBase):
+    msg_type: Literal[1]
+
+
+class NoticeMsgCommand2(NoticeMsgCommandBase):
+    msg_type: Literal[2]
+
+
+class NoticeMsgCommand6(NoticeMsgCommandBase):
+    msg_type: Literal[6]
 
     msg_common: str
     msg_self: str
-
-    full: dict
-    half: dict
-    side: dict = {}
 
     roomid: int
     real_roomid: int
     link_url: str
 
-    shield_uid: int | None = None
-    business_id: str | None = None
-    scatter: Scatter | None = None
-    marquee_id: str | None = None
-    notice_type: int | None = None
+    full: FullNotice
+    half: HalfNotice
 
     def summarize(self) -> Summary:
         return Summary(
@@ -35,3 +61,8 @@ class NoticeMsgCommand(CommandModel):
             room_id=self.real_roomid,
             raw=self,
         )
+
+
+NoticeMsgCommand = Annotated[Union[
+    NoticeMsgCommand1, NoticeMsgCommand2, NoticeMsgCommand6
+], Field(discriminator='msg_type')]
