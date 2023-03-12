@@ -22,7 +22,7 @@ class ComboSendData(BaseModel):
     is_naming: bool
     is_show: int
     medal_info: MedalInfo
-    name_color: Color
+    name_color: Color | Literal[''] = ''
     r_uname: str
     receive_user_info: UserInfo
     ruid: int

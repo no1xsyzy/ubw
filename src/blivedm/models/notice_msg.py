@@ -45,6 +45,24 @@ class NoticeMsgCommandBase(CommandModel):
 class NoticeMsgCommand1(NoticeMsgCommandBase):
     msg_type: Literal[1]
 
+    msg_common: str
+    msg_self: str
+    roomid: int
+    real_roomid: int
+    notice_type: int
+    shield_uid: int
+    id: int
+    name: str
+    business_id: Literal['']
+    marquee_id: Literal['']
+    link_url: str
+
+    full: FullNotice
+    half: HalfNotice
+    side: SideNotice
+
+    scatter: Scatter
+
 
 class NoticeMsgCommand2(NoticeMsgCommandBase):
     msg_type: Literal[2]
@@ -58,7 +76,52 @@ class NoticeMsgCommand2(NoticeMsgCommandBase):
     id: int
     name: str
     business_id: int
-    marquee_id: int
+    marquee_id: Literal['']
+    link_url: str
+
+    side: SideNotice
+    full: FullNotice
+    half: HalfNotice
+
+    scatter: Scatter
+
+
+class NoticeMsgCommand3(NoticeMsgCommandBase):
+    msg_type: Literal[3]
+
+    msg_common: str
+    msg_self: str
+    roomid: int
+    real_roomid: int
+    id: int
+    name: str
+    link_url: str
+    business_id: Literal['']
+    marquee_id: Literal['']
+    notice_type: int
+    shield_uid: int
+
+    side: SideNotice
+    full: FullNotice
+    half: HalfNotice
+
+    scatter: Scatter
+
+
+class NoticeMsgCommand4(NoticeMsgCommandBase):
+    msg_type: Literal[4]
+
+    msg_common: str
+    msg_self: str
+    roomid: int
+    real_roomid: int
+    id: int
+    name: str
+    link_url: str
+    business_id: Literal['']
+    marquee_id: Literal['']
+    notice_type: int
+    shield_uid: int
 
     side: SideNotice
     full: FullNotice
@@ -90,5 +153,9 @@ class NoticeMsgCommand6(NoticeMsgCommandBase):
 
 
 NoticeMsgCommand = Annotated[Union[
-    NoticeMsgCommand1, NoticeMsgCommand2, NoticeMsgCommand6
+    NoticeMsgCommand1,
+    NoticeMsgCommand2,
+    NoticeMsgCommand3,
+    NoticeMsgCommand4,
+    NoticeMsgCommand6,
 ], Field(discriminator='msg_type')]

@@ -33,8 +33,8 @@ CommonNoticeDanmakuSegment = Annotated[
 
 
 class CommonNoticeDanmakuStyle(BaseModel):
-    background_color: Color
-    background_color_dark: Color
+    background_color: Color | None = None
+    background_color_dark: Color | None = None
 
 
 class CommonNoticeDanmakuData(BaseModel):
@@ -42,7 +42,7 @@ class CommonNoticeDanmakuData(BaseModel):
     content_segments: list[CommonNoticeDanmakuSegment]
     danmaku_style: CommonNoticeDanmakuStyle | None = None
     danmaku_uri: str | None = None
-    dmscore: int
+    dmscore: int = 0
     terminals: list[int]
 
 
