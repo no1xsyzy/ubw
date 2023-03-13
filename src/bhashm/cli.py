@@ -32,7 +32,7 @@ def go_with_argv():
                 elif fuid not in famous_people:
                     famous_people.append(fuid)
         else:
-            raise ValueError()
+            sys.exit(f"wrong parameter: {arg}")
     if not room_ids:
         sys.exit("no room_ids, this may be due to a config mistake")
 
