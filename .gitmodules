@@ -1,0 +1,3 @@
+[submodule "src/bliveshield"]
+	path = src/bliveshield
+	url = https://github.com/FHChen0420/bili_live_shield_words
