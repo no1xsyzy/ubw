@@ -65,3 +65,35 @@ class DanmuInfo(BaseModel):
     max_delay: int
     token: str
     host_list: list[Host]
+
+
+class Emoticon(BaseModel):
+    emoji: str
+    descript: str
+    url: str
+    width: int
+    height: int
+    emoticon_unique: str
+    emoticon_id: int
+
+    identity: int
+    """解锁需要99=无需求，4=粉丝团，3=舰长，2=提督，1=总督"""
+    unlock_need_level: int
+    """解锁需要粉丝牌等级"""
+    unlock_show_text: int
+    """解锁需求文字描述"""
+
+
+class EmoticonPkg(BaseModel):
+    emoticons: list[Emoticon]
+    pkg_id: int
+    pkg_name: str
+    pkg_type: int
+    pkg_descript: str
+    current_cover: str
+
+
+class RoomEmoticons(BaseModel):
+    fans_brand: int
+    data: list[EmoticonPkg]
+    purchase_url: str | None = None

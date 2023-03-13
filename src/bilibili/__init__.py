@@ -4,10 +4,11 @@ from typing import *
 import aiohttp
 from pydantic import parse_obj_as
 
-from bilibili.models import Response, InfoByRoom, DanmuInfo
+from bilibili.models import Response, InfoByRoom, DanmuInfo, RoomEmoticons
 
 ROOM_INIT_URL = 'https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom'
 DANMAKU_SERVER_CONF_URL = 'https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo'
+EMOTICON_URL = 'https://api.live.bilibili.com/xlive/web-ucenter/v2/emoticon/GetEmoticons'
 
 RETURN_VAR = TypeVar('RETURN_VAR')
 
@@ -46,6 +47,17 @@ async def get_info_by_room(room_id: int, type_: Type[_Type] = InfoByRoom, *, ses
 @auto_session
 async def get_danmaku_server(room_id: int, type_: Type[_Type] = DanmuInfo, *, session: aiohttp.ClientSession) -> _Type:
     async with session.get(DANMAKU_SERVER_CONF_URL, params={'id': room_id}) as res:
+        data = parse_obj_as(Response[type_], await res.json())
+        if data.code == 0:
+            return data.data
+        else:
+            raise BilibiliApiError(data.message)
+
+
+@auto_session
+async def get_emoticons(room_id: int, platform: str = 'pc', type_: Type[_Type] = RoomEmoticons, *,
+                        session: aiohttp.ClientSession) -> _Type:
+    async with session.get(EMOTICON_URL, params={'platform': platform, 'id': room_id}) as res:
         data = parse_obj_as(Response[type_], await res.json())
         if data.code == 0:
             return data.data
