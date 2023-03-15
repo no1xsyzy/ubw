@@ -100,6 +100,7 @@ class BLiveClient(ClientABC):
             ssl: Union[bool, ssl_.SSLContext] = True,
             loop: Optional[asyncio.BaseEventLoop] = None,
     ):
+        super().__init__()
         # 用来init_room的临时房间ID，可以用短ID
         self._tmp_room_id = room_id
         self._uid = uid
@@ -585,6 +586,7 @@ class BLiveClient(ClientABC):
 
 class TcpClient(ClientABC):
     def __init__(self, hosts, room_id, token):
+        super().__init__()
         self.hosts = hosts  # type: list[bilibili.models.Host]
         self.room_id = room_id  # type: int
         self.token = token  # type: str
@@ -629,7 +631,11 @@ class TcpClient(ClientABC):
                         await self._proc_pack(header, body)
                 except asyncio.exceptions.IncompleteReadError:
                     # 断线重连？
-                    pass
+                    try:
+                        self._writer.close()
+                    except:
+                        pass
+                    self._reader = self._writer = None
                 except AuthError:
                     # 认证失败了，应该重新获取token再重连
                     logger.info('room=%d auth failed, trying init_room() again', self.room_id)
@@ -705,7 +711,7 @@ class TcpClient(ClientABC):
         if self._task is not None:
             self._task.cancel("stop")
             self._writer.close()
-            self._reader = self._writer = None
+            self._reader = self._writer = self._task = None
 
     async def close(self):
         pass
@@ -716,3 +722,56 @@ class TcpClient(ClientABC):
             self.stop()
             await task
         await self.close()
+
+
+class DummyClient(ClientABC):
+    """测试用，可手动发送也可发送随机信息"""
+    MESSAGES = [
+        "Lorem ipsum dolor sit amet",
+        "The quick brown fox jumps over the lazy dog",
+        "我能吞下玻璃而不伤身体",
+        "私はガラスを食べられます。それは私を傷つけません。",
+    ]
+    INTERVAL = (1, 0.7)
+
+    def __init__(self):
+        super().__init__()
+        self._task = None
+
+    def start(self):
+        self._task = True
+
+    async def _random_command(self):
+        import random
+        while True:
+            for handler in self._handlers:
+                await handler.handle(self, self._create_command())
+            await asyncio.sleep(random.normalvariate(*self.INTERVAL))
+
+    def _create_command(self):
+        return {"cmd": "DANMU_MSG"}
+
+    async def _replay_raw(self, fn):
+        import random
+        with open(fn, 'r') as fp:
+            d = json.load(fp)
+        for j in d['_default'].values():
+            if 'cmd' in j:
+                for handler in self._handlers:
+                    await handler.handle(self, j)
+                await asyncio.sleep(random.normalvariate(*self.INTERVAL))
+
+    async def stop_and_close(self):
+        task = self._task
+        if task:
+            self.stop()
+        await self.close()
+
+    async def close(self):
+        pass
+
+    def stop(self):
+        self._task = False
+
+    async def join(self):
+        await asyncio.shield(self._task)

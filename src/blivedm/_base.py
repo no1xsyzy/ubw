@@ -16,23 +16,43 @@ class HandlerInterface(Protocol):
 class ClientABC(abc.ABC):
     room_id: int
 
-    @abc.abstractmethod
-    def __init__(self): ...
+    def __init__(self):
+        self._handlers: list[HandlerInterface] = []
+        self._task = None
+
+    def add_handler(self, handler: HandlerInterface):
+        if handler not in self._handlers:
+            self._handlers.append(handler)
+
+    def remove_handler(self, handler: HandlerInterface):
+        try:
+            self._handlers.remove(handler)
+        except ValueError:
+            pass
+
+    @property
+    def is_running(self):
+        return self._task is not None
 
     @abc.abstractmethod
-    def add_handler(self, handler: HandlerInterface): ...
+    def start(self):
+        ...
 
     @abc.abstractmethod
-    def start(self): ...
+    async def join(self):
+        ...
 
     @abc.abstractmethod
-    async def join(self): ...
+    def stop(self):
+        ...
 
     @abc.abstractmethod
-    def stop(self): ...
+    async def close(self):
+        ...
 
-    @abc.abstractmethod
-    async def close(self): ...
-
-    @abc.abstractmethod
-    async def stop_and_close(self): ...
+    async def stop_and_close(self):
+        task = self._task
+        if task:
+            self.stop()
+            await task
+        await self.close()
