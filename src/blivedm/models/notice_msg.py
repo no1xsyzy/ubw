@@ -152,10 +152,27 @@ class NoticeMsgCommand6(NoticeMsgCommandBase):
         )
 
 
+class NoticeMsgCommand9(NoticeMsgCommandBase):
+    msg_type: Literal[9]
+
+    msg_common: str
+    msg_self: str
+
+    link_url: str
+    roomid: int
+    real_roomid: int
+    shield_uid: int  # seems to be -1 only
+
+    full: FullNotice
+    half: HalfNotice
+    side: SideNotice
+
+
 NoticeMsgCommand = Annotated[Union[
     NoticeMsgCommand1,
     NoticeMsgCommand2,
     NoticeMsgCommand3,
     NoticeMsgCommand4,
     NoticeMsgCommand6,
+    NoticeMsgCommand9,
 ], Field(discriminator='msg_type')]
