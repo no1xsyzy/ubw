@@ -6,6 +6,7 @@ class PreparingCommand(CommandModel):
     cmd: Literal['PREPARING']
     roomid: int
     scatter: Scatter | None = None
+    round: bool = False
 
     def summarize(self) -> Summary:
         return Summary(
