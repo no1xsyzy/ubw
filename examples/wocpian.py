@@ -3,6 +3,7 @@ import logging
 import sys
 
 import sentry_sdk
+from rich.logging import RichHandler
 from rich.markup import escape
 
 import blivedm
@@ -16,11 +17,31 @@ ROOM_IDS = [
     22898905,  # 珞璃Official
 ]
 
-logger = logging.getLogger('wocpian')
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    datefmt="[%Y-%m-%d %H:%M:%S]",
+    handlers=[RichHandler(
+        # rich_tracebacks=True,
+        # tracebacks_show_locals=True,
+        tracebacks_suppress=['logging', 'rich'],
+        show_path=False,
+    )],
+)
 sentry_sdk.init(
     dsn="https://f6bcb89a35fb438f81eb2d7679c5ded0@o4504791466835968.ingest.sentry.io/4504791473127424",
     traces_sample_rate=1.0,
 )
+
+
+class RichClientAdapter(logging.LoggerAdapter):
+    def process(self, msg, kwargs):
+        kwargs.setdefault('extra', {})
+        kwargs['extra']['markup'] = True
+        return msg, kwargs
+
+
+logger = RichClientAdapter(logging.getLogger('wocpian'), {})
 
 
 async def listen_to_all(room_ids: list[int], handler: blivedm.BaseHandler):
@@ -61,16 +82,13 @@ class PianHandler(blivedm.BaseHandler):
     async def on_else(self, client, model):
         pass
 
-    async def on_summary(self, client, model):
-        pass
-
     async def on_interact_word(self, client, model):
         uid = model.data.uid
         uname = model.data.uname
         room_id = client.room_id
 
         if self.maybe_pian(uid, uname) and model.data.msg_type == 1:
-            logger.info(rf"\[[bright_cyan]{room_id}[/]] [cyan]{uname}[/]进入直播间")
+            logger.info(rf"\[[bright_cyan]{room_id}[/]] [bright_red]{uname}[/]进入直播间")
 
     async def on_danmu_msg(self, client, message):
         uid = message.info.uid
@@ -79,7 +97,7 @@ class PianHandler(blivedm.BaseHandler):
         room_id = client.room_id
 
         if self.maybe_pian(uid, uname):
-            logger.info(rf"\[[bright_cyan]{room_id}[/]] [cyan]{uname}[/]: [bright_white]{escape(msg)}[/]")
+            logger.info(rf"\[[bright_cyan]{room_id}[/]] [bright_red]{uname}[/]: [bright_white]{escape(msg)}[/]")
 
     async def on_room_block_msg(self, client, message):
         uname = message.data.uname
@@ -87,7 +105,7 @@ class PianHandler(blivedm.BaseHandler):
         room_id = client.room_id
 
         if self.maybe_pian(uid, uname):
-            logger.info(rf"\[[bright_cyan]{room_id}[/]] 用户 {uname}（uid={uid}）被封禁")
+            logger.info(rf"\[[bright_cyan]{room_id}[/]] 用户 [bright_red]{uname}[/]（uid={uid}）被封禁")
 
 
 if __name__ == '__main__':
