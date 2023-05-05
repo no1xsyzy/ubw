@@ -23,13 +23,18 @@ class CommonNoticeDanmakuSegment1(CommonNoticeDanmakuSegmentBase):
     type: Literal[1]
 
 
+class CommonNoticeDanmakuSegment2(CommonNoticeDanmakuSegmentBase):
+    type: Literal[2]
+
+
 class CommonNoticeDanmakuSegment3(CommonNoticeDanmakuSegmentBase):
     type: Literal[3]
     uri: str
 
 
 CommonNoticeDanmakuSegment = Annotated[
-    CommonNoticeDanmakuSegment1 | CommonNoticeDanmakuSegment3, Field(discriminator='type')]
+    CommonNoticeDanmakuSegment1 | CommonNoticeDanmakuSegment2 | CommonNoticeDanmakuSegment3,
+    Field(discriminator='type')]
 
 
 class CommonNoticeDanmakuStyle(BaseModel):
