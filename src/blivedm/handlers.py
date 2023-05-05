@@ -201,3 +201,7 @@ class BaseHandler:
     async def on_notice_msg(self, client: client_.BLiveClient, model: models.NoticeMsgCommand):
         """未知"""
         await self.on_else(client, model)
+
+    async def on_interact_word(self, client: client_.BLiveClient, model: models.InteractWordCommand):
+        """进入，关注，分享，特别关注，互相关注"""
+        await self.on_else(client, model)
