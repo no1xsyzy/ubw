@@ -2,6 +2,7 @@ import asyncio
 import logging
 import sys
 
+import sentry_sdk
 from rich.markup import escape
 
 import blivedm
@@ -16,6 +17,10 @@ ROOM_IDS = [
 ]
 
 logger = logging.getLogger('wocpian')
+sentry_sdk.init(
+    dsn="https://f6bcb89a35fb438f81eb2d7679c5ded0@o4504791466835968.ingest.sentry.io/4504791473127424",
+    traces_sample_rate=1.0,
+)
 
 
 async def listen_to_all(room_ids: list[int], handler: blivedm.BaseHandler):
@@ -39,8 +44,19 @@ class PianHandler(blivedm.BaseHandler):
         return uid > 3493280000000000 and uname.startswith("bili_") and uname[5:].isnumeric()
 
     async def on_unknown_cmd(self, client, command):
-        import traceback
-        traceback.print_exception(*sys.exc_info())
+        import json
+        import aiofiles.os
+        cmd = command.get('cmd', None)
+        logger.warning(f"unknown cmd {cmd}")
+        await aiofiles.os.makedirs("output/unknown_cmd", exist_ok=True)
+        async with aiofiles.open(f"output/unknown_cmd/{cmd}.json", mode='a', encoding='utf-8') as afp:
+            await afp.write(json.dumps(command, indent=2))
+        sentry_sdk.capture_event(
+            event={'level': 'warning', 'message': f"unknown cmd {cmd}"},
+            user={'id': client.room_id},
+            contexts={'command': {'command': command}},
+            tags={'module': 'bhashm', 'unknown_cmd': "yes", 'cmd': cmd, 'room_id': client.room_id},
+        )
 
     async def on_else(self, client, model):
         pass
