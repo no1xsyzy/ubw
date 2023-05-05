@@ -19,6 +19,11 @@ from .live import LiveCommand
 from .live_multi_view_change import LiveMultiViewChangeCommand
 from .notice_msg import NoticeMsgCommand
 from .online_rank_count import OnlineRankCountCommand
+from .pk import (
+    PkBattleRankChangeCommand,
+    PkBattlePreCommand, PkBattlePreNewCommand,
+    PkBattleStartCommand, PkBattleStartNewCommand,
+)
 from .preparing import PreparingCommand
 from .recommend_card import RecommendCardCommand
 from .ring_status_change import RingStatusChangeCommand, RingStatusChangeCommandV2
@@ -59,6 +64,9 @@ AnnotatedCommandModel = Annotated[Union[
     LiveMultiViewChangeCommand,
     NoticeMsgCommand,
     OnlineRankCountCommand,
+    PkBattleRankChangeCommand,
+    PkBattlePreCommand, PkBattlePreNewCommand,
+    PkBattleStartCommand, PkBattleStartNewCommand,
     PreparingCommand,
     RecommendCardCommand,
     RingStatusChangeCommand, RingStatusChangeCommandV2,
@@ -101,6 +109,9 @@ __all__ = (
     'NoticeMsgCommand',
     'OnlineRankCountCommand',
     'PreparingCommand',
+    'PkBattleRankChangeCommand',
+    'PkBattlePreCommand', 'PkBattlePreNewCommand',
+    'PkBattleStartCommand', 'PkBattleStartNewCommand',
     'RecommendCardCommand',
     'RingStatusChangeCommand', 'RingStatusChangeCommandV2',
     'RoomAdminEntranceCommand',
