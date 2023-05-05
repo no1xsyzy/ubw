@@ -9,6 +9,7 @@ from .danmu_aggregation import DanmuAggregationCommand
 from .danmu_msg import DanmakuCommand
 from .entry_effect import EntryEffectCommand
 from .gift_star_process import GiftStarProcessCommand
+from .goto_buy_flow import GotoBuyFlowCommand
 from .guard_buy import GuardBuyCommand
 from .guard_honor_thousand import GuardHonorThousandCommand
 from .heartbeat import HeartbeatCommand
@@ -48,6 +49,7 @@ AnnotatedCommandModel = Annotated[Union[
     DanmakuCommand,
     EntryEffectCommand,
     GiftStarProcessCommand,
+    GotoBuyFlowCommand,
     GuardBuyCommand,
     GuardHonorThousandCommand,
     HeartbeatCommand,
@@ -88,6 +90,7 @@ __all__ = (
     'DanmakuCommand',
     'EntryEffectCommand',
     'GiftStarProcessCommand',
+    'GotoBuyFlowCommand',
     'GuardBuyCommand',
     'GuardHonorThousandCommand',
     'HeartbeatCommand',
