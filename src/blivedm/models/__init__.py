@@ -19,6 +19,7 @@ from .live_multi_view_change import LiveMultiViewChangeCommand
 from .notice_msg import NoticeMsgCommand
 from .online_rank_count import OnlineRankCountCommand
 from .preparing import PreparingCommand
+from .recommend_card import RecommendCardCommand
 from .ring_status_change import RingStatusChangeCommand, RingStatusChangeCommandV2
 from .room_admin_entrace import RoomAdminEntranceCommand
 from .room_admins import RoomAdminsCommand
@@ -57,6 +58,7 @@ AnnotatedCommandModel = Annotated[Union[
     NoticeMsgCommand,
     OnlineRankCountCommand,
     PreparingCommand,
+    RecommendCardCommand,
     RingStatusChangeCommand, RingStatusChangeCommandV2,
     RoomAdminEntranceCommand,
     RoomAdminsCommand,
@@ -96,6 +98,7 @@ __all__ = (
     'NoticeMsgCommand',
     'OnlineRankCountCommand',
     'PreparingCommand',
+    'RecommendCardCommand',
     'RingStatusChangeCommand', 'RingStatusChangeCommandV2',
     'RoomAdminEntranceCommand',
     'RoomAdminsCommand',
