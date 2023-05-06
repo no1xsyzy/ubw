@@ -440,7 +440,7 @@ def test_notice_msg():
         }
     )
 
-    assert isinstance(c, models.NoticeMsgCommand)
+    assert isinstance(c, models.notice_msg.NoticeMsgCommand2)
 
     c = parse_obj_as(
         models.AnnotatedCommandModel,
@@ -492,4 +492,4 @@ def test_notice_msg():
         }
     )
 
-    assert isinstance(c, models.NoticeMsgCommand)
+    assert isinstance(c, models.notice_msg.NoticeMsgCommand2)
