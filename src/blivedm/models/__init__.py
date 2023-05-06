@@ -5,6 +5,7 @@ from .anchor_lot import AnchorLotStartCommand, AnchorLotCheckStatusCommand, Anch
 from .area_rank_changed import AreaRankChangedCommand
 from .combo_send import ComboSendCommand
 from .common_notice_danmaku import CommonNoticeDanmakuCommand
+from .cut_off import CutOffCommand
 from .danmu_aggregation import DanmuAggregationCommand
 from .danmu_msg import DanmakuCommand
 from .entry_effect import EntryEffectCommand
@@ -52,6 +53,7 @@ AnnotatedCommandModel = Annotated[Union[
     AreaRankChangedCommand,
     ComboSendCommand,
     CommonNoticeDanmakuCommand,
+    CutOffCommand,
     DanmuAggregationCommand,
     DanmakuCommand,
     EntryEffectCommand,
@@ -98,6 +100,7 @@ __all__ = (
     'AreaRankChangedCommand',
     'ComboSendCommand',
     'CommonNoticeDanmakuCommand',
+    'CutOffCommand',
     'DanmuAggregationCommand',
     'DanmakuCommand',
     'EntryEffectCommand',
