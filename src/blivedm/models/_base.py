@@ -52,7 +52,7 @@ class Color(BaseModel):
                 data = r + r + g + g + b + b
         elif isinstance(data, int):
             data = ("000000" + hex(data)[2:])[-6:]
-        if re.match("[0-9a-fA-F]{6}", data):
+        if re.match("[0-9a-fA-F]{6}", data) or re.match("[0-9a-fA-F]{8}", data):
             return {'__root__': data}
         else:
             raise ValueError(f"`{values['__root__']}` is not a valid color")
@@ -62,20 +62,20 @@ class Color(BaseModel):
         return "#" + self.__root__
 
     @property
-    def contrast_black_or_white(self):
-        return 'black' if max(self.red, self.green, self.blue) > 127 else 'white'
-
-    @property
-    def red(self):
+    def red(self) -> int:
         return int(self.__root__[:2], 16)
 
     @property
-    def green(self):
+    def green(self) -> int:
         return int(self.__root__[2:4], 16)
 
     @property
-    def blue(self):
-        return int(self.__root__[4:], 16)
+    def blue(self) -> int:
+        return int(self.__root__[4:6], 16)
+
+    @property
+    def alpha(self) -> int | None:
+        return int(self.__root__[6:]) if len(self.__root__) > 6 else None
 
     def __str__(self):
         return "#" + self.__root__
