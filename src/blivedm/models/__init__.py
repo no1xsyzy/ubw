@@ -9,6 +9,7 @@ from .cut_off import CutOffCommand
 from .danmu_aggregation import DanmuAggregationCommand
 from .danmu_msg import DanmakuCommand
 from .entry_effect import EntryEffectCommand
+from .full_screen_special_effect import FullScreenSpecialEffectCommand
 from .gift_star_process import GiftStarProcessCommand
 from .goto_buy_flow import GotoBuyFlowCommand
 from .guard_buy import GuardBuyCommand
@@ -57,6 +58,7 @@ AnnotatedCommandModel = Annotated[Union[
     DanmuAggregationCommand,
     DanmakuCommand,
     EntryEffectCommand,
+    FullScreenSpecialEffectCommand,
     GiftStarProcessCommand,
     GotoBuyFlowCommand,
     GuardBuyCommand,
@@ -104,6 +106,7 @@ __all__ = (
     'DanmuAggregationCommand',
     'DanmakuCommand',
     'EntryEffectCommand',
+    'FullScreenSpecialEffectCommand',
     'GiftStarProcessCommand',
     'GotoBuyFlowCommand',
     'GuardBuyCommand',
