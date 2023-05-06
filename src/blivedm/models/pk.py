@@ -15,6 +15,7 @@ class PkBattleRankChangeCommand(CommandModel):
 class PkBattlePreData(BaseModel):
     battle_type: int
     end_win_task: None
+    is_followed: bool = False
     face: str
     match_type: int
     pk_votes_name: str
@@ -38,7 +39,8 @@ class PkBattlePreNewCommand(CommandModel):
     cmd: Literal['PK_BATTLE_PRE_NEW']
     pk_id: int
     pk_status: int
-    roomid: int
+    roomid: int = 0
+    status_msg: str = ""
     data: PkBattlePreData
     timestamp: datetime
 
@@ -90,4 +92,78 @@ class PkBattleStartNewCommand(CommandModel):
     pk_status: int
     roomid: int
     data: PkBattleStartData
+    timestamp: datetime
+
+
+class PkBattlePunishEndData(BaseModel):
+    battle_type: int
+
+
+class PkBattlePunishEndCommand(CommandModel):
+    cmd: Literal['PK_BATTLE_PUNISH_END']
+    pk_id: int
+    pk_status: int
+    status_msg: str
+    data: PkBattlePunishEndData
+    timestamp: datetime
+
+
+class AssistInfo(BaseModel):
+    face: str
+    rank: int
+    uid: int
+    uname: str
+
+
+class PkBattleProcessNewInfo(BaseModel):
+    assist_info: list[AssistInfo] | None
+    best_uname: str
+    room_id: int
+    votes: int
+
+
+class PkBattleProcessNewData(BaseModel):
+    battle_type: int
+    init_info: PkBattleProcessNewInfo
+    match_info: PkBattleProcessNewInfo
+
+
+class PkBattleProcessNewCommand(CommandModel):
+    cmd: Literal['PK_BATTLE_PROCESS_NEW']
+    pk_id: int
+    pk_status: int
+    data: PkBattleProcessNewData
+    timestamp: datetime
+
+
+class DmConf(BaseModel):
+    bg_color: Color
+    font_color: Color
+
+
+class PkBattleSettleNewInfo(BaseModel):
+    assist_info: list[AssistInfo]
+    result_type: int
+    room_id: int
+    votes: int
+
+
+class PkBattleSettleNewData(BaseModel):
+    battle_type: int
+    dm_conf: DmConf
+    dmscore: int
+    init_info: PkBattleSettleNewInfo
+    match_info: PkBattleSettleNewInfo
+    pk_id: int
+    pk_status: int
+    punish_end_time: datetime
+    settle_status: int
+    timestamp: datetime
+
+
+class PkBattleSettleNewCommand(CommandModel):
+    cmd: Literal['PK_BATTLE_SETTLE_NEW']
+    pk_id: int
+    pk_status: int
+    data: PkBattleSettleNewData
     timestamp: datetime
