@@ -38,8 +38,8 @@ CommonNoticeDanmakuSegment = Annotated[
 
 
 class CommonNoticeDanmakuStyle(BaseModel):
-    background_color: Color | None = None
-    background_color_dark: Color | None = None
+    background_color: Color | list[Color] | None = None
+    background_color_dark: Color | list[Color] | None = None
 
 
 class CommonNoticeDanmakuData(BaseModel):
