@@ -17,6 +17,7 @@ from .guard_honor_thousand import GuardHonorThousandCommand
 from .heartbeat import HeartbeatCommand
 from .hot_rank_settlement import HotRankSettlementCommand, HotRankSettlementV2Command
 from .interact_word import InteractWordCommand
+from .like_info import LikeInfoV3UpdateCommand, LikeInfoV3ClickCommand
 from .live import LiveCommand
 from .live_multi_view_change import LiveMultiViewChangeCommand
 from .notice_msg import NoticeMsgCommand
@@ -68,6 +69,7 @@ AnnotatedCommandModel = Annotated[Union[
     HeartbeatCommand,
     HotRankSettlementCommand, HotRankSettlementV2Command,
     InteractWordCommand,
+    LikeInfoV3UpdateCommand, LikeInfoV3ClickCommand,
     LiveCommand,
     LiveMultiViewChangeCommand,
     NoticeMsgCommand,
@@ -118,6 +120,7 @@ __all__ = (
     'HeartbeatCommand',
     'HotRankSettlementCommand', 'HotRankSettlementV2Command',
     'InteractWordCommand',
+    'LikeInfoV3UpdateCommand', 'LikeInfoV3ClickCommand',
     'LiveCommand',
     'LiveMultiViewChangeCommand',
     'NoticeMsgCommand',
