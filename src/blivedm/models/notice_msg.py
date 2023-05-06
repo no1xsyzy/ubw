@@ -161,7 +161,7 @@ class NoticeMsgCommand9(NoticeMsgCommandBase):
     link_url: str
     roomid: int
     real_roomid: int
-    shield_uid: int  # seems to be -1 only
+    shield_uid: str  # 其他一直保持 -1，唯独 msg_type=9 与众不同？
 
     full: FullNotice
     half: HalfNotice
