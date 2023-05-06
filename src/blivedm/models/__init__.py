@@ -34,6 +34,7 @@ from .room_admin_entrace import RoomAdminEntranceCommand
 from .room_admins import RoomAdminsCommand
 from .room_block_msg import RoomBlockCommand
 from .room_change import RoomChangeCommand
+from .room_real_time_message_update import RoomRealTimeMessageUpdateCommand
 from .room_silent_on import RoomSilentOnCommand
 from .room_skin_msg import RoomSkinCommand
 from .send_gift import GiftCommand
@@ -82,6 +83,7 @@ AnnotatedCommandModel = Annotated[Union[
     RoomAdminsCommand,
     RoomBlockCommand,
     RoomChangeCommand,
+    RoomRealTimeMessageUpdateCommand,
     RoomSilentOnCommand,
     RoomSkinCommand,
     GiftCommand,
@@ -131,6 +133,7 @@ __all__ = (
     'RoomAdminsCommand',
     'RoomBlockCommand',
     'RoomChangeCommand',
+    'RoomRealTimeMessageUpdateCommand',
     'RoomSilentOnCommand',
     'RoomSkinCommand',
     'GiftCommand',
