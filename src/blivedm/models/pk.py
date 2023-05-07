@@ -1,6 +1,24 @@
 from ._base import *
 
 
+class AssistInfo(BaseModel):
+    face: str
+    rank: int
+    uid: int
+    uname: str
+
+
+class PkInfo(BaseModel):
+    room_id: int
+    date_streak: int | None = None
+    vision_desc: int | None = None
+    best_uname: str | None = None
+    votes: int | None = None
+    assist_info: list[AssistInfo] | None = None
+    result_type: int | None = None
+    winner_type: int | None = None
+
+
 class PkBattleRankChangeData(BaseModel):
     first_rank_img_url: str
     rank_name: str
@@ -51,22 +69,12 @@ class FinalConfData(BaseModel):
     switch: int
 
 
-class InitInfo(BaseModel):
-    date_streak: int
-    room_id: int
-
-
-class MatchInfo(BaseModel):
-    date_streak: int
-    room_id: int
-
-
 class PkBattleStartData(BaseModel):
     battle_type: int
     final_conf: FinalConfData
     final_hit_votes: int
-    init_info: InitInfo
-    match_info: MatchInfo
+    init_info: PkInfo
+    match_info: PkInfo
     pk_countdown: datetime
     pk_end_time: datetime
     pk_frozen_time: datetime
@@ -108,31 +116,25 @@ class PkBattlePunishEndCommand(CommandModel):
     timestamp: datetime
 
 
-class AssistInfo(BaseModel):
-    face: str
-    rank: int
-    uid: int
-    uname: str
-
-
-class PkBattleProcessNewInfo(BaseModel):
-    assist_info: list[AssistInfo] | None
-    best_uname: str
-    room_id: int
-    votes: int
-
-
-class PkBattleProcessNewData(BaseModel):
+class PkBattleProcessData(BaseModel):
     battle_type: int
-    init_info: PkBattleProcessNewInfo
-    match_info: PkBattleProcessNewInfo
+    init_info: PkInfo
+    match_info: PkInfo
+
+
+class PkBattleProcessCommand(CommandModel):
+    cmd: Literal['PK_BATTLE_PROCESS']
+    pk_id: int
+    pk_status: int
+    data: PkBattleProcessData
+    timestamp: datetime
 
 
 class PkBattleProcessNewCommand(CommandModel):
     cmd: Literal['PK_BATTLE_PROCESS_NEW']
     pk_id: int
     pk_status: int
-    data: PkBattleProcessNewData
+    data: PkBattleProcessData
     timestamp: datetime
 
 
@@ -141,19 +143,12 @@ class DmConf(BaseModel):
     font_color: Color
 
 
-class PkBattleSettleNewInfo(BaseModel):
-    assist_info: list[AssistInfo]
-    result_type: int
-    room_id: int
-    votes: int
-
-
 class PkBattleSettleNewData(BaseModel):
     battle_type: int
     dm_conf: DmConf
     dmscore: int
-    init_info: PkBattleSettleNewInfo
-    match_info: PkBattleSettleNewInfo
+    init_info: PkInfo
+    match_info: PkInfo
     pk_id: int
     pk_status: int
     punish_end_time: datetime
@@ -166,4 +161,65 @@ class PkBattleSettleNewCommand(CommandModel):
     pk_id: int
     pk_status: int
     data: PkBattleSettleNewData
+    timestamp: datetime
+
+
+class LevelInfo(BaseModel):
+    first_rank_img: str
+    first_rank_name: str
+    second_rank_icon: str
+    second_rank_num: int
+    uid: int | None = None
+
+
+class ResultInfo(BaseModel):
+    pk_extra_value: int
+    pk_votes: int
+    pk_votes_name: str
+    total_score: int
+
+
+class PkBattleSettleV2Data(BaseModel):
+    assist_list: list[AssistInfo]
+    level_info: LevelInfo
+    pk_id: int
+    pk_type: int
+    result_info: ResultInfo
+    result_type: int
+    season_id: int
+    star_light_msg: str
+
+
+class PkBattleSettleV2Command(CommandModel):
+    cmd: Literal['PK_BATTLE_SETTLE_V2']
+    pk_id: int
+    pk_status: int
+    settle_status: int
+    timestamp: datetime
+
+
+class PkBattleEndData(BaseModel):
+    battle_type: int
+    init_info: PkInfo
+    match_info: PkInfo
+
+
+class PkBattleEndCommand(CommandModel):
+    cmd: Literal['PK_BATTLE_END']
+    pk_id: int
+    pk_status: int
+    data: PkBattleEndData
+    timestamp: datetime
+
+
+class PkBattleFinalProcessData(BaseModel):
+    battle_type: int
+    pk_frozen_time: datetime
+
+
+class PkBattleFinalProcessCommand(CommandModel):
+    cmd: Literal['PK_BATTLE_FINAL_PROCESS']
+    pk_id: int
+    pk_status: int
+    data: PkBattleFinalProcessData
     timestamp: datetime
