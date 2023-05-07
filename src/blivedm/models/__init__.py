@@ -29,6 +29,7 @@ from .pk import (
     PkBattlePunishEndCommand, PkBattleProcessNewCommand, PkBattleSettleNewCommand,
     PkBattleEndCommand, PkBattleProcessCommand, PkBattleFinalProcessCommand, PkBattleSettleV2Command,
 )
+from .popular_rank_changed import PopularRankChangedCommand
 from .preparing import PreparingCommand
 from .recommend_card import RecommendCardCommand
 from .ring_status_change import RingStatusChangeCommand, RingStatusChangeCommandV2
@@ -80,6 +81,7 @@ AnnotatedCommandModel = Annotated[Union[
     PkBattleStartCommand, PkBattleStartNewCommand,
     PkBattlePunishEndCommand, PkBattleProcessNewCommand, PkBattleSettleNewCommand,
     PkBattleEndCommand, PkBattleProcessCommand, PkBattleFinalProcessCommand, PkBattleSettleV2Command,
+    PopularRankChangedCommand,
     PreparingCommand,
     RecommendCardCommand,
     RingStatusChangeCommand, RingStatusChangeCommandV2,
@@ -133,6 +135,7 @@ __all__ = (
     'PkBattleStartCommand', 'PkBattleStartNewCommand',
     'PkBattlePunishEndCommand', 'PkBattleProcessNewCommand', 'PkBattleSettleNewCommand',
     'PkBattleEndCommand', 'PkBattleProcessCommand', 'PkBattleFinalProcessCommand', 'PkBattleSettleV2Command',
+    'PopularRankChangedCommand',
     'RecommendCardCommand',
     'RingStatusChangeCommand', 'RingStatusChangeCommandV2',
     'RoomAdminEntranceCommand',
