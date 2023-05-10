@@ -7,19 +7,20 @@ from rich.logging import RichHandler
 from rich.markup import escape
 
 import blivedm
+from bilibili import get_info_by_room
 
 ROOM_IDS = [
     5252,  # 天堂
-    17961,  # 赫萝老师
+    # 17961,  # 赫萝老师
     42062,  # 瓶子君152
-    81004,  # 艾尔莎_Channel
+    # 81004,  # 艾尔莎_Channel
     913137,  # 噩梦
     1141542,  # 仙乐阅
-    3428783,  # 绫濑光Official
+    # 3428783,  # 绫濑光Official
     7688602,  # 花花Haya
-    22898905,  # 珞璃Official
+    # 22898905,  # 珞璃Official
     27299825,  # 布莲雾
-    27337779,  # 月见林林
+    # 27337779,  # 月见林林
 ]
 
 logging.basicConfig(
@@ -49,19 +50,24 @@ class RichClientAdapter(logging.LoggerAdapter):
 logger = RichClientAdapter(logging.getLogger('wocpian'), {})
 
 
-async def listen_to_all(room_ids: list[int], handler: blivedm.BaseHandler):
-    clients = {}
-    for room_id in room_ids:
-        clients[room_id] = blivedm.BLiveClient(room_id)
+async def client_and_listen(room_id, handler) -> blivedm.BLiveClient | None:
+    info = await get_info_by_room(room_id)
+    if info.silent_room_info.level > 0:
+        return None
+    client = blivedm.BLiveClient(room_id)
+    client.add_handler(handler)
+    client.start()
+    return client
 
-    for client in clients.values():
-        client.add_handler(handler)
-        client.start()
+
+async def listen_to_all(room_ids: list[int], handler: blivedm.BaseHandler):
+    clients = await asyncio.gather(*(client_and_listen(room_id, handler) for room_id in room_ids))
+    clients = [client for client in clients if client is not None]
 
     try:
-        await asyncio.gather(*(client.join() for client in clients.values()))
+        await asyncio.gather(*(client.join() for client in clients))
     finally:
-        await asyncio.gather(*(client.stop_and_close() for client in clients.values()))
+        await asyncio.gather(*(client.stop_and_close() for client in clients))
 
 
 class PianHandler(blivedm.BaseHandler):
@@ -102,7 +108,8 @@ class PianHandler(blivedm.BaseHandler):
         room_id = client.room_id
 
         if self.maybe_pian(uid, uname):
-            logger.info(rf"\[[bright_cyan]{room_id}[/]] [bright_red]{uname}[/] ({uid=}): [bright_white]{escape(msg)}[/]")
+            logger.info(
+                rf"\[[bright_cyan]{room_id}[/]] [bright_red]{uname}[/] ({uid=}): [bright_white]{escape(msg)}[/]")
 
     async def on_room_block_msg(self, client, message):
         uname = message.data.uname
