@@ -73,7 +73,7 @@ class PianHandler(blivedm.BaseHandler):
         import json
         import aiofiles.os
         cmd = command.get('cmd', None)
-        logger.warning(f"unknown cmd {cmd}")
+        # logger.warning(f"unknown cmd {cmd}")
         await aiofiles.os.makedirs("output/unknown_cmd", exist_ok=True)
         async with aiofiles.open(f"output/unknown_cmd/{cmd}.json", mode='a', encoding='utf-8') as afp:
             await afp.write(json.dumps(command, indent=2))
@@ -102,7 +102,7 @@ class PianHandler(blivedm.BaseHandler):
         room_id = client.room_id
 
         if self.maybe_pian(uid, uname):
-            logger.info(rf"\[[bright_cyan]{room_id}[/]] [bright_red]{uname}[/]: [bright_white]{escape(msg)}[/]")
+            logger.info(rf"\[[bright_cyan]{room_id}[/]] [bright_red]{uname}[/] ({uid=}): [bright_white]{escape(msg)}[/]")
 
     async def on_room_block_msg(self, client, message):
         uname = message.data.uname
