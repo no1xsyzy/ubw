@@ -45,8 +45,16 @@ class RoomInfo(BaseModel):
         return v
 
 
+class SilentRoomInfo(BaseModel):
+    type: str
+    level: int
+    second: int
+    expire_time: int
+
+
 class InfoByRoom(BaseModel):
     room_info: RoomInfo
+    silent_room_info: SilentRoomInfo
     ct: datetime = Field(default_factory=lambda: datetime.now(timezone(timedelta(seconds=8 * 3600))))
 
 
