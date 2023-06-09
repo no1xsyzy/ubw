@@ -15,6 +15,7 @@ from .goto_buy_flow import GotoBuyFlowCommand
 from .guard_buy import GuardBuyCommand
 from .guard_honor_thousand import GuardHonorThousandCommand
 from .heartbeat import HeartbeatCommand
+from .hot_buy_num import HotBuyNumCommand
 from .hot_rank_settlement import HotRankSettlementCommand, HotRankSettlementV2Command
 from .interact_word import InteractWordCommand
 from .like_info import LikeInfoV3UpdateCommand, LikeInfoV3ClickCommand
@@ -69,6 +70,7 @@ AnnotatedCommandModel = Annotated[Union[
     GuardBuyCommand,
     GuardHonorThousandCommand,
     HeartbeatCommand,
+    HotBuyNumCommand,
     HotRankSettlementCommand, HotRankSettlementV2Command,
     InteractWordCommand,
     LikeInfoV3UpdateCommand, LikeInfoV3ClickCommand,
@@ -122,6 +124,7 @@ __all__ = (
     'GuardBuyCommand',
     'GuardHonorThousandCommand',
     'HeartbeatCommand',
+    'HotBuyNumCommand',
     'HotRankSettlementCommand', 'HotRankSettlementV2Command',
     'InteractWordCommand',
     'LikeInfoV3UpdateCommand', 'LikeInfoV3ClickCommand',
