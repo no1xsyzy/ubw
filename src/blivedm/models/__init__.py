@@ -42,7 +42,9 @@ from .room_real_time_message_update import RoomRealTimeMessageUpdateCommand
 from .room_silent import RoomSilentOnCommand, RoomSilentOffCommand
 from .room_skin_msg import RoomSkinCommand
 from .send_gift import GiftCommand
+from .shopping_bubbles_style import ShoppingBubblesStyleCommand
 from .shopping_cart_show import ShoppingCartShowCommand
+from .shopping_explain_card import ShoppingExplainCardCommand
 from .special_gift import SpecialGiftCommand
 from .stop_live_room_list import StopLiveRoomListCommand
 from .super_chat_entrance import SuperChatEntranceCommand
@@ -95,7 +97,9 @@ AnnotatedCommandModel = Annotated[Union[
     RoomSilentOnCommand, RoomSilentOffCommand,
     RoomSkinCommand,
     GiftCommand,
+    ShoppingBubblesStyleCommand,
     ShoppingCartShowCommand,
+    ShoppingExplainCardCommand,
     SpecialGiftCommand,
     StopLiveRoomListCommand,
     SuperChatEntranceCommand,
@@ -149,7 +153,9 @@ __all__ = (
     'RoomSilentOnCommand', 'RoomSilentOffCommand',
     'RoomSkinCommand',
     'GiftCommand',
+    'ShoppingBubblesStyleCommand',
     'ShoppingCartShowCommand',
+    'ShoppingExplainCardCommand',
     'SpecialGiftCommand',
     'StopLiveRoomListCommand',
     'SuperChatEntranceCommand',
