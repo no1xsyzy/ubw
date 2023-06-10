@@ -24,6 +24,7 @@ from .interact_word import InteractWordCommand
 from .like_info import LikeInfoV3UpdateCommand, LikeInfoV3ClickCommand
 from .live import LiveCommand
 from .live_multi_view_change import LiveMultiViewChangeCommand
+from .live_panel_change import LivePanelChangeCommand
 from .notice_msg import NoticeMsgCommand
 from .online_rank_count import OnlineRankCountCommand
 from .pk import (
@@ -84,6 +85,7 @@ AnnotatedCommandModel = Annotated[Union[
     LikeInfoV3UpdateCommand, LikeInfoV3ClickCommand,
     LiveCommand,
     LiveMultiViewChangeCommand,
+    LivePanelChangeCommand,
     NoticeMsgCommand,
     OnlineRankCountCommand,
     PkBattleRankChangeCommand,
@@ -143,6 +145,7 @@ __all__ = (
     'LikeInfoV3UpdateCommand', 'LikeInfoV3ClickCommand',
     'LiveCommand',
     'LiveMultiViewChangeCommand',
+    'LivePanelChangeCommand',
     'NoticeMsgCommand',
     'OnlineRankCountCommand',
     'PreparingCommand',
