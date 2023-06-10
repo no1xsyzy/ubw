@@ -196,6 +196,7 @@ class PkBattleSettleV2Command(CommandModel):
     pk_status: int
     settle_status: int
     timestamp: datetime
+    data: PkBattleSettleV2Data
 
 
 class PkBattleEndData(BaseModel):
@@ -233,3 +234,28 @@ class PkBattleEntranceCommand(CommandModel):
     cmd: Literal['PK_BATTLE_ENTRANCE']
     data: PkBattleEntranceData
     timestamp: datetime
+
+
+class PkBattleSettleData(BaseModel):
+    battle_type: int
+    result_type: int
+    star_light_msg: str
+
+
+class PkBattleSettleCommand(CommandModel):
+    cmd: Literal['PK_BATTLE_SETTLE']
+    pk_id: int
+    pk_status: int
+    settle_status: int
+    timestamp: datetime
+    data: PkBattleSettleData
+    roomid: int
+
+
+class PkBattleSettleUserCommand(CommandModel):
+    cmd: Literal['PK_BATTLE_SETTLE_USER']
+    pk_id: int
+    pk_status: int
+    settle_status: int
+    timestamp: datetime
+    data: dict  # 太复杂而且只是为了爆米，谁爱写解析谁写
