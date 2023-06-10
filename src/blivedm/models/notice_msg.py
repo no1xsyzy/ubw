@@ -53,7 +53,7 @@ class NoticeMsgCommand1(NoticeMsgCommandBase):
     shield_uid: int
     id: int
     name: str
-    business_id: Literal['']
+    business_id: str
     marquee_id: Literal['']
     link_url: str
 
@@ -75,7 +75,7 @@ class NoticeMsgCommand2(NoticeMsgCommandBase):
     shield_uid: int
     id: int
     name: str
-    business_id: int
+    business_id: str
     marquee_id: Literal['']
     link_url: str
 
@@ -96,7 +96,7 @@ class NoticeMsgCommand3(NoticeMsgCommandBase):
     id: int
     name: str
     link_url: str
-    business_id: Literal['']
+    business_id: str
     marquee_id: Literal['']
     notice_type: int
     shield_uid: int
@@ -118,7 +118,7 @@ class NoticeMsgCommand4(NoticeMsgCommandBase):
     id: int
     name: str
     link_url: str
-    business_id: Literal['']
+    business_id: str
     marquee_id: Literal['']
     notice_type: int
     shield_uid: int
