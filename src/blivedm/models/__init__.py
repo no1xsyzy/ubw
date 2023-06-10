@@ -59,6 +59,7 @@ from .super_chat_message_delete import SuperChatDeleteCommand
 from .sys_msg import SysMsgCommand
 from .trading_score import TradingScoreCommand
 from .user_toast_msg import UserToastMsgCommand
+from .video_connection import VideoConnectionMsgCommand, VideoConnectionJoinEndCommand, VideoConnectionJoinStartCommand
 from .warning import WarningCommand
 from .watched_change import WatchedChangeCommand
 from .widget_gift_star_process import WidgetGiftStarProcessCommand
@@ -119,6 +120,7 @@ AnnotatedCommandModel = Annotated[Union[
     SysMsgCommand,
     TradingScoreCommand,
     UserToastMsgCommand,
+    VideoConnectionMsgCommand, VideoConnectionJoinEndCommand, VideoConnectionJoinStartCommand,
     WarningCommand,
     WatchedChangeCommand,
     WidgetGiftStarProcessCommand
@@ -179,6 +181,7 @@ __all__ = (
     'SysMsgCommand',
     'TradingScoreCommand',
     'UserToastMsgCommand',
+    'VideoConnectionMsgCommand', 'VideoConnectionJoinEndCommand', 'VideoConnectionJoinStartCommand',
     'WarningCommand',
     'WatchedChangeCommand',
     'WidgetGiftStarProcessCommand',
