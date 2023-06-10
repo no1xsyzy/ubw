@@ -179,24 +179,13 @@ class ResultInfo(BaseModel):
     total_score: int
 
 
-class PkBattleSettleV2Data(BaseModel):
-    assist_list: list[AssistInfo]
-    level_info: LevelInfo
-    pk_id: int
-    pk_type: int
-    result_info: ResultInfo
-    result_type: int
-    season_id: int
-    star_light_msg: str
-
-
 class PkBattleSettleV2Command(CommandModel):
     cmd: Literal['PK_BATTLE_SETTLE_V2']
     pk_id: int
     pk_status: int
     settle_status: int
     timestamp: datetime
-    data: PkBattleSettleV2Data
+    data: dict  # 太复杂、一直在变、只是为了爆米，谁爱写解析谁写
 
 
 class PkBattleEndData(BaseModel):
