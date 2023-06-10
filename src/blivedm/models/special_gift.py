@@ -11,6 +11,11 @@ class SpecialGiftDatum(BaseModel):
     time: int  # 看上去像是秒数
 
 
+class SpecialGiftEndDatum(BaseModel):
+    action: Literal['end']
+    id: int
+
+
 class SpecialGiftCommand(CommandModel):
     cmd: Literal['SPECIAL_GIFT']
-    data: dict[str, SpecialGiftDatum]
+    data: dict[str, SpecialGiftDatum | SpecialGiftEndDatum]
