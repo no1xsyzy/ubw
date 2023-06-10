@@ -223,3 +223,13 @@ class PkBattleFinalProcessCommand(CommandModel):
     pk_status: int
     data: PkBattleFinalProcessData
     timestamp: datetime
+
+
+class PkBattleEntranceData(BaseModel):
+    is_open: bool
+
+
+class PkBattleEntranceCommand(CommandModel):
+    cmd: Literal['PK_BATTLE_ENTRANCE']
+    data: PkBattleEntranceData
+    timestamp: datetime
