@@ -60,6 +60,7 @@ from .sys_msg import SysMsgCommand
 from .trading_score import TradingScoreCommand
 from .user_toast_msg import UserToastMsgCommand
 from .video_connection import VideoConnectionMsgCommand, VideoConnectionJoinEndCommand, VideoConnectionJoinStartCommand
+from .voice_join import VoiceJoinStatusCommand
 from .warning import WarningCommand
 from .watched_change import WatchedChangeCommand
 from .widget_gift_star_process import WidgetGiftStarProcessCommand
@@ -121,6 +122,7 @@ AnnotatedCommandModel = Annotated[Union[
     TradingScoreCommand,
     UserToastMsgCommand,
     VideoConnectionMsgCommand, VideoConnectionJoinEndCommand, VideoConnectionJoinStartCommand,
+    VoiceJoinStatusCommand,
     WarningCommand,
     WatchedChangeCommand,
     WidgetGiftStarProcessCommand
@@ -182,6 +184,7 @@ __all__ = (
     'TradingScoreCommand',
     'UserToastMsgCommand',
     'VideoConnectionMsgCommand', 'VideoConnectionJoinEndCommand', 'VideoConnectionJoinStartCommand',
+    'VoiceJoinStatusCommand',
     'WarningCommand',
     'WatchedChangeCommand',
     'WidgetGiftStarProcessCommand',
