@@ -15,4 +15,5 @@ FAMOUS_PEOPLE = [
     1816182565,  # 珞璃Official
 ]
 
-go_with(ROOM_IDS, FAMOUS_PEOPLE)
+if __name__ == '__main__':
+    go_with(FAMOUS_PEOPLE, ROOM_IDS)
