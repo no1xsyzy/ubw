@@ -8,7 +8,7 @@ import blivedm
 
 ROOM_IDS = [
     81004,  # 艾尔莎_Channel
-    21622680,  # 脚本作者，测试用
+    21622680,  # 花玲
 ]
 
 FAMOUS_PEOPLE = [
