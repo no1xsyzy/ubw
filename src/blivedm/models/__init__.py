@@ -26,6 +26,7 @@ from .live import LiveCommand
 from .live_multi_view_change import LiveMultiViewChangeCommand
 from .live_panel_change import LivePanelChangeCommand
 from .log_in_notice import LogInNoticeCommand
+from .messagebox_user_gain_medal import MessageboxUserGainMedalCommand
 from .notice_msg import NoticeMsgCommand
 from .online_rank_count import OnlineRankCountCommand
 from .pk import (
@@ -91,6 +92,7 @@ AnnotatedCommandModel = Annotated[Union[
     LiveMultiViewChangeCommand,
     LivePanelChangeCommand,
     LogInNoticeCommand,
+    MessageboxUserGainMedalCommand,
     NoticeMsgCommand,
     OnlineRankCountCommand,
     PkBattleRankChangeCommand,
@@ -155,6 +157,7 @@ __all__ = (
     'LiveMultiViewChangeCommand',
     'LivePanelChangeCommand',
     'LogInNoticeCommand',
+    'MessageboxUserGainMedalCommand',
     'NoticeMsgCommand',
     'OnlineRankCountCommand',
     'PreparingCommand',
