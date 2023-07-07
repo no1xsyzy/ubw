@@ -47,3 +47,24 @@ class LikeInfoV3ClickData(BaseModel):
 class LikeInfoV3ClickCommand(CommandModel):
     cmd: Literal['LIKE_INFO_V3_CLICK']
     data: LikeInfoV3ClickData
+
+
+class DanmakuStyle(BaseModel):
+    background_color: None
+
+
+class ContentSegment(BaseModel):
+    font_color: Color
+    text: str
+    type: int
+
+
+class LikeInfoV3NoticeData(BaseModel):
+    content_segments: list[ContentSegment]
+    danmaku_style: DanmakuStyle
+    terminals: list[int]
+
+
+class LikeInfoV3NoticeCommand(CommandModel):
+    cmd: Literal['LIKE_INFO_V3_NOTICE']
+    data: LikeInfoV3NoticeData
