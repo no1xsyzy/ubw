@@ -91,7 +91,7 @@ class MyHandler(blivedm.BaseHandler):
         msg = message.data.message
         color = message.data.message_font_color
         room_id = client.room_id
-        logger.info(rf"\[[bright_cyan]{room_id}[/]] {uname} \\[[bright_cyan]¥{price}[/]]: [{color}]{escape(msg)}[/]")
+        logger.info(rf"\[[bright_cyan]{room_id}[/]] {uname} \[[bright_cyan]¥{price}[/]]: [{color}]{escape(msg)}[/]")
 
     async def on_room_block_msg(self, client, message):
         room_id = client.room_id
