@@ -5,7 +5,7 @@ from ._base import *
 
 class CommonNoticeDanmakuSegmentBase(BaseModel):
     type: int
-    text: str
+    text: str | None = None
 
     background_color: Any = None
     background_color_dark: Any = None
