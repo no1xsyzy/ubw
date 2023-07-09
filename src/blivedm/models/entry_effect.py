@@ -34,3 +34,8 @@ class EntryEffectData(BaseModel):
 class EntryEffectCommand(CommandModel):
     cmd: Literal['ENTRY_EFFECT']
     data: EntryEffectData
+
+
+class EntryEffectMustReceiveCommand(CommandModel):
+    cmd: Literal['ENTRY_EFFECT_MUST_RECEIVE']
+    data: EntryEffectData
