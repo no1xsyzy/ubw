@@ -35,7 +35,25 @@ class EntryEffectCommand(CommandModel):
     cmd: Literal['ENTRY_EFFECT']
     data: EntryEffectData
 
+    def summary(self) -> Summary:
+        return Summary(
+            t=self.data.trigger_time,
+            msg=self.data.copy_writing,
+            user=(self.data.uid, None),
+            room_id=self.data.target_id,
+            raw=self,
+        )
+
 
 class EntryEffectMustReceiveCommand(CommandModel):
     cmd: Literal['ENTRY_EFFECT_MUST_RECEIVE']
     data: EntryEffectData
+
+    def summary(self) -> Summary:
+        return Summary(
+            t=self.data.trigger_time,
+            msg=self.data.copy_writing,
+            user=(self.data.uid, None),
+            room_id=self.data.target_id,
+            raw=self,
+        )
