@@ -5,6 +5,7 @@ from .activity_banner_change import ActivityBannerChangeCommand
 from .activity_banner_change_v2 import ActivityBannerChangeV2Command
 from .anchor_lot import AnchorLotStartCommand, AnchorLotCheckStatusCommand, AnchorLotEndCommand, AnchorLotAwardCommand
 from .area_rank_changed import AreaRankChangedCommand
+from .card_msg import CardMsgCommand
 from .combo_end import ComboEndCommand
 from .combo_send import ComboSendCommand
 from .common_notice_danmaku import CommonNoticeDanmakuCommand
@@ -72,6 +73,7 @@ AnnotatedCommandModel = Annotated[Union[
     ActivityBannerChangeCommand, ActivityBannerChangeV2Command,
     AnchorLotStartCommand, AnchorLotCheckStatusCommand, AnchorLotEndCommand, AnchorLotAwardCommand,
     AreaRankChangedCommand,
+    CardMsgCommand,
     ComboEndCommand,
     ComboSendCommand,
     CommonNoticeDanmakuCommand,
@@ -138,6 +140,7 @@ __all__ = (
     'ActivityBannerChangeCommand', 'ActivityBannerChangeV2Command',
     'AnchorLotStartCommand', 'AnchorLotCheckStatusCommand', 'AnchorLotEndCommand', 'AnchorLotAwardCommand',
     'AreaRankChangedCommand',
+    'CardMsgCommand',
     'ComboEndCommand',
     'ComboSendCommand',
     'CommonNoticeDanmakuCommand',
