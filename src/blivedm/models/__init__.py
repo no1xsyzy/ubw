@@ -3,6 +3,7 @@
 from ._base import *
 from .activity_banner_change import ActivityBannerChangeCommand
 from .activity_banner_change_v2 import ActivityBannerChangeV2Command
+from .anchor_helper_danmu import AnchorHelperDanmuCommand
 from .anchor_lot import AnchorLotStartCommand, AnchorLotCheckStatusCommand, AnchorLotEndCommand, AnchorLotAwardCommand
 from .area_rank_changed import AreaRankChangedCommand
 from .card_msg import CardMsgCommand
@@ -72,6 +73,7 @@ from .widget_gift_star_process import WidgetGiftStarProcessCommand
 
 AnnotatedCommandModel = Annotated[Union[
     ActivityBannerChangeCommand, ActivityBannerChangeV2Command,
+    AnchorHelperDanmuCommand,
     AnchorLotStartCommand, AnchorLotCheckStatusCommand, AnchorLotEndCommand, AnchorLotAwardCommand,
     AreaRankChangedCommand,
     CardMsgCommand,
@@ -140,6 +142,7 @@ AnnotatedCommandModel = Annotated[Union[
 
 __all__ = (
     'ActivityBannerChangeCommand', 'ActivityBannerChangeV2Command',
+    'AnchorHelperDanmuCommand',
     'AnchorLotStartCommand', 'AnchorLotCheckStatusCommand', 'AnchorLotEndCommand', 'AnchorLotAwardCommand',
     'AreaRankChangedCommand',
     'CardMsgCommand',
