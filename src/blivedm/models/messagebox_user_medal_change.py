@@ -11,7 +11,7 @@ class MessageboxUserMedalChangeData(BaseModel):
     medal_level: int
     medal_name: str
     multi_unlock_level: str
-    MultiUnlockLevel: list
+    MultiUnlockLevel: list = Field(default_factory=list)
     uid: int
     unlock: int
     unlock_level: int
