@@ -68,11 +68,16 @@ class MyHandler(blivedm.BaseHandler):
         )
 
     async def on_summary(self, client, model):
-        if model.user is not None and model.user[0] == 1521415:
+        if model.user is not None and model.user[0] in [1521415, 2351778]:
             logger.info(rf"{model.msg} ({model.raw.__class__.__name__})")
 
-    async def on_card_msg(self, client, message):
-        logger.info(rf"")
+    async def on_danmu_msg(self, client, message):
+        if message.info.uid in [1521415, 2351778]:
+            logger.info(rf"\[[bright_cyan]{client.room_id}[/]] "
+                        rf"[cyan]{message.info.uname}[/]: [bright_white]{escape(message.info.msg)}[/]")
+
+    async def on_card_msg(self, client, model):
+        logger.info(rf"{model.data.card_data.uid}进入了{model.data.card_data.room_id} (CardMsgCommand)")
 
     async def on_room_change(self, client, message):
         title = message.data.title
@@ -97,7 +102,8 @@ class MyHandler(blivedm.BaseHandler):
 
 def main():
     try:
-        asyncio.run(listen_to_all([81004], MyHandler()))
+        OPS = [730215, 81004]
+        asyncio.run(listen_to_all(OPS, MyHandler()))
     except KeyboardInterrupt:
         print("用户中断", file=sys.stdout)
 
