@@ -72,6 +72,7 @@ from .video_connection import VideoConnectionMsgCommand, VideoConnectionJoinEndC
 from .voice_join import VoiceJoinStatusCommand
 from .warning import WarningCommand
 from .watched_change import WatchedChangeCommand
+from .wealth_notify import WealthNotifyCommand
 from .widget_gift_star_process import WidgetGiftStarProcessCommand
 
 AnnotatedCommandModel = Annotated[Union[
@@ -143,6 +144,7 @@ AnnotatedCommandModel = Annotated[Union[
     VoiceJoinStatusCommand,
     WarningCommand,
     WatchedChangeCommand,
+    WealthNotifyCommand,
     WidgetGiftStarProcessCommand
 ], Field(discriminator='cmd')]
 
@@ -214,6 +216,7 @@ __all__ = (
     'VoiceJoinStatusCommand',
     'WarningCommand',
     'WatchedChangeCommand',
+    'WealthNotifyCommand',
     'WidgetGiftStarProcessCommand',
     'AnnotatedCommandModel', 'Summary', 'Summarizer', 'CommandModel',
 )
