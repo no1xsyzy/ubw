@@ -25,6 +25,7 @@ from .hot_rank_settlement import HotRankSettlementCommand, HotRankSettlementV2Co
 from .hot_room_notify import HotRoomNotifyCommand
 from .interact_word import InteractWordCommand
 from .like_info import LikeInfoV3UpdateCommand, LikeInfoV3ClickCommand, LikeInfoV3NoticeCommand
+from .little_message_box import LittleMessageBoxCommand
 from .live import LiveCommand
 from .live_multi_view_change import LiveMultiViewChangeCommand
 from .live_panel_change import LivePanelChangeCommand
@@ -95,6 +96,7 @@ AnnotatedCommandModel = Annotated[Union[
     HotRoomNotifyCommand,
     InteractWordCommand,
     LikeInfoV3UpdateCommand, LikeInfoV3ClickCommand, LikeInfoV3NoticeCommand,
+    LittleMessageBoxCommand,
     LiveCommand,
     LiveMultiViewChangeCommand,
     LivePanelChangeCommand,
@@ -164,6 +166,7 @@ __all__ = (
     'HotRoomNotifyCommand',
     'InteractWordCommand',
     'LikeInfoV3UpdateCommand', 'LikeInfoV3ClickCommand', 'LikeInfoV3NoticeCommand',
+    'LittleMessageBoxCommand',
     'LiveCommand',
     'LiveMultiViewChangeCommand',
     'LivePanelChangeCommand',
