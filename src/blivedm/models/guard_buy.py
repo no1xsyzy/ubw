@@ -30,7 +30,7 @@ class GuardBuyCommand(CommandModel):
     def summarize(self) -> Summary:
         return Summary(
             t=self.data.start_time,
-            msg=f"{self.data.gift_name}x{self.data.num}",
+            msg=f"{self.data.username} 购买了 {self.data.gift_name}x{self.data.num} (￥{self.data.price})",
             user=(self.data.uid, self.data.username),
             room_id=0,
             price=self.data.price,

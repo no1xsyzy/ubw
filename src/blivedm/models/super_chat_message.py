@@ -82,7 +82,7 @@ class SuperChatCommand(CommandModel):
     def summarize(self) -> Summary:
         return Summary(
             t=self.data.start_time,
-            msg=self.data.message,
+            msg=f"{self.data.user_info.uname} (￥{self.data.price}): {self.data.message}",
             user=(self.data.uid, self.data.user_info.uname),
             room_id=self.roomid,
             price=self.data.price,
