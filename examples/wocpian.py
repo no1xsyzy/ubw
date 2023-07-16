@@ -82,7 +82,7 @@ class PianHandler(blivedm.BaseHandler):
         # logger.warning(f"unknown cmd {cmd}")
         await aiofiles.os.makedirs("output/unknown_cmd", exist_ok=True)
         async with aiofiles.open(f"output/unknown_cmd/{cmd}.json", mode='a', encoding='utf-8') as afp:
-            await afp.write(json.dumps(command, indent=2))
+            await afp.write(json.dumps(command, indent=2, ensure_ascii=False))
         sentry_sdk.capture_event(
             event={'level': 'warning', 'message': f"unknown cmd {cmd}"},
             user={'id': client.room_id},
