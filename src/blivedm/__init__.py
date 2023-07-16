@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
-from .models import *
-from .handlers import *
+from ._base import HandlerInterface
 from .client import *
+from .handlers import *
+from .models import *
