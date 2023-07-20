@@ -12,20 +12,6 @@ __all__ = (
 )
 
 
-class Summary(BaseModel):
-    t: datetime
-    msg: str | None = None
-    user: tuple[int, str] | None = None
-    room_id: int | None = None
-    price: float = 0
-    raw: BaseModel | None = None
-
-
-@runtime_checkable
-class Summarizer(Protocol):
-    def summarize(self) -> Summary: ...
-
-
 class Scatter(BaseModel):
     min: int
     max: int
@@ -117,3 +103,17 @@ class MedalInfo(BaseModel):
     special: str
     target_id: int
     """粉丝牌主播uid"""
+
+
+class Summary(BaseModel):
+    t: datetime
+    msg: str | None = None
+    user: tuple[int, str] | None = None
+    room_id: int | None = None
+    price: float = 0
+    raw: CommandModel | None = None
+
+
+@runtime_checkable
+class Summarizer(Protocol):
+    def summarize(self) -> Summary: ...

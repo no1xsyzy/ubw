@@ -67,9 +67,9 @@ class MyHandler(blivedm.BaseHandler):
             tags={'module': 'bhashm', 'unknown_cmd': "yes", 'cmd': cmd, 'room_id': client.room_id},
         )
 
-    async def on_summary(self, client, model):
-        if model.user is not None and model.user[0] in [1521415, 2351778]:
-            logger.info(rf"{model.msg} ({model.raw.__class__.__name__})")
+    async def on_summary(self, client, summary):
+        if summary.user is not None and summary.user[0] in [1521415, 2351778]:
+            logger.info(rf"{summary.msg} ({summary.raw.__class__.__name__})")
 
     async def on_danmu_msg(self, client, message):
         if message.info.uid in [1521415, 2351778]:

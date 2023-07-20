@@ -79,14 +79,15 @@ class MyHandler(blivedm.BaseHandler):
         )
         logger.info(command)
 
+    async def on_summary(self, client, summary):
+        json = summary.raw.json(ensure_ascii=False)
+        if self.reg.match(json):
+            logger.info(rf"[{summary.room_id}] {summary.msg} ({summary.raw.cmd})")
+
     async def on_else(self, client, model):
         json = model.json(ensure_ascii=False)
         if self.reg.match(json):
-            if isinstance(model, blivedm.models.Summarizer):
-                summary = model.summarize()
-                logger.info(rf"[{summary.room_id}] {summary.msg} ({summary.raw.cmd})")
-            else:
-                logger.info(rf"\[[bright_cyan]{client.room_id}[/]] " + json)
+            logger.info(rf"\[[bright_cyan]{client.room_id}[/]] " + json)
 
     async def on_danmu_msg(self, client, message):
         if message.info.uid in self.uids:

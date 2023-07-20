@@ -18,22 +18,17 @@ logger = logging.getLogger('blivedm')
 
 # 常见可忽略的cmd
 IGNORED_CMDS = (
-    'LIVE_INTERACTIVE_GAME',
-    'ONLINE_RANK_TOP3',
-    'ONLINE_RANK_V2',
-    'POPULARITY_RED_POCKET_NEW',
-    'POPULARITY_RED_POCKET_START',
-    'POPULARITY_RED_POCKET_WINNER_LIST',
-    'SUPER_CHAT_MESSAGE_JPN',
-    'VOICE_JOIN_LIST',
-    'VOICE_JOIN_ROOM_COUNT_INFO',
-    'VOICE_JOIN_SWITCH',
-    'WIDGET_BANNER',
-    'WIDGET_GIFT_STAR_PROCESS',
 )
 
 ctx_client = ContextVar[client_.BLiveClient]('client')
 ctx_command = ContextVar[Union[dict, models.CommandModel]]('command')
+
+
+def func_info(func: Callable):
+    try:
+        return f"{func.__qualname__} ({func.__code__.co_filename}:{func.__code__.co_firstlineno})"
+    except:
+        return f"{func.__qualname__} (???:???)"
 
 
 class BaseHandler:
@@ -46,9 +41,7 @@ class BaseHandler:
     _cmd_callbacks: dict[str, Union[None, CmdCallback]]
 
     def __init__(self, **p):
-        self._cmd_callbacks = {}
-        for ignore in IGNORED_CMDS:
-            self._cmd_callbacks[ignore] = None
+        self._cmd_callbacks = dict.fromkeys(p.pop('ignored_cmd', ()))
 
     async def handle(self, client: client_.BLiveClient, command: dict):
         tok_client_set = ctx_client.set(client)
@@ -65,7 +58,7 @@ class BaseHandler:
             if cmd in self._cmd_callbacks:
                 callback = self._cmd_callbacks[cmd]
                 if callback is not None:
-                    logger.debug(f"got a {cmd}, processed with {callback.__name__}")
+                    logger.debug(f"got a {cmd}, processed with {func_info(callback)}")
                     return await callback(client, command)
                 else:
                     logger.debug(f"got a {cmd}, processed with ignore")
@@ -75,16 +68,9 @@ class BaseHandler:
                 model: models.CommandModel = parse_obj_as(models.AnnotatedCommandModel, command)
                 ctx_command.reset(tok_command_set)
                 tok_command_set = ctx_command.set(model)
-                cmd = model.cmd.lower().strip("_")
-                if hasattr(self, f'on_{cmd}'):
-                    callback = getattr(self, f'on_{cmd}')
-                    logger.debug(f"got a {cmd}, processed with {callback.__qualname__}")
-                    return await callback(client, model)
-                else:
-                    logger.debug(f"got a {cmd}, processed with {self.on_else.__qualname__}")
-                    return await self.on_else(client, model)
+                return await self.on_known_cmd(client, model)
             except ValidationError:
-                logger.debug(f"got a {cmd}, processed with {self.on_unknown_cmd.__qualname__}")
+                logger.debug(f"got a {cmd}, processed with {func_info(self.on_unknown_cmd)}")
                 await self.on_unknown_cmd(client, command)
         except Exception:
             logger.debug(f"got a {command.get('cmd', '')}, and error in processing")
@@ -93,16 +79,28 @@ class BaseHandler:
             ctx_command.reset(tok_command_set)
             ctx_client.reset(tok_client_set)
 
+    async def on_known_cmd(self, client: client_.BLiveClient, model: models.CommandModel):
+        """默认的 dispatcher，自省寻找 on_{model.cmd}"""
+        cmd = model.cmd.lower().strip("_")
+        if hasattr(self, f'on_{cmd}'):
+            callback = getattr(self, f'on_{cmd}')
+            logger.debug(f"got a {cmd}, processing with {func_info(callback)})")
+            return await callback(client, model)
+        if isinstance(model, models.Summarizer):
+            return await self.on_summary(client, model.summarize())
+        else:
+            logger.debug(f"got a {cmd}, processing with {func_info(self.on_else)})")
+            return await self.on_else(client, model)
+
     async def on_unknown_cmd(self, client: client_.BLiveClient, command: dict):
         logger.warning(f"unknown cmd {command.get('cmd', None)} {command}")
 
-    async def on_summary(self, client: client_.BLiveClient, model: models.Summary):
+    async def on_summary(self, client: client_.BLiveClient, summary: models.Summary):
         """可摘要消息"""
+        await self.on_else(client, summary.raw)
 
     async def on_else(self, client: client_.BLiveClient, model: models.CommandModel):
-        """未处理且未忽略消息"""
-        if isinstance(model, models.Summarizer):
-            return await self.on_summary(client, model.summarize())
+        """未处理、不可摘要消息"""
 
     async def on_heartbeat(self, client: client_.BLiveClient, message: models.HeartbeatCommand):
         """收到心跳包（人气值）"""
