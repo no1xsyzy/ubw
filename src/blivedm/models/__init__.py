@@ -34,6 +34,8 @@ from .messagebox_user_gain_medal import MessageboxUserGainMedalCommand
 from .messagebox_user_medal_change import MessageboxUserMedalChangeCommand
 from .notice_msg import NoticeMsgCommand
 from .online_rank_count import OnlineRankCountCommand
+from .online_rank_top3 import OnlineRankTop3Command
+from .online_rank_v2 import OnlineRankV2Command
 from .pk import (
     PkBattleRankChangeCommand,
     PkBattlePreCommand, PkBattlePreNewCommand,
@@ -108,6 +110,8 @@ AnnotatedCommandModel = Annotated[Union[
     MessageboxUserMedalChangeCommand,
     NoticeMsgCommand,
     OnlineRankCountCommand,
+    OnlineRankTop3Command,
+    OnlineRankV2Command,
     PkBattleRankChangeCommand,
     PkBattlePreCommand, PkBattlePreNewCommand,
     PkBattleStartCommand, PkBattleStartNewCommand,
@@ -181,6 +185,8 @@ __all__ = (
     'MessageboxUserMedalChangeCommand',
     'NoticeMsgCommand',
     'OnlineRankCountCommand',
+    'OnlineRankTop3Command',
+    'OnlineRankV2Command',
     'PreparingCommand',
     'PkBattleRankChangeCommand',
     'PkBattlePreCommand', 'PkBattlePreNewCommand',
