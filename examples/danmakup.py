@@ -36,21 +36,6 @@ class RichClientAdapter(logging.LoggerAdapter):
 logger = RichClientAdapter(logging.getLogger('danmakup'), {})
 
 
-async def listen_to_all(room_ids: list[int], handler: blivedm.BaseHandler):
-    clients = {}
-    for room_id in room_ids:
-        clients[room_id] = blivedm.BLiveClient(room_id)
-
-    for client in clients.values():
-        client.add_handler(handler)
-        client.start()
-
-    try:
-        await asyncio.gather(*(client.join() for client in clients.values()))
-    finally:
-        await asyncio.gather(*(client.stop_and_close() for client in clients.values()))
-
-
 class MyHandler(blivedm.BaseHandler):
     async def on_unknown_cmd(self, client, command):
         import json
@@ -117,7 +102,7 @@ def main():
     if not args.room_ids:
         print("没有需要观察的房间，直接退出")
     try:
-        asyncio.run(listen_to_all(args.room_ids, MyHandler()))
+        asyncio.run(blivedm.listen_to_all(args.room_ids, MyHandler()))
     except KeyboardInterrupt:
         print("用户中断", file=sys.stdout)
 

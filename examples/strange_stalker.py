@@ -37,21 +37,6 @@ class RichClientAdapter(logging.LoggerAdapter):
 logger = RichClientAdapter(logging.getLogger('find_elza'), {})
 
 
-async def listen_to_all(room_ids: list[int], handler: blivedm.HandlerInterface):
-    clients = {}
-    for room_id in room_ids:
-        clients[room_id] = blivedm.BLiveClient(room_id)
-
-    for client in clients.values():
-        client.add_handler(handler)
-        client.start()
-
-    try:
-        await asyncio.gather(*(client.join() for client in clients.values()))
-    finally:
-        await asyncio.gather(*(client.stop_and_close() for client in clients.values()))
-
-
 class MyHandler(blivedm.BaseHandler):
     def __init__(self, uids=None, reg=None, **p):
         super().__init__(**p)
@@ -140,10 +125,7 @@ def main():
     parser.add_argument('rooms', nargs='+', type=int)
     args = parser.parse_args()
     try:
-        asyncio.run(listen_to_all(args.rooms, MyHandler(uids=args.uids, reg=args.regex)))
-        # asyncio.run(listen_to_all([int(x) for x in sys.argv[1:]],
-        #                           MyHandler(uids=[1521415, 2351778],
-        #                                     reg='2351778|1521415|橘枳橼|艾尔莎|81004|730215|王飘')))
+        asyncio.run(blivedm.listen_to_all(args.rooms, MyHandler(uids=args.uids, reg=args.regex)))
     except KeyboardInterrupt:
         print("用户中断", file=sys.stdout)
 

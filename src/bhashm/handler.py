@@ -67,26 +67,6 @@ def create_csv_writer(room_id: int):
     return queue
 
 
-async def listen_to_all(room_ids: list[int], famous_people: list[int]):
-    clients = []
-    for room_id in room_ids:
-        client = blivedm.BLiveClient(room_id)
-        # start time
-        start_time_stamp = await get_live_start_time(room_id)
-        live_start_times[room_id] = start_time_stamp
-        # writer
-        q = create_csv_writer(room_id)
-        handler = HashMarkHandler(famous_people=famous_people, csv_queue=q)
-        client.add_handler(handler)
-        client.start()
-        clients.append(client)
-
-    try:
-        await asyncio.gather(*(client.join() for client in clients))
-    finally:
-        await asyncio.gather(*(client.stop_and_close() for client in clients))
-
-
 class HashMarkHandler(blivedm.BaseHandler):
     def __init__(self, *, famous_people, csv_queue, **p):
         super().__init__(**p)

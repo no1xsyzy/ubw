@@ -5,7 +5,8 @@ import sys
 import sentry_sdk
 from rich.logging import RichHandler
 
-from bhashm.handler import listen_to_all
+import blivedm
+from .handler import HashMarkHandler, create_csv_writer
 
 sentry_sdk.init(
     dsn="https://f6bcb89a35fb438f81eb2d7679c5ded0@o4504791466835968.ingest.sentry.io/4504791473127424",
@@ -27,6 +28,10 @@ def go_with(famous_people, room_ids):
     )
 
     try:
-        asyncio.run(listen_to_all(room_ids, famous_people))
+        asyncio.run(blivedm.listen_to_all(
+            room_ids,
+            handler_factory=lambda room_id: HashMarkHandler(famous_people=famous_people,
+                                                            csv_queue=create_csv_writer(room_id))
+        ))
     except KeyboardInterrupt:
         print("keyboard interrupt", file=sys.stdout)

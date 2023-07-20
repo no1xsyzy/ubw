@@ -60,16 +60,6 @@ async def client_and_listen(room_id, handler) -> blivedm.BLiveClient | None:
     return client
 
 
-async def listen_to_all(room_ids: list[int], handler: blivedm.BaseHandler):
-    clients = await asyncio.gather(*(client_and_listen(room_id, handler) for room_id in room_ids))
-    clients = [client for client in clients if client is not None]
-
-    try:
-        await asyncio.gather(*(client.join() for client in clients))
-    finally:
-        await asyncio.gather(*(client.stop_and_close() for client in clients))
-
-
 class PianHandler(blivedm.BaseHandler):
     @staticmethod
     def maybe_pian(uid: int, uname: str) -> bool:
@@ -124,6 +114,6 @@ class PianHandler(blivedm.BaseHandler):
 
 if __name__ == '__main__':
     try:
-        asyncio.run(listen_to_all(ROOM_IDS, PianHandler()))
+        asyncio.run(blivedm.listen_to_all(ROOM_IDS, PianHandler()))
     except KeyboardInterrupt:
         print("keyboard interrupt", file=sys.stdout)

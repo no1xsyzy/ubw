@@ -24,21 +24,6 @@ FAMOUS_PEOPLE = [
 logger = logging.getLogger('elza_karin')
 
 
-async def listen_to_all(room_ids: list[int], handler: blivedm.BaseHandler):
-    clients = {}
-    for room_id in room_ids:
-        clients[room_id] = blivedm.BLiveClient(room_id)
-
-    for client in clients.values():
-        client.add_handler(handler)
-        client.start()
-
-    try:
-        await asyncio.gather(*(client.join() for client in clients.values()))
-    finally:
-        await asyncio.gather(*(client.stop_and_close() for client in clients.values()))
-
-
 class MyHandler(blivedm.BaseHandler):
     def __init__(self, *, famous_people, **p):
         super().__init__(**p)
@@ -97,6 +82,6 @@ class MyHandler(blivedm.BaseHandler):
 
 if __name__ == '__main__':
     try:
-        asyncio.get_event_loop().run_until_complete(listen_to_all(ROOM_IDS, MyHandler(famous_people=FAMOUS_PEOPLE)))
+        asyncio.run(blivedm.listen_to_all(ROOM_IDS, MyHandler(famous_people=FAMOUS_PEOPLE)))
     except KeyboardInterrupt:
         print("keyboard interrupt", file=sys.stdout)

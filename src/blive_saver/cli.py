@@ -9,21 +9,6 @@ import blivedm
 from .handler import BliveTinyFluxHandler
 
 
-async def listen_to_all(room_ids: list[int]):
-    clients = []
-    for room_id in room_ids:
-        client = blivedm.BLiveClient(room_id)
-        handler = BliveTinyFluxHandler(room_id=room_id)
-        client.add_handler(handler)
-        client.start()
-        clients.append(client)
-
-    try:
-        await asyncio.gather(*(client.join() for client in clients))
-    finally:
-        await asyncio.gather(*(client.stop_and_close() for client in clients))
-
-
 def main():
     logging.basicConfig(
         level=logging.INFO,
@@ -60,6 +45,6 @@ def main():
         sys.exit("no room_ids, this may be due to a config mistake")
 
     try:
-        asyncio.run(listen_to_all(room_ids))
+        asyncio.run(blivedm.listen_to_all(room_ids, handler_factory=lambda r: BliveTinyFluxHandler(room_id=r)))
     except KeyboardInterrupt:
         print("keyboard interrupt", file=sys.stdout)
