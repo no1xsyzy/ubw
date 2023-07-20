@@ -102,15 +102,6 @@ class MyHandler(blivedm.BaseHandler):
         room_id = client.room_id
         logger.info(rf"\[[bright_cyan]{room_id}[/]] 直播结束")
 
-    async def on_stop_live_room_list(self, client, model):
-        pass
-
-    async def on_heartbeat(self, client, message):
-        pass
-
-    async def on_online_rank_count(self, client, model):
-        pass
-
     async def on_interact_word(self, client, model):
         if model.data.uid not in self.uids:
             return
