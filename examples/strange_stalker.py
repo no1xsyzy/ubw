@@ -105,7 +105,7 @@ class MyHandler(blivedm.BaseHandler):
     async def on_interact_word(self, client, model):
         if model.data.uid not in self.uids:
             return
-        return super().on_interact_word(client, model)
+        return await super().on_interact_word(client, model)
 
 
 def main():
