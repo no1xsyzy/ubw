@@ -14,6 +14,7 @@ class AnchorHelperDanmuData(BaseModel):
 
 
 class AnchorHelperDanmuCommand(CommandModel):
+    """这个command似乎会泄漏主播的收益？"""
     cmd: Literal['ANCHOR_HELPER_DANMU']
     data: AnchorHelperDanmuData
 

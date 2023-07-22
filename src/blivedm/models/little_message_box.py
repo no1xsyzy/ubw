@@ -16,6 +16,7 @@ class LittleMessageBoxData(BaseModel):
 
 
 class LittleMessageBoxCommand(CommandModel):
+    """目前看来只有『今日首条弹幕发送成功~亲密度+100』这个提示"""
     cmd: Literal['LITTLE_MESSAGE_BOX']
     data: LittleMessageBoxData
 
