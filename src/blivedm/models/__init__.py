@@ -68,6 +68,7 @@ from .stop_live_room_list import StopLiveRoomListCommand
 from .super_chat_entrance import SuperChatEntranceCommand
 from .super_chat_message import SuperChatCommand
 from .super_chat_message_delete import SuperChatDeleteCommand
+from .super_chat_message_jpn import SuperChatMessageJpnCommand
 from .sys_msg import SysMsgCommand
 from .trading_score import TradingScoreCommand
 from .user_panel_red_alarm import UserPanelRedAlarmCommand
@@ -145,6 +146,7 @@ AnnotatedCommandModel = Annotated[Union[
     SuperChatEntranceCommand,
     SuperChatCommand,
     SuperChatDeleteCommand,
+    SuperChatMessageJpnCommand,
     SysMsgCommand,
     TradingScoreCommand,
     UserPanelRedAlarmCommand,
@@ -222,6 +224,7 @@ __all__ = (
     'SuperChatEntranceCommand',
     'SuperChatCommand',
     'SuperChatDeleteCommand',
+    'SuperChatMessageJpnCommand',
     'SysMsgCommand',
     'TradingScoreCommand',
     'UserPanelRedAlarmCommand',
