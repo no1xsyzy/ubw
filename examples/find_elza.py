@@ -84,6 +84,10 @@ class MyHandler(blivedm.BaseHandler):
         room_id = client.room_id
         logger.info(rf"\[[bright_cyan]{room_id}[/]] 直播结束")
 
+    async def on_anchor_helper_danmu(self, client, model):
+        room_id = client.room_id
+        logger.info(rf"\[[bright_cyan]{room_id}[/]] {model.data.sender}: {model.data.msg}")
+
 
 def main():
     try:

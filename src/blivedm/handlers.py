@@ -184,3 +184,6 @@ class BaseHandler:
 
     async def on_card_msg(self, client: client_.BLiveClient, model: models.CardMsgCommand):
         await self.on_else(client, model)
+
+    async def on_anchor_helper_danmu(self, client: client_.BLiveClient, model: models.AnchorHelperDanmuCommand):
+        await self.on_else(client, model)

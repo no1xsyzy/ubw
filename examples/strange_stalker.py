@@ -107,6 +107,10 @@ class MyHandler(blivedm.BaseHandler):
             return
         return await super().on_interact_word(client, model)
 
+    async def on_anchor_helper_danmu(self, client, model):
+        room_id = client.room_id
+        logger.info(rf"\[[bright_cyan]{room_id}[/]] {model.data.sender}: {model.data.msg}")
+
 
 def main():
     import argparse
