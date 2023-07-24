@@ -6,31 +6,27 @@ authors = ["Xu Siyuan <inqb@protonmail.com>"]
 license = "MIT"
 readme = "Readme.md"
 packages = [
-    {include = "blivedm", from = "src"},
-    {include = "bilibili", from = "src"},
-    {include = "blive_dumpraw", from = "src"},
-    {include = "blive_saver", from = "src"},
-    {include = "bhashm", from = "src"},
+    { include = "blivedm", from = "src" },
+    { include = "bilibili", from = "src" },
+    { include = "blive_dumpraw", from = "src" },
+    { include = "bhashm", from = "src" },
 ]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-aiohttp = {version = "^3.8.3", extras = ["speedups"]}
+aiohttp = { version = "^3.8.3", extras = ["speedups"] }
 aiofiles = "^22.1.0"
 aiocsv = "^1.2.3"
 rich = "^13.0.0"
 pydantic = "^1.10.4"
 toml = "^0.10.2"
-tinydb = {version = "^4.7.1", optional = true}
-tinydb-serialization = {version = "^2.1.0", optional = true}
-aiotinydb = {version = "^2.0.0", optional = true}
 sentry-sdk = "^1.16.0"
 lxml = "^4.9.2"
 
-[tool.poetry.extras]
-tinydb = ["tinydb", "tinydb-serialization", "aiotinydb"]
-
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.saver.dependencies]
+tinydb = "^4.7.1"
+tinydb-serialization = "^2.1.0"
+aiotinydb = "^2.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"

@@ -1,8 +1,12 @@
+import argparse
 import asyncio
 import logging
 import sys
 from datetime import datetime, timezone, timedelta
 from functools import cached_property
+
+import toml
+from rich.logging import RichHandler
 
 try:
     from tinydb import TinyDB, Query
@@ -18,6 +22,18 @@ import blivedm
 from bilibili import get_info_by_room
 
 logger = logging.getLogger('blive_saver')
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    datefmt="[%Y-%m-%d %H:%M:%S]",
+    handlers=[RichHandler(
+        rich_tracebacks=True,
+        tracebacks_show_locals=True,
+        tracebacks_suppress=['logging', 'rich', 'tinydb'],
+        show_path=False,
+    )],
+)
 
 
 class SerializationMiddleware(_SyncSerializationMiddleware, AIOMiddleware):
@@ -120,3 +136,36 @@ class BliveTinyFluxHandler(blivedm.BaseHandler):
         else:
             logger.info(f"[{self.room_id}] sharding")
             asyncio.create_task(self.m_new_shard())
+
+
+def main():
+    room_ids = []
+
+    parser = argparse.ArgumentParser('saver')
+
+    parser.add_argument("-c", "--config", action='append')
+    parser.add_argument("-r", "--room", action='append')
+
+    args = parser.parse_args()
+
+    for cf in args.config:
+        with open(cf, 'r') as f:
+            cfg = toml.load(f)
+            room_ids = cfg['room_ids']
+    for r in args.room:
+        for room_id in (int(sri) for sri in r.split(",")):
+            if room_id < 0:
+                room_ids.remove(-room_id)
+            elif room_id not in room_ids:
+                room_ids.append(room_id)
+    if not room_ids:
+        sys.exit("no room_ids, this may be due to a config mistake")
+
+    try:
+        asyncio.run(blivedm.listen_to_all(room_ids, handler_factory=lambda r: BliveTinyFluxHandler(room_id=r)))
+    except KeyboardInterrupt:
+        print("keyboard interrupt", file=sys.stderr)
+
+
+if __name__ == '__main__':
+    main()
