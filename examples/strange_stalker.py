@@ -34,7 +34,7 @@ class RichClientAdapter(logging.LoggerAdapter):
         return msg, kwargs
 
 
-logger = RichClientAdapter(logging.getLogger('find_elza'), {})
+logger = RichClientAdapter(logging.getLogger('strange_stalker'), {})
 
 
 class MyHandler(blivedm.BaseHandler):
