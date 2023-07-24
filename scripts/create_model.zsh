@@ -26,3 +26,6 @@ class ${CAPITAL_CASE}Command(CommandModel):
 EOF
 
 rm -f "${TMP_NAME}.json" "${TMP_NAME}.py"
+
+echo "lines should be checked:"
+grep "time|color" "${OUT_FILE}"
