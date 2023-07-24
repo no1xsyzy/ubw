@@ -51,6 +51,7 @@ class MyHandler(blivedm.BaseHandler):
     async def on_unknown_cmd(self, client, command):
         import json
         import aiofiles.os
+        import traceback
         cmd = command.get('cmd', None)
         # logger.warning(f"unknown cmd {cmd}")
         await aiofiles.os.makedirs("output/unknown_cmd", exist_ok=True)
@@ -59,10 +60,10 @@ class MyHandler(blivedm.BaseHandler):
         sentry_sdk.capture_event(
             event={'level': 'warning', 'message': f"unknown cmd {cmd}"},
             user={'id': client.room_id},
-            contexts={'command': {'command': command}},
+            contexts={'command': {'command': command}, 'exception': traceback.format_exc()},
             tags={'module': 'bhashm', 'unknown_cmd': "yes", 'cmd': cmd, 'room_id': client.room_id},
         )
-        logger.info(command)
+        logger.exception(f"unknown cmd {cmd}, content: \n{json.dumps(command, indent=2, ensure_ascii=False)}")
 
     async def on_summary(self, client, summary):
         json = summary.raw.json(ensure_ascii=False)
