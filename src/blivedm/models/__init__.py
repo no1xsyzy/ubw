@@ -46,6 +46,7 @@ from .pk import (
     PkBattleSettleNewCommand, PkBattleSettleCommand, PkBattleSettleV2Command, PkBattleSettleUserCommand,
     PkBattleEntranceCommand,
 )
+from .playtogether_icon_change import PlaytogetherIconChangeCommand
 from .popular_rank_changed import PopularRankChangedCommand
 from .popularity_red_pocket_new import PopularityRedPocketNewCommand
 from .popularity_red_pocket_start import PopularityRedPocketStartCommand
@@ -127,6 +128,7 @@ AnnotatedCommandModel = Annotated[Union[
     PkBattleEndCommand, PkBattleProcessCommand, PkBattleFinalProcessCommand,
     PkBattleSettleNewCommand, PkBattleSettleCommand, PkBattleSettleV2Command, PkBattleSettleUserCommand,
     PkBattleEntranceCommand,
+    PlaytogetherIconChangeCommand,
     PopularRankChangedCommand,
     PopularityRedPocketNewCommand,
     PopularityRedPocketStartCommand,
@@ -210,6 +212,7 @@ __all__ = (
     'PkBattleEndCommand', 'PkBattleProcessCommand', 'PkBattleFinalProcessCommand',
     'PkBattleSettleNewCommand', 'PkBattleSettleCommand', 'PkBattleSettleV2Command', 'PkBattleSettleUserCommand',
     'PkBattleEntranceCommand',
+    'PlaytogetherIconChangeCommand',
     'PopularityRedPocketNewCommand',
     'PopularityRedPocketStartCommand',
     'PopularityRedPocketWinnerListCommand',
