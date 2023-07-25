@@ -108,7 +108,7 @@ class MedalInfo(BaseModel):
 class Summary(BaseModel):
     t: datetime
     msg: str | None = None
-    user: tuple[int, str] | None = None
+    user: tuple[int, str] | tuple[int, None] | tuple[None, str] | None = None
     room_id: int | None = None
     price: float = 0
     raw: CommandModel | None = None
