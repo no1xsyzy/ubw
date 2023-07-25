@@ -1,10 +1,9 @@
 import asyncio
 import logging
 import re
-import sys
+from typing import Annotated
 
-import sentry_sdk
-from rich.logging import RichHandler
+import typer
 from rich.markup import escape
 
 import blivedm
@@ -113,18 +112,23 @@ class MyHandler(blivedm.BaseHandler):
         logger.info(rf"\[[bright_cyan]{room_id}[/]] {model.data.sender}: {model.data.msg}")
 
 
-def main():
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-r', '--regex', default='')
-    parser.add_argument('-u', '--uids', action='append', type=int)
-    parser.add_argument('rooms', nargs='+', type=int)
-    args = parser.parse_args()
-    try:
-        asyncio.run(blivedm.listen_to_all(args.rooms, MyHandler(uids=args.uids, reg=args.regex)))
-    except KeyboardInterrupt:
-        print("用户中断", file=sys.stdout)
+@blivedm.utils.sync
+async def main(
+        regex: Annotated[list[str], typer.Option("--regex", "-r")] = None,
+        uids: Annotated[list[int], typer.Option("--uids", "-u")] = None,
+        rooms: Annotated[list[int], typer.Argument(help="")] = None,
+        derive_uids: bool = True,
+        derive_regex: bool = True,
+):
+    if derive_uids:
+        from bilibili import get_info_by_room
+        uids.extend(await asyncio.gather(*(get_info_by_room(room) for room in rooms)))
+    if derive_regex:
+        regex.extend(map(str, uids))
+        regex.extend(map(str, rooms))
+    regex = '|'.join(regex)
+    return await blivedm.listen_to_all(rooms, MyHandler(uids=uids, reg=regex))
 
 
 if __name__ == '__main__':
-    main()
+    typer.run(main)

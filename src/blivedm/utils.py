@@ -1,10 +1,12 @@
 import asyncio
+import sys
+from functools import wraps
 from typing import Callable
 
 from .client import BLiveClient
 from .handlers import BaseHandler
 
-__all__ = ('listen_to_all',)
+__all__ = ('listen_to_all', 'sync',)
 
 
 async def listen_to_all(room_ids: list[int],
@@ -21,3 +23,14 @@ async def listen_to_all(room_ids: list[int],
         await asyncio.gather(*(client.join() for client in clients.values()))
     finally:
         await asyncio.gather(*(client.stop_and_close() for client in clients.values()))
+
+
+def sync(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        try:
+            return asyncio.run(f(*args, **kwargs))
+        except KeyboardInterrupt:
+            print("...user abort...", file=sys.stderr)
+
+    return wrapper

@@ -3,6 +3,7 @@ import logging
 import sys
 
 import sentry_sdk
+import typer
 from rich.logging import RichHandler
 from rich.markup import escape
 
@@ -37,21 +38,6 @@ logger = RichClientAdapter(logging.getLogger('danmakup'), {})
 
 
 class MyHandler(blivedm.BaseHandler):
-    # async def on_unknown_cmd(self, client, command):
-    #     import json
-    #     import aiofiles.os
-    #     cmd = command.get('cmd', None)
-    #     # logger.warning(f"unknown cmd {cmd}")
-    #     await aiofiles.os.makedirs("output/unknown_cmd", exist_ok=True)
-    #     async with aiofiles.open(f"output/unknown_cmd/{cmd}.json", mode='a', encoding='utf-8') as afp:
-    #         await afp.write(json.dumps(command, indent=2, ensure_ascii=False))
-    #     sentry_sdk.capture_event(
-    #         event={'level': 'warning', 'message': f"unknown cmd {cmd}"},
-    #         user={'id': client.room_id},
-    #         contexts={'command': {'command': command}},
-    #         tags={'module': 'bhashm', 'unknown_cmd': "yes", 'cmd': cmd, 'room_id': client.room_id},
-    #     )
-
     async def on_danmu_msg(self, client, message):
         uname = message.info.uname
         msg = message.info.msg
@@ -91,21 +77,12 @@ class MyHandler(blivedm.BaseHandler):
         logger.info(rf"\[[bright_cyan]{room_id}[/]] 直播结束")
 
 
-def main():
-    import argparse
-    p = argparse.ArgumentParser()
-    p.add_argument('room_ids', type=int, nargs='*')
-    args = p.parse_args()
-    if not args.room_ids:
-        while (j := input("输入想要观察的房间号（输入任意非数字内容退出）：")).isdigit():
-            args.room_ids.extend(int(j))
-    if not args.room_ids:
-        print("没有需要观察的房间，直接退出")
+def main(room_ids: list[int]):
     try:
-        asyncio.run(blivedm.listen_to_all(args.room_ids, MyHandler()))
+        asyncio.run(blivedm.listen_to_all(room_ids, MyHandler()))
     except KeyboardInterrupt:
         print("用户中断", file=sys.stdout)
 
 
 if __name__ == '__main__':
-    main()
+    typer.run(main)

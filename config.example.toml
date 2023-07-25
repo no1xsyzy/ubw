@@ -1,14 +1,39 @@
-room_ids = [
-    81004,  # 艾尔莎_Channel
-    730215,  # InQβ，脚本作者，测试用
-]
+[sentry]
+dsn = "https://f6bcb89a35fb438f81eb2d7679c5ded0@o4504791466835968.ingest.sentry.io/4504791473127424"
+traces_sample_rate = 1.0
 
-famous_people = {
-    777964,  # 奶茶☆
-    1351379,  # 赫萝老师
-    1521415,  # 艾尔莎_Channel
-    2351778,  # InQβ，脚本作者，测试用
-    5204356,  # 仙乐阅
-    431412406,  # 虚研社长Official
-    1816182565,  # 珞璃Official
-}
+[logging]
+version = 1  # see logging.dictConfig
+level = "INFO"
+format = "%(message)s"
+datefmt = "[%Y-%m-%d %H:%M:%S]"
+[logging.handlers.richconsole]
+class = 'rich.logging.RichHandler'
+tracebacks_suppress = ['logging', 'rich']
+show_path = false
+
+[strange_stalker.elza]
+rooms = [81004]
+regex = ['艾尔莎', '王飘', '本周开播满7有效天']
+
+[strange_stalker.naicha]
+rooms = [1220]
+regex = ['本周开播满7有效天']
+
+[strange_stalker.yjll]
+rooms = [27337779]
+regex = ['本周开播满7有效天']
+
+[strange_stalker.find_elza]
+rooms = [
+    1220, # 奶茶星
+    17961, # 赫萝老师
+    92613, # 少年Pi
+    21622680, # 花玲Karin
+    27008928, # vv音乐_助眠
+    27442036, # vv音乐助眠
+]
+uids = [1521415]
+regex = ['艾尔莎', '王飘', '1521415']
+derive_uids = false
+derive_regex = false
