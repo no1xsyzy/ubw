@@ -3,6 +3,7 @@ from ._base import *
 
 class MessageboxUserMedalChangeData(BaseModel):
     type: int
+    "1=粉丝勋章升级，2=再次点亮"
     guard_level: int
     is_lighted: int
     medal_color_border: Color
@@ -26,7 +27,11 @@ class MessageboxUserMedalChangeCommand(CommandModel):
     def summarize(self) -> Summary:
         return Summary(
             t=self.ct,
-            msg=self.data.upper_bound_content,
+            msg=self.data.upper_bound_content or (
+                f"{self.data.uid}再次点亮了粉丝勋章【{self.data.medal_name}】{self.data.medal_level}级"
+                if self.data.type == 2 else
+                f"{self.data.uid}的粉丝勋章【{self.data.medal_name}|{self.data.medal_level}】发生了type={self.data.type}"
+            ),
             user=(self.data.uid, None),
             raw=self,
         )
