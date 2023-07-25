@@ -10,7 +10,7 @@ TMP_NAME="_tmp_create_model"
 
 jq -s '.[0]' "$IN_FILE" > ${TMP_NAME}.json
 
-poetry run datamodel-codegen --input ${TMP_NAME}.json --output ${TMP_NAME}.py --input-file-type json
+datamodel-codegen --input ${TMP_NAME}.json --output ${TMP_NAME}.py --input-file-type json
 
 cat >"$OUT_FILE" << EOF
 from ._base import *
@@ -28,4 +28,4 @@ EOF
 rm -f "${TMP_NAME}.json" "${TMP_NAME}.py"
 
 echo "lines should be checked:"
-grep "time|color" "${OUT_FILE}"
+grep -E "time|color" "${OUT_FILE}"
