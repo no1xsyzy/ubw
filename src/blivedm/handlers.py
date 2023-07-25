@@ -3,6 +3,7 @@ import logging
 from contextvars import ContextVar
 from typing import *
 
+import sentry_sdk
 from pydantic import parse_obj_as, ValidationError
 
 from . import client as client_
@@ -66,9 +67,9 @@ class BaseHandler:
 
             try:
                 model: models.CommandModel = parse_obj_as(models.AnnotatedCommandModel, command)
-            except ValidationError:
+            except ValidationError as e:
                 logger.debug(f"got a {cmd}, processed with {func_info(self.on_unknown_cmd)}")
-                return await self.on_unknown_cmd(client, command)
+                return await self.on_unknown_cmd(client, command, e)
             else:
                 ctx_command.reset(tok_command_set)
                 tok_command_set = ctx_command.set(model)
@@ -93,8 +94,26 @@ class BaseHandler:
             logger.debug(f"got a {cmd}, processing with {func_info(self.on_else)})")
             return await self.on_else(client, model)
 
-    async def on_unknown_cmd(self, client: client_.BLiveClient, command: dict):
-        logger.warning(f"unknown cmd {command.get('cmd', None)} {command}")
+    async def on_unknown_cmd(self, client: client_.BLiveClient, command: dict, err: ValidationError):
+        import json
+        import aiofiles.os
+        cmd = command.get('cmd', None)
+        await aiofiles.os.makedirs("output/unknown_cmd", exist_ok=True)
+        async with aiofiles.open(f"output/unknown_cmd/{cmd}.json", mode='a', encoding='utf-8') as afp:
+            await afp.write(json.dumps(command, indent=2, ensure_ascii=False))
+        # noinspection PyProtectedMember
+        uid = client._uid or client.room_owner_uid or 0
+        sentry_sdk.capture_event(
+            event={'level': 'warning', 'message': f"unknown cmd {cmd}"},
+            user={'id': f"u{uid}:{client.room_id}"},
+            contexts={'ValidationError': {'command': command, 'error': err.errors()}},
+            tags={'module': 'bhashm',
+                  'unknown_cmd':
+                      "yes"
+                      if err.errors()[0]['type'] == 'value_error.discriminated_union.invalid_discriminator' else
+                      "no",
+                  'cmd': cmd, 'room_id': client.room_id, 'user_id': uid},
+        )
 
     async def on_summary(self, client: client_.BLiveClient, summary: models.Summary):
         """可摘要消息"""
