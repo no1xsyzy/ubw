@@ -66,12 +66,13 @@ class BaseHandler:
 
             try:
                 model: models.CommandModel = parse_obj_as(models.AnnotatedCommandModel, command)
+            except ValidationError:
+                logger.debug(f"got a {cmd}, processed with {func_info(self.on_unknown_cmd)}")
+                return await self.on_unknown_cmd(client, command)
+            else:
                 ctx_command.reset(tok_command_set)
                 tok_command_set = ctx_command.set(model)
                 return await self.on_known_cmd(client, model)
-            except ValidationError:
-                logger.debug(f"got a {cmd}, processed with {func_info(self.on_unknown_cmd)}")
-                await self.on_unknown_cmd(client, command)
         except Exception:
             logger.debug(f"got a {command.get('cmd', '')}, and error in processing")
             logger.exception(f"Error command: {command!r}")
