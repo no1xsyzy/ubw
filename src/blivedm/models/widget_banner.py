@@ -23,7 +23,7 @@ class Widget(BaseModel):
 
 class Data(BaseModel):
     timestamp: datetime
-    widget_list: dict[str, Widget]
+    widget_list: dict[str, Widget | None]
 
 
 class WidgetBannerCommand(CommandModel):
