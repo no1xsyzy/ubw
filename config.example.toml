@@ -7,14 +7,20 @@ version = 1  # see logging.dictConfig
 level = "INFO"
 format = "%(message)s"
 datefmt = "[%Y-%m-%d %H:%M:%S]"
+disable_existing_loggers = false
 [logging.handlers.richconsole]
 class = 'rich.logging.RichHandler'
 tracebacks_suppress = ['logging', 'rich']
 show_path = false
+[logging.root]
+level = "INFO"
+handlers = ['richconsole']
+#[logging.loggers.strange_stalker]
+#level = "INFO"
 
 [strange_stalker.elza]
 rooms = [81004]
-regex = ['艾尔莎', '王飘', '本周开播满7有效天']
+regex = ['本周开播满7有效天']
 
 [strange_stalker.naicha]
 rooms = [1220]
@@ -31,9 +37,49 @@ rooms = [
     92613, # 少年Pi
     21622680, # 花玲Karin
     27008928, # vv音乐_助眠
-    27442036, # vv音乐助眠
 ]
 uids = [1521415]
 regex = ['艾尔莎', '王飘', '1521415']
 derive_uids = false
 derive_regex = false
+
+[danmakup.elza_karin]
+rooms = [81004, 21622680]
+
+[danmakup.elza]
+rooms = [81004]
+
+[pian.a]
+rooms = [
+    5252, # 天堂
+    # 17961,  # 赫萝老师
+    42062, # 瓶子君152
+    # 81004,  # 艾尔莎_Channel
+    913137, # 噩梦
+    1141542, # 仙乐阅
+    # 3428783,  # 绫濑光Official
+    7688602, # 花花Haya
+    # 22898905,  # 珞璃Official
+    27299825, # 布莲雾
+    # 27337779,  # 月见林林
+]
+
+[bhashm.elza]
+rooms = [
+    81004, # 艾尔莎_Channel
+]
+
+famous_people = [
+    777964, # 奶茶☆
+    1351379, # 赫萝老师
+    1521415, # 艾尔莎_Channel
+    5204356, # 仙乐阅
+    431412406, # 虚研社长Official
+    1816182565, # 珞璃Official
+]
+
+[dump_raw.elza]
+rooms = [81004]
+
+[saver.elza]
+rooms = [81004]

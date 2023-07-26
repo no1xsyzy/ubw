@@ -1,9 +1,6 @@
-import asyncio
 import logging
 import re
-from typing import Annotated
 
-import typer
 from rich.markup import escape
 
 import blivedm
@@ -19,7 +16,7 @@ class RichClientAdapter(logging.LoggerAdapter):
 logger = RichClientAdapter(logging.getLogger('strange_stalker'), {})
 
 
-class MyHandler(blivedm.BaseHandler):
+class StrangeStalkerHandler(blivedm.BaseHandler):
     def __init__(self, uids=None, reg=None, **p):
         super().__init__(**p)
         self.uids = uids or []
@@ -76,29 +73,3 @@ class MyHandler(blivedm.BaseHandler):
     async def on_anchor_helper_danmu(self, client, model):
         room_id = client.room_id
         logger.info(rf"\[[bright_cyan]{room_id}[/]] {model.data.sender}: {model.data.msg}")
-
-
-@blivedm.utils.sync
-async def main(
-        rooms: Annotated[list[int], typer.Argument(help="")],
-        regex: Annotated[list[str], typer.Option("--regex", "-r")] = None,
-        uids: Annotated[list[int], typer.Option("--uids", "-u")] = None,
-        derive_uids: bool = True,
-        derive_regex: bool = True,
-):
-    if regex is None:
-        regex = []
-    if uids is None:
-        uids = []
-    if derive_uids:
-        from bilibili import get_info_by_room
-        uids.extend(await asyncio.gather(*(get_info_by_room(room) for room in rooms)))
-    if derive_regex:
-        regex.extend(map(str, uids))
-        regex.extend(map(str, rooms))
-    regex = '|'.join(regex)
-    return await blivedm.listen_to_all(rooms, MyHandler(uids=uids, reg=regex))
-
-
-if __name__ == '__main__':
-    typer.run(main)

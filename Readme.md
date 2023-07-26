@@ -9,7 +9,7 @@ Copy `config.example.toml` to `config.toml` and edit it.
 
 ```sh
 poetry install
-poetry run python -m bhashm [-c config.toml]
+poetry run python b --help  # help
 ```
 
 License

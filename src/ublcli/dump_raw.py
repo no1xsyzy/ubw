@@ -15,7 +15,7 @@ from bilibili import get_info_by_room
 logger = logging.getLogger('blive_dumpraw')
 
 
-class BliveDumpHandler(blivedm.BaseHandler):
+class DumpRawHandler(blivedm.BaseHandler):
     def __init__(self, *, room_id, max_shard_length=timedelta(days=1), **p):
         self.room_id = room_id
         self.max_shard_length = max_shard_length

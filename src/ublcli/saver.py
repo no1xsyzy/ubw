@@ -4,9 +4,6 @@ import sys
 from datetime import datetime, timezone, timedelta
 from functools import cached_property
 
-import typer
-from rich.logging import RichHandler
-
 try:
     from tinydb import TinyDB, Query
     from tinydb.storages import JSONStorage
@@ -37,7 +34,7 @@ class TimeDeltaSerializer(Serializer):
         return timedelta(seconds=float(s))
 
 
-class BliveTinyFluxHandler(blivedm.BaseHandler):
+class SaverHandler(blivedm.BaseHandler):
     def __init__(self, *, room_id, max_shard_length=timedelta(days=1), **p):
         self.room_id = room_id
         self.max_shard_length = max_shard_length
@@ -123,25 +120,3 @@ class BliveTinyFluxHandler(blivedm.BaseHandler):
         else:
             logger.info(f"[{self.room_id}] sharding")
             asyncio.create_task(self.m_new_shard())
-
-
-def main(room_ids: list[int]):
-    try:
-        logging.basicConfig(
-            level=logging.INFO,
-            format="%(message)s",
-            datefmt="[%Y-%m-%d %H:%M:%S]",
-            handlers=[RichHandler(
-                rich_tracebacks=True,
-                tracebacks_show_locals=True,
-                tracebacks_suppress=['logging', 'rich', 'tinydb'],
-                show_path=False,
-            )],
-        )
-        asyncio.run(blivedm.listen_to_all(room_ids, handler_factory=lambda r: BliveTinyFluxHandler(room_id=r)))
-    except KeyboardInterrupt:
-        print("keyboard interrupt", file=sys.stderr)
-
-
-if __name__ == '__main__':
-    typer.run(main)

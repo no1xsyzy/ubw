@@ -3,8 +3,8 @@ import sys
 from functools import wraps
 from typing import Callable
 
-from .client import BLiveClient
-from .handlers import BaseHandler
+from blivedm.client import BLiveClient
+from blivedm.handlers import BaseHandler
 
 __all__ = ('listen_to_all', 'sync',)
 
