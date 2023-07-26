@@ -80,12 +80,16 @@ class MyHandler(blivedm.BaseHandler):
 
 @blivedm.utils.sync
 async def main(
+        rooms: Annotated[list[int], typer.Argument(help="")],
         regex: Annotated[list[str], typer.Option("--regex", "-r")] = None,
         uids: Annotated[list[int], typer.Option("--uids", "-u")] = None,
-        rooms: Annotated[list[int], typer.Argument(help="")] = None,
         derive_uids: bool = True,
         derive_regex: bool = True,
 ):
+    if regex is None:
+        regex = []
+    if uids is None:
+        uids = []
     if derive_uids:
         from bilibili import get_info_by_room
         uids.extend(await asyncio.gather(*(get_info_by_room(room) for room in rooms)))
