@@ -8,23 +8,6 @@ from rich.markup import escape
 
 import blivedm
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(message)s",
-    datefmt="[%Y-%m-%d %H:%M:%S]",
-    handlers=[RichHandler(
-        # rich_tracebacks=True,
-        # tracebacks_show_locals=True,
-        tracebacks_suppress=['logging', 'rich'],
-        show_path=False,
-    )],
-)
-
-sentry_sdk.init(
-    dsn="https://f6bcb89a35fb438f81eb2d7679c5ded0@o4504791466835968.ingest.sentry.io/4504791473127424",
-    traces_sample_rate=1.0,
-)
-
 
 class RichClientAdapter(logging.LoggerAdapter):
     def process(self, msg, kwargs):
@@ -47,23 +30,6 @@ class MyHandler(blivedm.BaseHandler):
         else:
             self.reg = re.compile('')
 
-    # async def on_unknown_cmd(self, client, command):
-    #     import json
-    #     import aiofiles.os
-    #     import traceback
-    #     cmd = command.get('cmd', None)
-    #     # logger.warning(f"unknown cmd {cmd}")
-    #     await aiofiles.os.makedirs("output/unknown_cmd", exist_ok=True)
-    #     async with aiofiles.open(f"output/unknown_cmd/{cmd}.json", mode='a', encoding='utf-8') as afp:
-    #         await afp.write(json.dumps(command, indent=2, ensure_ascii=False))
-    #     sentry_sdk.capture_event(
-    #         event={'level': 'warning', 'message': f"unknown cmd {cmd}"},
-    #         user={'id': client.room_id},
-    #         contexts={'command': {'command': command}, 'exception': traceback.format_exc()},
-    #         tags={'module': 'bhashm', 'unknown_cmd': "yes", 'cmd': cmd, 'room_id': client.room_id},
-    #     )
-    #     logger.exception(f"unknown cmd {cmd}, content: \n{json.dumps(command, indent=2, ensure_ascii=False)}")
-
     async def on_summary(self, client, summary):
         json = summary.raw.json(ensure_ascii=False)
         if self.reg.match(json):
@@ -75,7 +41,7 @@ class MyHandler(blivedm.BaseHandler):
             logger.info(rf"\[[bright_cyan]{client.room_id}[/]] " + json)
 
     async def on_danmu_msg(self, client, message):
-        if message.info.uid in self.uids:
+        if message.info.uid in self.uids or self.reg.match(message.info.msg):
             logger.info(rf"\[[bright_cyan]{client.room_id}[/]] "
                         rf"[cyan]{message.info.uname}[/]: [bright_white]{escape(message.info.msg)}[/]")
 
