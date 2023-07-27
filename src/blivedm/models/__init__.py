@@ -32,6 +32,7 @@ from .little_message_box import LittleMessageBoxCommand
 from .live import LiveCommand
 from .live_multi_view_change import LiveMultiViewChangeCommand
 from .live_panel_change import LivePanelChangeCommand
+from .live_panel_change_content import LivePanelChangeContentCommand
 from .log_in_notice import LogInNoticeCommand
 from .messagebox_user_gain_medal import MessageboxUserGainMedalCommand
 from .messagebox_user_medal_change import MessageboxUserMedalChangeCommand
@@ -119,6 +120,7 @@ AnnotatedCommandModel = Annotated[Union[
     LiveCommand,
     LiveMultiViewChangeCommand,
     LivePanelChangeCommand,
+    LivePanelChangeContentCommand,
     LogInNoticeCommand,
     MessageboxUserGainMedalCommand,
     MessageboxUserMedalChangeCommand,
@@ -205,6 +207,7 @@ __all__ = (
     'LiveCommand',
     'LiveMultiViewChangeCommand',
     'LivePanelChangeCommand',
+    'LivePanelChangeContentCommand',
     'LogInNoticeCommand',
     'MessageboxUserGainMedalCommand',
     'MessageboxUserMedalChangeCommand',
