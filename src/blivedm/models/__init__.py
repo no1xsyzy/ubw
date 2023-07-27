@@ -31,6 +31,7 @@ from .like_info import LikeInfoV3UpdateCommand, LikeInfoV3ClickCommand, LikeInfo
 from .little_message_box import LittleMessageBoxCommand
 from .live import LiveCommand
 from .live_multi_view_change import LiveMultiViewChangeCommand
+from .live_open_platform_game import LiveOpenPlatformGameCommand
 from .live_panel_change import LivePanelChangeCommand
 from .live_panel_change_content import LivePanelChangeContentCommand
 from .log_in_notice import LogInNoticeCommand
@@ -119,6 +120,7 @@ AnnotatedCommandModel = Annotated[Union[
     LittleMessageBoxCommand,
     LiveCommand,
     LiveMultiViewChangeCommand,
+    LiveOpenPlatformGameCommand,
     LivePanelChangeCommand,
     LivePanelChangeContentCommand,
     LogInNoticeCommand,
@@ -206,6 +208,7 @@ __all__ = (
     'LittleMessageBoxCommand',
     'LiveCommand',
     'LiveMultiViewChangeCommand',
+    'LiveOpenPlatformGameCommand',
     'LivePanelChangeCommand',
     'LivePanelChangeContentCommand',
     'LogInNoticeCommand',
