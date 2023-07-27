@@ -17,6 +17,7 @@ from .danmu_msg import DanmakuCommand
 from .entry_effect import EntryEffectCommand, EntryEffectMustReceiveCommand
 from .full_screen_special_effect import FullScreenSpecialEffectCommand
 from .gift_board_red_dot import GiftBoardRedDotCommand
+from .gift_panel_plan import GiftPanelPlanCommand
 from .gift_star_process import GiftStarProcessCommand
 from .goto_buy_flow import GotoBuyFlowCommand
 from .guard_buy import GuardBuyCommand
@@ -103,6 +104,7 @@ AnnotatedCommandModel = Annotated[Union[
     EntryEffectCommand, EntryEffectMustReceiveCommand,
     FullScreenSpecialEffectCommand,
     GiftBoardRedDotCommand,
+    GiftPanelPlanCommand,
     GiftStarProcessCommand,
     GotoBuyFlowCommand,
     GuardBuyCommand,
@@ -188,6 +190,7 @@ __all__ = (
     'EntryEffectCommand', 'EntryEffectMustReceiveCommand',
     'FullScreenSpecialEffectCommand',
     'GiftBoardRedDotCommand',
+    'GiftPanelPlanCommand',
     'GiftStarProcessCommand',
     'GotoBuyFlowCommand',
     'GuardBuyCommand',
