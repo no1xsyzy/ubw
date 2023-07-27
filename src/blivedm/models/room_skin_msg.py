@@ -35,5 +35,5 @@ class RoomSkinCommand(CommandModel):
     end_time: datetime
     current_time: datetime
     only_local: bool
-    skin_config: SkinConfig
-    scatter: Scatter
+    skin_config: SkinConfig | None = None
+    scatter: Scatter | None = None
