@@ -9,7 +9,7 @@ class Modules(BaseModel):
 
 class Data(BaseModel):
     modules: Modules
-    timestamp: int
+    timestamp: datetime
 
 
 class RoomModuleDisplayCommand(CommandModel):
