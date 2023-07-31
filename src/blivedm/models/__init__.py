@@ -80,6 +80,7 @@ from .super_chat_message_delete import SuperChatDeleteCommand
 from .super_chat_message_jpn import SuperChatMessageJpnCommand
 from .sys_msg import SysMsgCommand
 from .trading_score import TradingScoreCommand
+from .user_info_update import UserInfoUpdateCommand
 from .user_panel_red_alarm import UserPanelRedAlarmCommand
 from .user_task_progress import UserTaskProgressCommand
 from .user_toast_msg import UserToastMsgCommand
@@ -168,6 +169,7 @@ AnnotatedCommandModel = Annotated[Union[
     SuperChatMessageJpnCommand,
     SysMsgCommand,
     TradingScoreCommand,
+    UserInfoUpdateCommand,
     UserPanelRedAlarmCommand,
     UserTaskProgressCommand,
     UserToastMsgCommand,
@@ -256,6 +258,7 @@ __all__ = (
     'SuperChatMessageJpnCommand',
     'SysMsgCommand',
     'TradingScoreCommand',
+    'UserInfoUpdateCommand',
     'UserPanelRedAlarmCommand',
     'UserTaskProgressCommand',
     'UserToastMsgCommand',
