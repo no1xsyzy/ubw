@@ -21,6 +21,7 @@ from .gift_panel_plan import GiftPanelPlanCommand
 from .gift_star_process import GiftStarProcessCommand
 from .goto_buy_flow import GotoBuyFlowCommand
 from .guard_achievement_room import GuardAchievementRoomCommand
+from .guard_benefit_receive import GuardBenefitReceiveCommand
 from .guard_buy import GuardBuyCommand
 from .guard_honor_thousand import GuardHonorThousandCommand
 from .heartbeat import HeartbeatCommand
@@ -112,6 +113,7 @@ AnnotatedCommandModel = Annotated[Union[
     GiftStarProcessCommand,
     GotoBuyFlowCommand,
     GuardAchievementRoomCommand,
+    GuardBenefitReceiveCommand,
     GuardBuyCommand,
     GuardHonorThousandCommand,
     HeartbeatCommand,
@@ -202,6 +204,7 @@ __all__ = (
     'GiftStarProcessCommand',
     'GotoBuyFlowCommand',
     'GuardAchievementRoomCommand',
+    'GuardBenefitReceiveCommand',
     'GuardBuyCommand',
     'GuardHonorThousandCommand',
     'HeartbeatCommand',
