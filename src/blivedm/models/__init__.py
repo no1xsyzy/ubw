@@ -7,6 +7,7 @@ from .anchor_ecommerce_status import AnchorEcommerceStatusCommand
 from .anchor_helper_danmu import AnchorHelperDanmuCommand
 from .anchor_lot import AnchorLotStartCommand, AnchorLotCheckStatusCommand, AnchorLotEndCommand, AnchorLotAwardCommand
 from .area_rank_changed import AreaRankChangedCommand
+from .benefit_status import BenefitStatusCommand
 from .card_msg import CardMsgCommand
 from .combo_end import ComboEndCommand
 from .combo_send import ComboSendCommand
@@ -99,6 +100,7 @@ AnnotatedCommandModel = Annotated[Union[
     AnchorHelperDanmuCommand,
     AnchorLotStartCommand, AnchorLotCheckStatusCommand, AnchorLotEndCommand, AnchorLotAwardCommand,
     AreaRankChangedCommand,
+    BenefitStatusCommand,
     CardMsgCommand,
     ComboEndCommand,
     ComboSendCommand,
@@ -190,6 +192,7 @@ __all__ = (
     'AnchorHelperDanmuCommand',
     'AnchorLotStartCommand', 'AnchorLotCheckStatusCommand', 'AnchorLotEndCommand', 'AnchorLotAwardCommand',
     'AreaRankChangedCommand',
+    'BenefitStatusCommand',
     'CardMsgCommand',
     'ComboEndCommand',
     'ComboSendCommand',
