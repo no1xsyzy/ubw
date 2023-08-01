@@ -15,11 +15,14 @@ from bilibili import get_info_by_room
 logger = logging.getLogger('blive_dumpraw')
 
 
-class DumpRawHandler(blivedm.BaseHandler):
-    def __init__(self, *, room_id, max_shard_length=timedelta(days=1), **p):
-        self.room_id = room_id
-        self.max_shard_length = max_shard_length
+class DumpRawHandlerSettings(blivedm.HandlerSettings):
+    max_shard_length: timedelta = timedelta(days=1)
+
+
+class DumpRawHandler(blivedm.BaseHandler[DumpRawHandlerSettings]):
+    def __init__(self, *, room_id, **p):
         super().__init__(**p)
+        self.room_id = room_id
         self._living = False
         asyncio.create_task(self.m_new_shard())
         self._wait_sharding: asyncio.Task | None = None
@@ -53,7 +56,7 @@ class DumpRawHandler(blivedm.BaseHandler):
     async def m_new_shard_waiting(self):
         if 'shard_start' not in self.__dict__:
             return
-        next_sharding = self.shard_start + self.max_shard_length
+        next_sharding = self.shard_start + self.settings.max_shard_length
         logger.info(f"[{self.room_id}] scheduled sharding: {next_sharding}")
         delay = next_sharding - datetime.now(timezone(timedelta(seconds=8 * 3600)))
         try:

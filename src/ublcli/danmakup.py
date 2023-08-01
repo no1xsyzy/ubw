@@ -1,5 +1,7 @@
 import logging
+import re
 
+import pydantic
 from rich.markup import escape
 
 import blivedm
@@ -13,6 +15,18 @@ class RichClientAdapter(logging.LoggerAdapter):
 
 
 logger = RichClientAdapter(logging.getLogger('danmakup'), {})
+
+
+def try_compile(cls, reg: re.Pattern | str | None) -> re.Pattern | None:
+    if isinstance(reg, str):
+        return re.compile(reg)
+    else:
+        return reg
+
+
+class DanmakuPHandlerSettings(blivedm.HandlerSettings):
+    ignore_danmaku: re.Pattern | None = None
+    validate_ignore_danmaku = pydantic.validator('ignore_danmaku', pre=True, allow_reuse=True)(try_compile)
 
 
 class DanmakuPHandler(blivedm.BaseHandler):

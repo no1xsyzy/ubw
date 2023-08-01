@@ -5,6 +5,8 @@ from typing import Annotated
 
 import typer
 
+from .bhashm import HashMarkHandlerSettings
+from .strange_stalker import StrangeStalkerHandlerSettings
 from .utils import sync, listen_to_all
 
 app = typer.Typer()
@@ -33,30 +35,35 @@ async def strange_stalker(
         rooms: Annotated[list[int], typer.Argument(help="")],
         regex: Annotated[list[str], typer.Option("--regex", "-r")] = None,
         uids: Annotated[list[int], typer.Option("--uids", "-u")] = None,
+        ignore_danmaku: Annotated[list[int], typer.Option("--ignore", "-v")] = None,
         derive_uids: bool = True,
         derive_regex: bool = True,
 ):
-    from ublcli.strange_stalker import StrangeStalkerHandler
+    from ublcli.strange_stalker import StrangeStalkerHandler, StrangeStalkerHandlerSettings
     if regex is None:
         regex = []
     if uids is None:
         uids = []
+    if ignore_danmaku is None:
+        ignore_danmaku = []
     if derive_uids:
         from bilibili import get_info_by_room
-        uids.extend(await asyncio.gather(*(get_info_by_room(room) for room in rooms)))
+        uids.extend([i.room_info.uid for i in await asyncio.gather(*(get_info_by_room(room) for room in rooms))])
     if derive_regex:
         regex.extend(map(str, uids))
         regex.extend(map(str, rooms))
     regex = '|'.join(regex)
-    return await listen_to_all(rooms, StrangeStalkerHandler(uids=uids, reg=regex))
+    ignore_danmaku = '|'.join(ignore_danmaku)
+    settings = StrangeStalkerHandlerSettings(uids=uids, regex=regex, ignore_danmaku=ignore_danmaku)
+    return await listen_to_all(rooms, StrangeStalkerHandler(settings))
 
 
 @app.command('p')
 @app.command('danmakup')
 @sync
-async def danmakup(rooms: list[int]):
-    from ublcli.danmakup import DanmakuPHandler
-    await listen_to_all(rooms, DanmakuPHandler())
+async def danmakup(rooms: list[int], ignore_danmaku: Annotated[list[int], typer.Option("--ignore", "-v")] = None):
+    from ublcli.danmakup import DanmakuPHandler, DanmakuPHandlerSettings
+    await listen_to_all(rooms, DanmakuPHandler(DanmakuPHandlerSettings(ignore_danmaku=ignore_danmaku)))
 
 
 @app.command('pian')
@@ -69,13 +76,8 @@ async def pian(rooms: list[int]):
 @app.command('bhashm')
 @sync
 async def bhashm(rooms: list[int], famous_people: Annotated[list[int], typer.Option("--famous", "-f")] = None):
-    from .bhashm import HashMarkHandler, create_csv_writer
-
-    await listen_to_all(
-        rooms,
-        handler_factory=lambda room_id: HashMarkHandler(famous_people=famous_people,
-                                                        csv_queue=create_csv_writer(room_id))
-    )
+    from .bhashm import HashMarkHandler, HashMarkHandlerSettings
+    await listen_to_all(rooms, HashMarkHandler(HashMarkHandlerSettings(famous_people=famous_people)))
 
 
 @app.command('dump_raw')

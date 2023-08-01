@@ -32,7 +32,7 @@ async def get_live_start_time(room_id: int) -> datetime | None:
     return (await get_info_by_room(room_id)).room_info.live_start_time
 
 
-def create_csv_writer(room_id: int):
+def create_csv_writer(room_id: int) -> asyncio.Queue:
     queue = asyncio.Queue()
 
     async def task():
@@ -66,19 +66,19 @@ def create_csv_writer(room_id: int):
     return queue
 
 
-class HashMarkHandler(blivedm.BaseHandler):
-    def __init__(self, *, famous_people, csv_queue, **p):
-        super().__init__(**p)
-        self.famous_people = famous_people
-        self.csv_queue = csv_queue
+class HashMarkHandlerSettings(blivedm.HandlerSettings):
+    famous_people: list[int] = []
 
-    @property
-    def famous_people(self):
-        return self._famous_people
 
-    @famous_people.setter
-    def famous_people(self, value):
-        self._famous_people = set(value)
+class HashMarkHandler(blivedm.BaseHandler[HashMarkHandlerSettings]):
+    def __init__(self, settings):
+        super().__init__(settings)
+        self.csv_queues: dict[int, asyncio.Queue] = {}
+
+    def get_csv_queue_for(self, room_id) -> asyncio.Queue:
+        if room_id not in self.csv_queues:
+            self.csv_queues[room_id] = create_csv_writer(room_id)
+        return self.csv_queues[room_id]
 
     async def on_summary(self, client, summary):
         line = f"{summary.user[1]}(uid={summary.user[0]}): {escape(summary.msg)}"
@@ -99,14 +99,14 @@ class HashMarkHandler(blivedm.BaseHandler):
 
         if msg.startswith("#"):
             logger.info(f"[blue]marker[/] {uname}: [bright_white]{escape(msg)}[/][bright_green]{live_start_suffix}[/]")
-            await self.csv_queue.put({
+            await self.get_csv_queue_for(room_id).put({
                 'time': (
                     time.astimezone(timezone(timedelta(seconds=8 * 3600)))
                     .replace(tzinfo=None)
                     .isoformat(sep=" ", timespec='seconds')),
                 't': t, 'marker': uname, 'symbol': msg
             })
-        elif message.info.uid in self.famous_people:
+        elif message.info.uid in self.settings.famous_people:
             logger.info(f"[red]famous[/] {uname}: [bright_white]{escape(msg)}[/][bright_green]{live_start_suffix}[/]")
 
     async def on_room_change(self, client, message):
@@ -130,11 +130,11 @@ class HashMarkHandler(blivedm.BaseHandler):
 
     async def on_live(self, client, message):
         logger.info("直播开始")
-        await self.csv_queue.put('RESTART')
+        await self.get_csv_queue_for(client.room_id).put('RESTART')
 
     async def on_preparing(self, client, message):
         logger.info("直播结束")
-        await self.csv_queue.put('RESTART')
+        await self.get_csv_queue_for(client.room_id).put('RESTART')
 
     async def on_notice_msg(self, client, model):
         if model.msg_type in {1, 2}:

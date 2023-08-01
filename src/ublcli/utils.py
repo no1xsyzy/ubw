@@ -3,6 +3,7 @@ import sys
 from functools import wraps
 from typing import Callable
 
+from blivedm import HandlerInterface
 from blivedm.client import BLiveClient
 from blivedm.handlers import BaseHandler
 
@@ -10,7 +11,7 @@ __all__ = ('listen_to_all', 'sync',)
 
 
 async def listen_to_all(room_ids: list[int],
-                        handler: BaseHandler = None, handler_factory: Callable[[int], BaseHandler] = None):
+                        handler: BaseHandler = None, handler_factory: Callable[[int], HandlerInterface] = None):
     if handler is None and handler_factory is None:
         raise ValueError("neither handler nor handler_factory is specified, useless")
     clients = {}

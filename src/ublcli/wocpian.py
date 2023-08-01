@@ -47,7 +47,7 @@ class PianHandler(blivedm.BaseHandler):
     def maybe_pian(uid: int, uname: str) -> bool:
         return uid > 3493280000000000 and uname.startswith("bili_") and uname[5:].isnumeric()
 
-    async def on_else(self, client, model):
+    async def on_maybe_summarizer(self, client, model):
         pass
 
     async def on_interact_word(self, client, model):
