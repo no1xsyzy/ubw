@@ -12,6 +12,7 @@ from .card_msg import CardMsgCommand
 from .combo_end import ComboEndCommand
 from .combo_send import ComboSendCommand
 from .common_notice_danmaku import CommonNoticeDanmakuCommand
+from .confirm_auto_follow import ConfirmAutoFollowCommand
 from .cut_off import CutOffCommand
 from .danmu_aggregation import DanmuAggregationCommand
 from .danmu_msg import DanmakuCommand
@@ -105,6 +106,7 @@ AnnotatedCommandModel = Annotated[Union[
     ComboEndCommand,
     ComboSendCommand,
     CommonNoticeDanmakuCommand,
+    ConfirmAutoFollowCommand,
     CutOffCommand,
     DanmuAggregationCommand,
     DanmakuCommand,
@@ -197,6 +199,7 @@ __all__ = (
     'ComboEndCommand',
     'ComboSendCommand',
     'CommonNoticeDanmakuCommand',
+    'ConfirmAutoFollowCommand',
     'CutOffCommand',
     'DanmuAggregationCommand',
     'DanmakuCommand',
