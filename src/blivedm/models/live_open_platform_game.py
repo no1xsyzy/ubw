@@ -40,7 +40,7 @@ class GameMsg(BaseModel):
 
 
 class Data(BaseModel):
-    block_uids: list[int]
+    block_uids: list[int] | None
     game_code: str
     game_conf: str
     game_id: str
