@@ -63,6 +63,9 @@ async def strange_stalker(
 @sync
 async def danmakup(rooms: list[int], ignore_danmaku: Annotated[list[int], typer.Option("--ignore", "-v")] = None):
     from ublcli.danmakup import DanmakuPHandler, DanmakuPHandlerSettings
+    if ignore_danmaku is None:
+        ignore_danmaku = []
+    ignore_danmaku = '|'.join(ignore_danmaku)
     await listen_to_all(rooms, DanmakuPHandler(DanmakuPHandlerSettings(ignore_danmaku=ignore_danmaku)))
 
 
