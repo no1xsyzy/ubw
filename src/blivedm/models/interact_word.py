@@ -24,7 +24,7 @@ class Contribution(BaseModel):
 class InteractWordData(BaseModel):
     contribution: Contribution
     core_user_type: int
-    dmscore: int
+    dmscore: int | None = None
     fans_medal: FansMedal
     identities: list[int]
     is_spread: int
