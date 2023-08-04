@@ -77,6 +77,7 @@ from .shopping_cart_show import ShoppingCartShowCommand
 from .shopping_explain_card import ShoppingExplainCardCommand
 from .special_gift import SpecialGiftCommand
 from .spread_order_start import SpreadOrderStartCommand
+from .spread_show_feet import SpreadShowFeetCommand
 from .spread_show_feet_v2 import SpreadShowFeetV2Command
 from .stop_live_room_list import StopLiveRoomListCommand
 from .super_chat_entrance import SuperChatEntranceCommand
@@ -171,6 +172,7 @@ AnnotatedCommandModel = Annotated[Union[
     ShoppingExplainCardCommand,
     SpecialGiftCommand,
     SpreadOrderStartCommand,
+    SpreadShowFeetCommand,
     SpreadShowFeetV2Command,
     StopLiveRoomListCommand,
     SuperChatEntranceCommand,
@@ -265,6 +267,7 @@ __all__ = (
     'ShoppingExplainCardCommand',
     'SpecialGiftCommand',
     'SpreadOrderStartCommand',
+    'SpreadShowFeetCommand',
     'SpreadShowFeetV2Command',
     'StopLiveRoomListCommand',
     'SuperChatEntranceCommand',
