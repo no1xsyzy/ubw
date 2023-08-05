@@ -81,6 +81,7 @@ from .spread_order_start import SpreadOrderStartCommand
 from .spread_show_feet import SpreadShowFeetCommand
 from .spread_show_feet_v2 import SpreadShowFeetV2Command
 from .stop_live_room_list import StopLiveRoomListCommand
+from .studio_room_close import StudioRoomCloseCommand
 from .super_chat_entrance import SuperChatEntranceCommand
 from .super_chat_message import SuperChatCommand
 from .super_chat_message_delete import SuperChatDeleteCommand
@@ -177,6 +178,7 @@ AnnotatedCommandModel = Annotated[Union[
     SpreadShowFeetCommand,
     SpreadShowFeetV2Command,
     StopLiveRoomListCommand,
+    StudioRoomCloseCommand,
     SuperChatEntranceCommand,
     SuperChatCommand,
     SuperChatDeleteCommand,
@@ -273,6 +275,7 @@ __all__ = (
     'SpreadShowFeetCommand',
     'SpreadShowFeetV2Command',
     'StopLiveRoomListCommand',
+    'StudioRoomCloseCommand',
     'SuperChatEntranceCommand',
     'SuperChatCommand',
     'SuperChatDeleteCommand',
