@@ -8,7 +8,7 @@ class AnchorHelperDanmuData(BaseModel):
     button_target: str
     msg: str
     platform: int
-    report: int
+    report: str
     report_type: str
     sender: str
 
