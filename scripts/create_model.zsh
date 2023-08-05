@@ -8,6 +8,8 @@ IN_FILE="output/unknown_cmd/${UPPER_SNAKE}.json"
 OUT_FILE="src/blivedm/models/${LOWER_SNAKE}.py"
 TMP_NAME="_tmp_create_model"
 
+[ -f "$IN_FILE" ] || echo "$IN_FILE not exists" && exit 2
+
 jq -s '.[0]' "$IN_FILE" > ${TMP_NAME}.json
 
 datamodel-codegen --input ${TMP_NAME}.json --output ${TMP_NAME}.py --input-file-type json
@@ -29,3 +31,4 @@ rm -f "${TMP_NAME}.json" "${TMP_NAME}.py"
 
 echo "lines should be checked:"
 grep -E "time|color" "${OUT_FILE}"
+
