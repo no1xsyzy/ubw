@@ -248,3 +248,12 @@ class PkBattleSettleUserCommand(CommandModel):
     settle_status: int
     timestamp: datetime
     data: dict  # 太复杂而且只是为了爆米，谁爱写解析谁写
+
+
+class PkBattleMatchTimeoutData(BaseModel):
+    battle_type: int
+
+
+class PkBattleMatchTimeoutCommand(CommandModel):
+    cmd: Literal['PK_BATTLE_MATCH_TIMEOUT']
+    data: PkBattleMatchTimeoutData
