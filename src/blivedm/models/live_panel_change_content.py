@@ -44,7 +44,7 @@ class Item(BaseModel):
 
 
 class Data(BaseModel):
-    interaction_list: list[Item]
+    interaction_list: list[Item] | None
     is_fixed: int
     is_match: int
     match_bg_image: str

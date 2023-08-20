@@ -1,6 +1,12 @@
 from ._base import *
 
 
+class SendMaster(BaseModel):
+    room_id: int
+    uid: int
+    uname: str
+
+
 class ComboEndData(BaseModel):
     uid: int
     ruid: int
@@ -12,7 +18,7 @@ class ComboEndData(BaseModel):
     batch_combo_num: int
     gift_name: str
     action: str
-    send_master: None
+    send_master: SendMaster | None
     price: int
     start_time: int
     end_time: int

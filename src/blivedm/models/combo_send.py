@@ -14,7 +14,7 @@ class ComboSendData(BaseModel):
     combo_id: str
     combo_num: int
     combo_total_coin: int
-    dmscore: int
+    dmscore: int | None = None
     gift_id: int
     gift_name: str
     gift_num: int

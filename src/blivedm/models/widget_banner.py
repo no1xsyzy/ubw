@@ -12,9 +12,9 @@ class Widget(BaseModel):
     stay_time: int
     sub_data: str
     sub_key: str
-    tip_bottom_color: Color
+    tip_bottom_color: Color | Literal[''] = ''
     tip_text: str
-    tip_text_color: Color
+    tip_text_color: Color | Literal[''] = ''
     title: str
     type: int
     url: str

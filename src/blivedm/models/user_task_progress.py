@@ -11,7 +11,7 @@ class UserTask(BaseModel):
 class UserTaskProgressData(BaseModel):
     count_down: int
     is_surplus: int
-    linked_task: dict[str, UserTask]
+    linked_task: dict[str, UserTask] | None
     progress: int
     status: int
     target: int
