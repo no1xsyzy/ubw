@@ -8,7 +8,7 @@ readme = "Readme.md"
 packages = [
     { include = "blivedm", from = "src" },
     { include = "bilibili", from = "src" },
-    { include = "ublcli", from = "src" },
+    { include = "ubw", from = "src" },
 ]
 
 [tool.poetry.dependencies]
@@ -38,4 +38,4 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-b = 'ublcli:app'
+ubw = 'ubw:app'

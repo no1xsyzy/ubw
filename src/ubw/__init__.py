@@ -39,7 +39,7 @@ async def strange_stalker(
         derive_uids: bool = True,
         derive_regex: bool = True,
 ):
-    from ublcli.strange_stalker import StrangeStalkerHandler, StrangeStalkerHandlerSettings
+    from ubw.strange_stalker import StrangeStalkerHandler, StrangeStalkerHandlerSettings
     if regex is None:
         regex = []
     if uids is None:
@@ -62,7 +62,7 @@ async def strange_stalker(
 @app.command('danmakup')
 @sync
 async def danmakup(rooms: list[int], ignore_danmaku: Annotated[list[int], typer.Option("--ignore", "-v")] = None):
-    from ublcli.danmakup import DanmakuPHandler, DanmakuPHandlerSettings
+    from ubw.danmakup import DanmakuPHandler, DanmakuPHandlerSettings
     if ignore_danmaku is None:
         ignore_danmaku = []
     ignore_danmaku = '|'.join(ignore_danmaku)
