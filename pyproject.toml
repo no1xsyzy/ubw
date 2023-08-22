@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "bhashm"
+name = "ubw"
 version = "0.1.0"
 description = ""
 authors = ["Xu Siyuan <inqb@protonmail.com>"]
