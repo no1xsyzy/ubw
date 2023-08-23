@@ -1,12 +1,9 @@
-#!/usr/bin/env python
 import asyncio
 from pathlib import Path
 from typing import Annotated
 
 import typer
 
-from .bhashm import HashMarkHandlerSettings
-from .strange_stalker import StrangeStalkerHandlerSettings
 from .utils import sync, listen_to_all
 
 app = typer.Typer()
@@ -39,7 +36,7 @@ async def strange_stalker(
         derive_uids: bool = True,
         derive_regex: bool = True,
 ):
-    from ubw.strange_stalker import StrangeStalkerHandler, StrangeStalkerHandlerSettings
+    from .handlers import StrangeStalkerHandler, StrangeStalkerHandlerSettings
     if regex is None:
         regex = []
     if uids is None:
@@ -66,7 +63,7 @@ async def danmakup(
         ignore_danmaku: Annotated[list[str], typer.Option("--ignore", "-i")] = None,
         show_ignore: bool = False,
 ):
-    from ubw.danmakup import DanmakuPHandler, DanmakuPHandlerSettings
+    from .handlers import DanmakuPHandler, DanmakuPHandlerSettings
     if ignore_danmaku:
         ignore_danmaku = '|'.join(ignore_danmaku)
     else:
@@ -78,21 +75,21 @@ async def danmakup(
 @app.command('pian')
 @sync
 async def pian(rooms: list[int]):
-    from .wocpian import PianHandler
+    from .handlers import PianHandler
     await listen_to_all(rooms, PianHandler())
 
 
 @app.command('bhashm')
 @sync
 async def bhashm(rooms: list[int], famous_people: Annotated[list[int], typer.Option("--famous", "-f")] = None):
-    from .bhashm import HashMarkHandler, HashMarkHandlerSettings
+    from .handlers import HashMarkHandler, HashMarkHandlerSettings
     await listen_to_all(rooms, HashMarkHandler(HashMarkHandlerSettings(famous_people=famous_people)))
 
 
 @app.command('dump_raw')
 @sync
 async def dump_raw(rooms: list[int]):
-    from .dump_raw import DumpRawHandler
+    from .handlers import DumpRawHandler
     await listen_to_all(rooms, handler_factory=lambda r: DumpRawHandler(room_id=r))
 
 
@@ -100,7 +97,7 @@ async def dump_raw(rooms: list[int]):
 @app.command('s')
 @sync
 async def saver(rooms: list[int]):
-    from .saver import SaverHandler
+    from .handlers import SaverHandler
     await listen_to_all(rooms, handler_factory=lambda r: SaverHandler(room_id=r))
 
 
