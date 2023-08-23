@@ -35,7 +35,7 @@ async def strange_stalker(
         rooms: Annotated[list[int], typer.Argument(help="")],
         regex: Annotated[list[str], typer.Option("--regex", "-r")] = None,
         uids: Annotated[list[int], typer.Option("--uids", "-u")] = None,
-        ignore_danmaku: Annotated[list[int], typer.Option("--ignore", "-v")] = None,
+        ignore_danmaku: Annotated[list[int], typer.Option("--ignore", "-i")] = None,
         derive_uids: bool = True,
         derive_regex: bool = True,
 ):
@@ -61,7 +61,11 @@ async def strange_stalker(
 @app.command('p')
 @app.command('danmakup')
 @sync
-async def danmakup(rooms: list[int], ignore_danmaku: Annotated[list[int], typer.Option("--ignore", "-v")] = None):
+async def danmakup(
+        rooms: list[int],
+        ignore_danmaku: Annotated[list[int], typer.Option("--ignore", "-i")] = None,
+        show_ignore: bool = False,
+):
     from ubw.danmakup import DanmakuPHandler, DanmakuPHandlerSettings
     if ignore_danmaku is None:
         ignore_danmaku = []
@@ -133,9 +137,12 @@ def main(
         cd: Annotated[Path, typer.Option('--config', '-c')] = "config.toml",
         sentry: bool = True,
         log: bool = True,
+        verbose: Annotated[int, typer.Option('--verbose', '-v', count=True)] = 0,
 ):
     main.config = config = load_config(cd)
     if log:
+        if verbose > 0:
+            config['logging']['root']['level'] = 'DEBUG'
         init_logging(config)
     if sentry:
         init_sentry(config)

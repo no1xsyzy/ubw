@@ -46,6 +46,7 @@ class BaseHandler(Generic[T]):
     """
 
     def __init__(self, settings: T = None):
+        logger.debug(f'{settings=}')
         self.settings = settings or HandlerSettings()
 
     async def handle(self, client: client_.BLiveClient, command: dict):
@@ -88,6 +89,7 @@ class BaseHandler(Generic[T]):
             logger.debug(f"got a {cmd}, processing with {func_info(callback)})")
             return await callback(client, model)
         if isinstance(model, models.Summarizer):
+            logger.debug(f"got a {cmd}, summarized and processing with {func_info(self.on_summary)})")
             return await self.on_summary(client, model.summarize())
         else:
             logger.debug(f"got a {cmd}, processing with {func_info(self.on_else)})")
