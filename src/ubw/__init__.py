@@ -63,14 +63,16 @@ async def strange_stalker(
 @sync
 async def danmakup(
         rooms: list[int],
-        ignore_danmaku: Annotated[list[int], typer.Option("--ignore", "-i")] = None,
+        ignore_danmaku: Annotated[list[str], typer.Option("--ignore", "-i")] = None,
         show_ignore: bool = False,
 ):
     from ubw.danmakup import DanmakuPHandler, DanmakuPHandlerSettings
-    if ignore_danmaku is None:
-        ignore_danmaku = []
-    ignore_danmaku = '|'.join(ignore_danmaku)
-    await listen_to_all(rooms, DanmakuPHandler(DanmakuPHandlerSettings(ignore_danmaku=ignore_danmaku)))
+    if ignore_danmaku:
+        ignore_danmaku = '|'.join(ignore_danmaku)
+    else:
+        ignore_danmaku = None
+    await listen_to_all(rooms, DanmakuPHandler(
+        DanmakuPHandlerSettings(ignore_danmaku=ignore_danmaku, show_ignore=show_ignore)))
 
 
 @app.command('pian')

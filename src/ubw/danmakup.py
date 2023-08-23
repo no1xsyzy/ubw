@@ -26,15 +26,21 @@ def try_compile(cls, reg: re.Pattern | str | None) -> re.Pattern | None:
 
 class DanmakuPHandlerSettings(blivedm.HandlerSettings):
     ignore_danmaku: re.Pattern | None = None
+    show_ignore: bool = False
     validate_ignore_danmaku = pydantic.validator('ignore_danmaku', pre=True, allow_reuse=True)(try_compile)
 
 
-class DanmakuPHandler(blivedm.BaseHandler):
+class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
     async def on_danmu_msg(self, client, message):
         uname = message.info.uname
         msg = message.info.msg
         room_id = client.room_id
-        logger.info(rf"\[[bright_cyan]{room_id}[/]] {uname}: [bright_white]{escape(msg)}[/]")
+        if self.settings.ignore_danmaku is not None and self.settings.ignore_danmaku.match(msg):
+            logger.debug(rf"This danmaku should be ignored, since it matches `ignore_danmaku`")
+            if self.settings.show_ignore:
+                logger.info(rf"\[[bright_cyan]{room_id}[/]] {uname}: [grey]{escape(msg)}[/]")
+        else:
+            logger.info(rf"\[[bright_cyan]{room_id}[/]] {uname}: [bright_white]{escape(msg)}[/]")
 
     async def on_room_change(self, client, message):
         title = message.data.title
