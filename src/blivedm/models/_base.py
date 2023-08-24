@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, root_validator, validator, Field
 __all__ = (
     'BaseModel', 'CommandModel', 'datetime', 'timedelta', 'timezone', 'Literal', 'Annotated', 'Union',
     'Summary', 'Summarizer',
-    'Scatter', 'strange_dict', 'Color', 'validator', 'Field', 'MedalInfo',
+    'Scatter', 'strange_dict', 'Color', 'root_validator', 'validator', 'Field', 'MedalInfo',
 )
 
 

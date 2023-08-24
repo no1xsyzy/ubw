@@ -13,6 +13,13 @@ class OnlineRankV2Data(BaseModel):
     rank_type: str
     list: list[OnlineRankV2Info]
 
+    @root_validator(pre=True)
+    def online_list_is_list(cls, values):  # TODO: use validation_alias=AliasChoice(...) after pydantic v2.0
+        if 'online_list' in values:
+            values['list'] = values['online_list']
+            del values['online_list']
+        return values
+
 
 class OnlineRankV2Command(CommandModel):
     cmd: Literal['ONLINE_RANK_V2']
