@@ -48,11 +48,12 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
         area_name = message.data.area_name
         room_id = client.room_id
         logger.info(
-            rf"\[[bright_cyan]{room_id}[/]] 直播间信息变更《[yellow]{escape(title)}[/]》，分区：{parent_area_name}/{area_name}")
+            rf"\[[bright_cyan]{room_id}[/]] "
+            f"直播间信息变更《[rgb(255,212,50)]{escape(title)}[/]》，分区：{parent_area_name}/{area_name}")
 
     async def on_warning(self, client, message):
         room_id = client.room_id
-        logger.info(rf"\[[bright_cyan]{room_id}[/]] {message}")
+        logger.info(rf"\[[bright_cyan]{room_id}[/]] [white on red]{message}[/]")
 
     async def on_super_chat_message(self, client, message):
         uname = message.data.user_info.uname
@@ -64,12 +65,14 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
 
     async def on_room_block_msg(self, client, message):
         room_id = client.room_id
-        logger.info(rf"\[[bright_cyan]{room_id}[/]] 用户 {message.data.uname}（uid={message.data.uid}）被封禁")
+        logger.info(rf"\[[bright_cyan]{room_id}[/]] "
+                    f"[red]用户 {message.data.uname}（uid={message.data.uid}）被封禁[/]")
 
     async def on_live(self, client, message):
         room_id = client.room_id
-        logger.info(rf"\[[bright_cyan]{room_id}[/]] 直播开始")
+        logger.info(rf"\[[bright_cyan]{room_id}[/]] "
+                    "[black on #eeaaaa]:black_right__pointing_triangle_with_double_vertical_bar-text:直播开始[/]")
 
     async def on_preparing(self, client, message):
         room_id = client.room_id
-        logger.info(rf"\[[bright_cyan]{room_id}[/]] 直播结束")
+        logger.info(rf"\[[bright_cyan]{room_id}[/]] [black on #eeaaaa]:black_square_for_stop-text:直播结束[/]")

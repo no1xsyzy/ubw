@@ -61,7 +61,8 @@ class StrangeStalkerHandler(blivedm.BaseHandler[StrangeStalkerHandlerSettings]):
         area_name = message.data.area_name
         room_id = client.room_id
         logger.info(
-            rf"\[[bright_cyan]{room_id}[/]] 直播间信息变更《[yellow]{escape(title)}[/]》，分区：{parent_area_name}/{area_name}")
+            rf"\[[bright_cyan]{room_id}[/]] "
+            f"直播间信息变更《[rgb(255,212,50)]{escape(title)}[/]》，分区：{parent_area_name}/{area_name}")
 
     async def on_warning(self, client, message):
         room_id = client.room_id
@@ -69,11 +70,12 @@ class StrangeStalkerHandler(blivedm.BaseHandler[StrangeStalkerHandlerSettings]):
 
     async def on_live(self, client, message):
         room_id = client.room_id
-        logger.info(rf"\[[bright_cyan]{room_id}[/]] 直播开始")
+        logger.info(rf"\[[bright_cyan]{room_id}[/]] "
+                    "[black on #eeaaaa]:black_right__pointing_triangle_with_double_vertical_bar-text:直播开始[/]")
 
     async def on_preparing(self, client, message):
         room_id = client.room_id
-        logger.info(rf"\[[bright_cyan]{room_id}[/]] 直播结束")
+        logger.info(rf"\[[bright_cyan]{room_id}[/]] [black on #eeaaaa]:black_square_for_stop-text:直播结束[/]")
 
     async def on_interact_word(self, client, model):
         if model.data.uid not in self.settings.uids:

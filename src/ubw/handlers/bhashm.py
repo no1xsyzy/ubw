@@ -113,7 +113,7 @@ class HashMarkHandler(blivedm.BaseHandler[HashMarkHandlerSettings]):
         title = message.data.title
         parent_area_name = message.data.parent_area_name
         area_name = message.data.area_name
-        logger.info(f"直播间信息变更《[yellow]{escape(title)}[/]》，分区：{parent_area_name}/{area_name}")
+        logger.info(f"直播间信息变更《[rgb(255,212,50)]{escape(title)}[/]》，分区：{parent_area_name}/{area_name}")
 
     async def on_warning(self, client, message):
         logger.info(message)
@@ -129,11 +129,11 @@ class HashMarkHandler(blivedm.BaseHandler[HashMarkHandlerSettings]):
         logger.info(f"用户 {message.data.uname}（uid={message.data.uid}）被封禁")
 
     async def on_live(self, client, message):
-        logger.info("直播开始")
+        logger.info("[black on #eeaaaa]:black_right__pointing_triangle_with_double_vertical_bar-text:直播开始[/]")
         await self.get_csv_queue_for(client.room_id).put('RESTART')
 
     async def on_preparing(self, client, message):
-        logger.info("直播结束")
+        logger.info("[black on #eeaaaa]:black_square_for_stop-text:直播结束[/]")
         await self.get_csv_queue_for(client.room_id).put('RESTART')
 
     async def on_notice_msg(self, client, model):
