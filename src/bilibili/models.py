@@ -10,7 +10,7 @@ DataV = TypeVar('DataV')
 class Response(GenericModel, Generic[DataV]):
     code: int
     message: str
-    ttl: int
+    ttl: int = -1
     data: DataV | None
 
 
@@ -105,3 +105,8 @@ class RoomEmoticons(BaseModel):
     fans_brand: int
     data: list[EmoticonPkg]
     purchase_url: str | None = None
+
+
+class FingerSPI(BaseModel):
+    b_3: str
+    b_4: str
