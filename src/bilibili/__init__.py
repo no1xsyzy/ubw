@@ -12,16 +12,16 @@ EMOTICON_URL = 'https://api.live.bilibili.com/xlive/web-ucenter/v2/emoticon/GetE
 FINGER_SPI_URL = 'https://api.bilibili.com/x/frontend/finger/spi'
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'
 
-RETURN_VAR = TypeVar('RETURN_VAR')
+F = TypeVar('F')
 
 
 class BilibiliApiError(Exception):
     pass
 
 
-def auto_session(func: Callable[[...], RETURN_VAR]):
+def auto_session(func: F) -> F:
     @functools.wraps(func)
-    async def wrapper(*args, **kwargs) -> RETURN_VAR:
+    async def wrapper(*args, **kwargs):
         session = None
         if 'session' not in kwargs:
             session = kwargs['session'] = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10))
