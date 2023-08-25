@@ -21,8 +21,6 @@ __all__ = (
 
 logger = logging.getLogger('blivedm')
 
-ROOM_INIT_URL = 'https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom'
-DANMAKU_SERVER_CONF_URL = 'https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo'
 DEFAULT_DANMAKU_SERVER_LIST = [
     {'host': 'broadcastlv.chat.bilibili.com', 'port': 2243, 'wss_port': 443, 'ws_port': 2244}
 ]
@@ -129,7 +127,7 @@ class BLiveClient(ClientABC):
         """房间短ID，没有则为0"""
         self._room_owner_uid = None
         """主播用户ID"""
-        self._host_server_list: Optional[List[dict]] = None
+        self._host_server_list: Optional[list[bilibili.Host]] = None
         """
         弹幕服务器列表
         [{host: "tx-bj4-live-comet-04.chat.bilibili.com", port: 2243, wss_port: 443, ws_port: 2244}, ...]
@@ -256,82 +254,45 @@ class BLiveClient(ClientABC):
         res = True
         if not await self._init_room_id_and_owner():
             res = False
-            # 失败了则降级
-            self._room_id = self._room_short_id = self._tmp_room_id
-            self._room_owner_uid = 0
-
         if not await self._init_host_server():
             res = False
-            # 失败了则降级
-            self._host_server_list = DEFAULT_DANMAKU_SERVER_LIST
-            self._host_server_token = None
-
         if not await self._init_buvid():
             res = False
-
         return res
 
     async def _init_room_id_and_owner(self):
         try:
-            async with self._session.get(ROOM_INIT_URL,
-                                         params={'room_id': self._tmp_room_id},
-                                         headers={'User-Agent': bilibili.USER_AGENT},
-                                         ssl=self._ssl) as res:
-                if res.status != 200:
-                    logger.warning('room=%d _init_room_id_and_owner() failed, status=%d, reason=%s', self._tmp_room_id,
-                                   res.status, res.reason)
-                    return False
-                data = await res.json()
-                if data['code'] != 0:
-                    logger.warning('room=%d _init_room_id_and_owner() failed, message=%s', self._tmp_room_id,
-                                   data['message'])
-                    return False
-                if not self._parse_room_init(data['data']):
-                    return False
-        except (aiohttp.ClientConnectionError, asyncio.TimeoutError):
+            info: bilibili.InfoByRoom = await bilibili.get_info_by_room(self._tmp_room_id, session=self._session)
+            self._room_id = info.room_info.room_id
+            self._room_short_id = info.room_info.short_id
+            self._room_owner_uid = info.room_info.uid
+        except (aiohttp.ClientConnectionError, asyncio.TimeoutError, bilibili.BilibiliApiError):
             logger.exception('room=%d _init_room_id_and_owner() failed:', self._tmp_room_id)
+            self._room_id = self._room_short_id = self._tmp_room_id
+            self._room_owner_uid = 0
             return False
-        return True
-
-    def _parse_room_init(self, data):
-        room_info = data['room_info']
-        self._room_id = room_info['room_id']
-        self._room_short_id = room_info['short_id']
-        self._room_owner_uid = room_info['uid']
         return True
 
     async def _init_host_server(self):
         try:
-            async with self._session.get(DANMAKU_SERVER_CONF_URL,
-                                         params={'id': self._room_id, 'type': 0},
-                                         headers={'User-Agent': bilibili.USER_AGENT},
-                                         ssl=self._ssl) as res:
-                if res.status != 200:
-                    logger.warning('room=%d _init_host_server() failed, status=%d, reason=%s', self._room_id,
-                                   res.status, res.reason)
-                    return False
-                data = await res.json()
-                if data['code'] != 0:
-                    logger.warning('room=%d _init_host_server() failed, message=%s', self._room_id, data['message'])
-                    return False
-                if not self._parse_danmaku_server_conf(data['data']):
-                    return False
-        except (aiohttp.ClientConnectionError, asyncio.TimeoutError):
+            server: bilibili.DanmuInfo = await bilibili.get_danmaku_server(self._room_id)
+            self._host_server_list = server.host_list
+            self._host_server_token = server.token
+        except (aiohttp.ClientConnectionError, asyncio.TimeoutError, bilibili.BilibiliApiError):
             logger.exception('room=%d _init_host_server() failed:', self._room_id)
-            return False
-        return True
-
-    def _parse_danmaku_server_conf(self, data):
-        self._host_server_list = data['host_list']
-        self._host_server_token = data['token']
-        if not self._host_server_list:
-            logger.warning('room=%d _parse_danmaku_server_conf() failed: host_server_list is empty', self._room_id)
+            self._host_server_list = DEFAULT_DANMAKU_SERVER_LIST
+            self._host_server_token = None
             return False
         return True
 
     async def _init_buvid(self):
-        c: bilibili.FingerSPI = await bilibili.get_finger_spi()
-        self._buvid3 = c.b_3
+        try:
+            c: bilibili.FingerSPI = await bilibili.get_finger_spi()
+            self._buvid3 = c.b_3
+        except (aiohttp.ClientConnectionError, asyncio.TimeoutError, bilibili.BilibiliApiError):
+            logger.exception('room=%d _init_buvid() failed:', self._room_id)
+            self._buvid3 = None
+            return False
         return True
 
     @staticmethod
@@ -383,7 +344,7 @@ class BLiveClient(ClientABC):
                 # 连接
                 host_server = self._host_server_list[retry_count % len(self._host_server_list)]
                 async with self._session.ws_connect(
-                        f"wss://{host_server['host']}:{host_server['wss_port']}/sub",
+                        f"wss://{host_server.host}:{host_server.wss_port}/sub",
                         headers={'User-Agent': bilibili.USER_AGENT},
                         receive_timeout=self._heartbeat_interval + 5,
                         ssl=self._ssl

@@ -4,7 +4,7 @@ from typing import *
 import aiohttp
 from pydantic import parse_obj_as
 
-from bilibili.models import Response, InfoByRoom, DanmuInfo, RoomEmoticons, FingerSPI
+from bilibili.models import Response, InfoByRoom, DanmuInfo, RoomEmoticons, FingerSPI, Host
 
 ROOM_INIT_URL = 'https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom'
 DANMAKU_SERVER_CONF_URL = 'https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo'
