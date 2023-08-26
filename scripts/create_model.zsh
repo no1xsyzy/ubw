@@ -8,7 +8,7 @@ IN_FILE="output/unknown_cmd/${UPPER_SNAKE}.json"
 OUT_FILE="src/blivedm/models/${LOWER_SNAKE}.py"
 TMP_NAME="_tmp_create_model"
 
-if [ -f "$IN_FILE" ]; then
+if [ ! -f "$IN_FILE" ]; then
   echo "$IN_FILE not exists"
   exit 2
 fi
@@ -32,4 +32,4 @@ EOF
 rm -f "${TMP_NAME}.json" "${TMP_NAME}.py"
 
 echo "lines should be checked:"
-grep -E "time|color" "${OUT_FILE}"
+grep -E "time|color|Any" "${OUT_FILE}"
