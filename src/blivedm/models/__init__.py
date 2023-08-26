@@ -36,6 +36,7 @@ from .interact_word import InteractWordCommand
 from .like_info import LikeInfoV3UpdateCommand, LikeInfoV3ClickCommand, LikeInfoV3NoticeCommand
 from .little_message_box import LittleMessageBoxCommand
 from .live import LiveCommand
+from .live_interactive_game import LiveInteractiveGameCommand
 from .live_multi_view_change import LiveMultiViewChangeCommand
 from .live_open_platform_game import LiveOpenPlatformGameCommand
 from .live_panel_change import LivePanelChangeCommand
@@ -136,6 +137,7 @@ AnnotatedCommandModel = Annotated[Union[
     LikeInfoV3UpdateCommand, LikeInfoV3ClickCommand, LikeInfoV3NoticeCommand,
     LittleMessageBoxCommand,
     LiveCommand,
+    LiveInteractiveGameCommand,
     LiveMultiViewChangeCommand,
     LiveOpenPlatformGameCommand,
     LivePanelChangeCommand,
@@ -235,6 +237,7 @@ __all__ = (
     'LikeInfoV3UpdateCommand', 'LikeInfoV3ClickCommand', 'LikeInfoV3NoticeCommand',
     'LittleMessageBoxCommand',
     'LiveCommand',
+    'LiveInteractiveGameCommand',
     'LiveMultiViewChangeCommand',
     'LiveOpenPlatformGameCommand',
     'LivePanelChangeCommand',
