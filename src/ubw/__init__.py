@@ -62,14 +62,25 @@ async def danmakup(
         rooms: list[int],
         ignore_danmaku: Annotated[list[str], typer.Option("--ignore", "-i")] = None,
         show_ignore: bool = False,
+        use_ui: bool = False,
 ):
     from .handlers import DanmakuPHandler, DanmakuPHandlerSettings
     if ignore_danmaku:
         ignore_danmaku = '|'.join(ignore_danmaku)
     else:
         ignore_danmaku = None
-    await listen_to_all(rooms, DanmakuPHandler(
-        DanmakuPHandlerSettings(ignore_danmaku=ignore_danmaku, show_ignore=show_ignore)))
+
+    if use_ui:
+        from .ui import LiveUI
+        ui = LiveUI(alternate_screen=True)
+        handler = DanmakuPHandler(
+            DanmakuPHandlerSettings(ignore_danmaku=ignore_danmaku, show_ignore=show_ignore, ui=ui))
+        with ui:
+            await listen_to_all(rooms, handler)
+    else:
+        handler = DanmakuPHandler(
+            DanmakuPHandlerSettings(ignore_danmaku=ignore_danmaku, show_ignore=show_ignore))
+        await listen_to_all(rooms, handler)
 
 
 @app.command('pian')
