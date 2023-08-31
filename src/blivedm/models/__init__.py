@@ -11,6 +11,7 @@ from .anchor_lot import AnchorLotStartCommand, AnchorLotCheckStatusCommand, Anch
 from .area_rank_changed import AreaRankChangedCommand
 from .benefit_status import BenefitStatusCommand
 from .card_msg import CardMsgCommand
+from .change_room_info import ChangeRoomInfoCommand
 from .combo_end import ComboEndCommand
 from .combo_send import ComboSendCommand
 from .common_notice_danmaku import CommonNoticeDanmakuCommand
@@ -112,6 +113,7 @@ AnnotatedCommandModel = Annotated[Union[
     AreaRankChangedCommand,
     BenefitStatusCommand,
     CardMsgCommand,
+    ChangeRoomInfoCommand,
     ComboEndCommand,
     ComboSendCommand,
     CommonNoticeDanmakuCommand,
@@ -212,6 +214,7 @@ __all__ = (
     'AreaRankChangedCommand',
     'BenefitStatusCommand',
     'CardMsgCommand',
+    'ChangeRoomInfoCommand',
     'ComboEndCommand',
     'ComboSendCommand',
     'CommonNoticeDanmakuCommand',
