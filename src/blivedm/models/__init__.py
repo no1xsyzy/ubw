@@ -80,6 +80,7 @@ from .shopping_bubbles_style import ShoppingBubblesStyleCommand
 from .shopping_cart_show import ShoppingCartShowCommand
 from .shopping_explain_card import ShoppingExplainCardCommand
 from .special_gift import SpecialGiftCommand
+from .spread_order_over import SpreadOrderOverCommand
 from .spread_order_start import SpreadOrderStartCommand
 from .spread_show_feet import SpreadShowFeetCommand
 from .spread_show_feet_v2 import SpreadShowFeetV2Command
@@ -180,6 +181,7 @@ AnnotatedCommandModel = Annotated[Union[
     ShoppingCartShowCommand,
     ShoppingExplainCardCommand,
     SpecialGiftCommand,
+    SpreadOrderOverCommand,
     SpreadOrderStartCommand,
     SpreadShowFeetCommand,
     SpreadShowFeetV2Command,
@@ -280,6 +282,7 @@ __all__ = (
     'ShoppingCartShowCommand',
     'ShoppingExplainCardCommand',
     'SpecialGiftCommand',
+    'SpreadOrderOverCommand',
     'SpreadOrderStartCommand',
     'SpreadShowFeetCommand',
     'SpreadShowFeetV2Command',
