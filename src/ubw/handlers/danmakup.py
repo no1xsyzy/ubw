@@ -30,6 +30,8 @@ class DanmakuPHandlerSettings(blivedm.HandlerSettings):
     ignore_danmaku: re.Pattern | None = None
     show_ignore: bool = False
     validate_ignore_danmaku = pydantic.validator('ignore_danmaku', pre=True, allow_reuse=True)(try_compile)
+    show_interact_word: bool = False
+
     ui: UI | None = None
 
 
@@ -148,3 +150,19 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
             ]))
         else:
             logger.info(rf"\[[bright_cyan]{room_id}[/]] [black on #eeaaaa]:black_square_for_stop-text:直播结束[/]")
+
+    async def on_interact_word(self, client, model):
+        if not self.settings.show_interact_word:
+            return
+        room_id = client.room_id
+        c = ["", "进入", "关注", "分享", "特别关注", "互相关注"]
+        if self.settings.ui is not None:
+            self.ui.add_record(Record(segments=[
+                ColorSeeSee(text=f"[{room_id}] "),
+                User(name=model.data.uname, uid=model.data.uid),
+                PlainText(text=c[model.data.msg_type]),
+                PlainText(text="了直播间"),
+            ]))
+        else:
+            logger.info(rf"\[[bright_cyan]{room_id}[/]] 用户 {model.data.uname}（uid={model.data.uid}）"
+                        rf"{c[model.data.msg_type]}了直播间")

@@ -63,6 +63,7 @@ async def danmakup(
         ignore_danmaku: Annotated[list[str], typer.Option("--ignore", "-i")] = None,
         show_ignore: bool = False,
         use_ui: bool = False,
+        show_interact_word: bool = False,
 ):
     from .handlers import DanmakuPHandler, DanmakuPHandlerSettings
     if ignore_danmaku:
@@ -70,16 +71,18 @@ async def danmakup(
     else:
         ignore_danmaku = None
 
+    settings = {'ignore_danmaku': ignore_danmaku, 'show_ignore': show_ignore, 'show_interact_word': show_interact_word}
+
     if use_ui:
         from .ui import LiveUI
         ui = LiveUI(alternate_screen=True)
         handler = DanmakuPHandler(
-            DanmakuPHandlerSettings(ignore_danmaku=ignore_danmaku, show_ignore=show_ignore, ui=ui))
+            DanmakuPHandlerSettings(**settings, ui=ui))
         with ui:
             await listen_to_all(rooms, handler)
     else:
         handler = DanmakuPHandler(
-            DanmakuPHandlerSettings(ignore_danmaku=ignore_danmaku, show_ignore=show_ignore))
+            DanmakuPHandlerSettings(**settings))
         await listen_to_all(rooms, handler)
 
 
