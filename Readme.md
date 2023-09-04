@@ -8,8 +8,13 @@ Usage
 Copy `config.example.toml` to `config.toml` and edit it.
 
 ```sh
+# ... install git, python, poetry
+git clone https://github.com/no1xsyzy/ubw.git
+cd ubw
+cp config.example.toml config.toml
+
 poetry install
-poetry run python b --help  # help
+poetry run ubw --help  # help
 ```
 
 License
