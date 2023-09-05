@@ -140,17 +140,17 @@ class BLiveClient(ClientABC):
         # 在运行时初始化的字段
         self._websocket: Optional[aiohttp.ClientWebSocketResponse] = None
         """WebSocket连接"""
-        self._network_future: Optional[asyncio.Future] = None
-        """网络协程的future"""
-        self._heartbeat_timer_handle: Optional[asyncio.TimerHandle] = None
-        """发心跳包定时器的handle"""
+        self._network_task: Optional[asyncio.Task] = None
+        """网络协程 task"""
+        self._heartbeat_timer_task: Optional[asyncio.Task] = None
+        """发心跳包定时器 task"""
 
     @property
     def is_running(self) -> bool:
         """
         本客户端正在运行，注意调用stop后还没完全停止也算正在运行
         """
-        return self._network_future is not None
+        return self._network_task is not None
 
     @property
     def room_id(self) -> Optional[int]:
@@ -203,7 +203,7 @@ class BLiveClient(ClientABC):
             logger.warning('room=%s client is running, cannot start() again', self.room_id)
             return
 
-        self._network_future = asyncio.create_task(self._network_coroutine_wrapper())
+        self._network_task = asyncio.create_task(self._network_coroutine_wrapper())
 
     def stop(self):
         """
@@ -213,7 +213,7 @@ class BLiveClient(ClientABC):
             logger.warning('room=%s client is stopped, cannot stop() again', self.room_id)
             return
 
-        self._network_future.cancel()
+        self._network_task.cancel()
 
     async def stop_and_close(self):
         """
@@ -232,7 +232,7 @@ class BLiveClient(ClientABC):
             logger.warning('room=%s client is stopped, cannot join()', self.room_id)
             return
 
-        await asyncio.shield(self._network_future)
+        await asyncio.shield(self._network_task)
 
     async def close(self):
         """
@@ -327,7 +327,7 @@ class BLiveClient(ClientABC):
             logger.exception('room=%s _network_coroutine() finished with exception:', self.room_id)
         finally:
             logger.debug('room=%s _network_coroutine() finished', self.room_id)
-            self._network_future = None
+            self._network_task = None
 
     async def _network_coroutine(self):
         """
@@ -384,17 +384,15 @@ class BLiveClient(ClientABC):
         websocket连接成功
         """
         await self._send_auth()
-        self._heartbeat_timer_handle = asyncio.get_running_loop().call_later(
-            self._heartbeat_interval, self._on_send_heartbeat
-        )
+        self._heartbeat_timer_task = asyncio.create_task(self._heartbeat_timer())
 
     async def _on_ws_close(self):
         """
         websocket连接断开
         """
-        if self._heartbeat_timer_handle is not None:
-            self._heartbeat_timer_handle.cancel()
-            self._heartbeat_timer_handle = None
+        if self._heartbeat_timer_task is not None:
+            self._heartbeat_timer_task.cancel()
+            self._heartbeat_timer_task = None
 
     async def _send_auth(self):
         """
@@ -416,18 +414,13 @@ class BLiveClient(ClientABC):
 
         await self._websocket.send_bytes(self._make_packet(auth_params, Operation.AUTH))
 
-    def _on_send_heartbeat(self):
-        """
-        定时发送心跳包的回调
-        """
-        if self._websocket is None or self._websocket.closed:
-            self._heartbeat_timer_handle = None
-            return
-
-        self._heartbeat_timer_handle = asyncio.get_running_loop().call_later(
-            self._heartbeat_interval, self._on_send_heartbeat
-        )
-        asyncio.ensure_future(self._send_heartbeat())
+    async def _heartbeat_timer(self):
+        while True:
+            await asyncio.sleep(self._heartbeat_interval)
+            if self._websocket is None or self._websocket.closed:
+                self._heartbeat_timer_task = None
+                return
+            asyncio.create_task(self._send_heartbeat())
 
     async def _send_heartbeat(self):
         """
