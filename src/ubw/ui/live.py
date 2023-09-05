@@ -153,7 +153,6 @@ class LiveUI(BLiveUI):
     def unstick(self, key):
         with self._lock:
             self._records[key]['is_sticky'] = False
-            # todo: what if it is a `before`?
 
     def unstick_before(self, key, before):
         with self._lock:
