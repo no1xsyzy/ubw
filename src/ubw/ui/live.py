@@ -90,16 +90,15 @@ class LiveUI(BLiveUI):
                                                             for k, v in self._records.items()}
             extra_lines = sum(len(r) for r in rendered.values()) - height
 
-            to_be_removed_keys = []
-
+            # process unstick_before
             former_k = None
-
             for k in reversed(self._records):
                 v = self._records[k]
                 if former_k in v['unstick_before']:
                     v['is_sticky'] = False
                 former_k = k
 
+            to_be_removed_keys = []
             for k, v in self._records.items():
                 if not v['is_sticky']:
                     if extra_lines >= len(rendered[k]):
