@@ -1,11 +1,8 @@
-import asyncio
 import logging
-import sys
 
 from rich.markup import escape
 
 import blivedm
-from bilibili import get_info_by_room
 
 ROOM_IDS = [
     5252,  # 天堂
@@ -30,16 +27,6 @@ class RichClientAdapter(logging.LoggerAdapter):
 
 
 logger = RichClientAdapter(logging.getLogger('wocpian'), {})
-
-
-async def client_and_listen(room_id, handler) -> blivedm.BLiveClient | None:
-    info = await get_info_by_room(room_id)
-    if info.silent_room_info.level > 0:
-        return None
-    client = blivedm.BLiveClient(room_id)
-    client.add_handler(handler)
-    client.start()
-    return client
 
 
 class PianHandler(blivedm.BaseHandler):
@@ -77,10 +64,3 @@ class PianHandler(blivedm.BaseHandler):
             logger.info(rf"\[[bright_cyan]{room_id}[/]] 用户 [bright_red]{uname}[/]（uid={uid}）被封禁")
         else:
             logger.warning(rf"\[[bright_cyan]{room_id}[/]] 用户 [cyan]{uname}[/]（uid={uid}）被封禁")
-
-
-if __name__ == '__main__':
-    try:
-        asyncio.run(blivedm.listen_to_all(ROOM_IDS, PianHandler()))
-    except KeyboardInterrupt:
-        print("keyboard interrupt", file=sys.stdout)
