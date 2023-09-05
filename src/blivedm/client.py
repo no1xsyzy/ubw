@@ -609,7 +609,7 @@ class TcpClient(ClientABC):
                     # 断线重连？
                     try:
                         self._writer.close()
-                    except:
+                    except Exception:
                         pass
                     self._reader = self._writer = None
                 except AuthError:

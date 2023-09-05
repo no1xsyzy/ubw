@@ -29,7 +29,7 @@ ctx_command = ContextVar[Union[dict, models.CommandModel]]('command')
 def func_info(func: Callable):
     try:
         return f"{func.__qualname__} ({func.__code__.co_filename}:{func.__code__.co_firstlineno})"
-    except:
+    except Exception:
         return f"{func.__qualname__} (???:???)"
 
 
