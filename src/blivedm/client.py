@@ -322,7 +322,7 @@ class BLiveClient(ClientABC):
             await self._network_coroutine()
         except asyncio.CancelledError:
             # 正常停止
-            pass
+            raise
         except Exception as e:  # noqa
             logger.exception('room=%s _network_coroutine() finished with exception:', self.room_id)
         finally:
