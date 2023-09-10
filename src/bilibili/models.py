@@ -110,3 +110,70 @@ class RoomEmoticons(BaseModel):
 class FingerSPI(BaseModel):
     b_3: str
     b_4: str
+
+
+class QnDesc(BaseModel):
+    attr_desc: None
+    desc: str
+    hdr_desc: str
+    qn: int
+
+
+class P2PData(BaseModel):
+    m_p2p: bool
+    m_servers: list[str]
+    p2p: bool
+    p2p_type: int
+
+
+class UrlInfo(BaseModel):
+    extra: str
+    host: str
+    stream_ttl: int
+
+
+class Codec(BaseModel):
+    codec_name: str
+    accept_qn: list[int]
+    attr_name: str
+    base_url: str
+    current_qn: int
+    dolby_type: int
+    hdr_qn: None
+    url_info: list[UrlInfo]
+
+
+class Format(BaseModel):
+    format_name: str
+    codec: list[Codec]
+
+
+class Stream(BaseModel):
+    protocol_name: str
+    format: list[Format]
+
+
+class PlayUrl(BaseModel):
+    cid: int
+    dolby_qn: None
+    g_qn_desc: list[QnDesc]
+    p2p_data: P2PData
+    stream: list[Stream]
+
+
+class PlayUrlInfo(BaseModel):
+    conf_json: str
+    playurl: PlayUrl
+
+
+class RoomPlayInfo(BaseModel):
+    all_special_types: list[int]
+    is_portrait: bool
+    live_status: int
+    live_time: datetime
+    official_room_id: int
+    official_type: int
+    room_id: int
+    short_id: int
+    uid: int
+    playurl_info: PlayUrlInfo
