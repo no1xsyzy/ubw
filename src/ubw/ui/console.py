@@ -41,6 +41,9 @@ class ConsoleUI(BLiveUI):
     def add_record(self, record: Record, sticky=False):
         print(self.format_record(record))
 
+    def edit_record(self, key, record: Record):
+        print(self.format_record(record))
+
     def remove(self, key):
         pass
 

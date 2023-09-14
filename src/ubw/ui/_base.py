@@ -61,6 +61,9 @@ class BLiveUI(BaseModel, abc.ABC):
     def add_record(self, record: Record, sticky: bool = False): ...
 
     @abc.abstractmethod
+    def edit_record(self, key, record: Record): ...
+
+    @abc.abstractmethod
     def remove(self, key): ...
 
     @abc.abstractmethod

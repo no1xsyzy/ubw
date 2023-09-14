@@ -59,6 +59,9 @@ class Richy(BLiveUI):
     def add_record(self, record: Record, sticky=False):
         self._console.print(self.format_record(record))
 
+    def edit_record(self, key, record: Record):
+        self._console.print(self.format_record(record))
+
     def remove(self, key):
         pass
 

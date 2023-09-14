@@ -146,6 +146,11 @@ class LiveUI(BLiveUI):
             self._records[key] = Info(is_sticky=sticky, renderable=self.format_record(record), unstick_before=set())
             return key
 
+    def edit_record(self, key, record: Record):
+        with self._lock:
+            if key in self._records:
+                self._records[key]['renderable'] = self.format_record(record)
+
     def remove(self, key: Key):
         with self._lock:
             self._records.pop(key, None)
