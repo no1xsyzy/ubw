@@ -61,7 +61,8 @@ async def strange_stalker(
 async def danmakup(
         rooms: list[int],
         ignore_danmaku: Annotated[list[str], typer.Option("--ignore", "-i")] = None,
-        show_ignore: bool = False,
+        ignore_rate: float = 0.,
+        dim_rate: float = .2,
         use_ui: bool = False,
         show_interact_word: bool = False,
 ):
@@ -71,7 +72,12 @@ async def danmakup(
     else:
         ignore_danmaku = None
 
-    settings = {'ignore_danmaku': ignore_danmaku, 'show_ignore': show_ignore, 'show_interact_word': show_interact_word}
+    settings = {
+        'ignore_danmaku': ignore_danmaku,
+        'ignore_rate': ignore_rate,
+        'dim_rate': dim_rate,
+        'show_interact_word': show_interact_word,
+    }
 
     if use_ui:
         from .ui import LiveUI

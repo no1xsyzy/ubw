@@ -8,6 +8,35 @@ from rich.markup import escape
 import blivedm
 from ubw.ui import Record, PlainText, User, RoomTitle, UI, ColorSeeSee
 
+KAOMOJIS = [
+    "(⌒▽⌒)",
+    "（￣▽￣）",
+    "(=・ω・=)",
+    "(｀・ω・´)",
+    "(〜￣△￣)〜",
+    "(･∀･)",
+    "(°∀°)ﾉ",
+    "(￣3￣)",
+    "╮(￣▽￣)╭",
+    "_(:3」∠)_",
+    "_(:3ゝ∠)_",  # slightly different :-(
+    "(^・ω・^ )",
+    "(●￣(ｴ)￣●)",
+    "ε=ε=(ノ≧∇≦)ノ",
+    "⁄(⁄ ⁄•⁄ω⁄•⁄ ⁄)⁄",
+    "←◡←",
+    "^v^",
+    "OvO",
+    "( ☉д⊙)",
+    "(╯°口°)╯",
+    "o(￣ヘ￣o＃)",
+    "|•'▿'•)✧",
+    "( TロT)σ",
+    "ᕕ( ´Д` )ᕗ",
+    "(●'◡'●)ﾉ♥",
+    "|ω・）",
+]
+
 
 class RichClientAdapter(logging.LoggerAdapter):
     def process(self, msg, kwargs):
@@ -28,8 +57,17 @@ def try_compile(cls, reg: re.Pattern | str | None) -> re.Pattern | None:
 
 class DanmakuPHandlerSettings(blivedm.HandlerSettings):
     ignore_danmaku: re.Pattern | None = None
-    show_ignore: bool = False
     validate_ignore_danmaku = pydantic.validator('ignore_danmaku', pre=True, allow_reuse=True)(try_compile)
+
+    ignore_rate: float = 0.0
+    dim_rate: float = 0.2
+
+    @pydantic.validator('dim_rate')
+    def ignore_less_than_dim(cls, v, values):
+        if values['ignore_rate'] > v:
+            raise ValueError('must contain a space')
+        return v
+
     show_interact_word: bool = False
 
     ui: UI | None = None
@@ -42,27 +80,50 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
             raise ValueError('this handler do not use ui')
         return self.settings.ui
 
-    async def on_danmu_msg(self, client, message):
+    @cached_property
+    def kaomojis(self):
+        return KAOMOJIS[:]
+
+    @property
+    def kaomoji_regex(self):
+        return re.compile('|'.join(re.escape(kaomoji) for kaomoji in self.kaomojis))
+
+    def trivial_rate(self, info: blivedm.models.danmu_msg.DanmakuInfo) -> float:
+        if self.settings.ignore_danmaku is not None and self.settings.ignore_danmaku.match(info.msg):
+            return -1
+        if info.mode_info.extra.emoticon_unique:  # 单一表情
+            return 0.1
+        orig_msg = msg = info.msg
+        msg = self.kaomoji_regex.sub("", msg)
+        orig_msg = self.kaomoji_regex.sub(".", orig_msg)
+        msg = msg.replace("打卡", "")
+        orig_msg = orig_msg.replace("打卡", ".")
+        msg = msg.replace(".", "", 1)
+        if info.mode_info.extra.emots is not None:
+            for emot in info.mode_info.extra.emots.keys():
+                msg = msg.replace(emot, "")
+                orig_msg = orig_msg.replace(emot, "$")
+        return len(msg) / len(orig_msg)
+
+    async def on_danmu_msg(self, client, message: blivedm.DanmakuCommand):
         uname = message.info.uname
         msg = message.info.msg
         room_id = client.room_id
-        if self.settings.ignore_danmaku is not None and self.settings.ignore_danmaku.match(msg):
+        trivial_rate = self.trivial_rate(message.info)
+        if trivial_rate < self.settings.ignore_rate:
+            pass
+        elif trivial_rate < self.settings.dim_rate:
             if self.settings.ui is not None:
-                pass
+                self.ui.add_record(Record(segments=[
+                    ColorSeeSee(text=f"[{room_id}] "),
+                    User(name=uname, uid=message.info.uid),
+                    PlainText(text=f": "),
+                    PlainText(text=msg),
+                    PlainText(text=f" (trivial {trivial_rate})"),
+                ]))
             else:
-                logger.debug(rf"This danmaku should be ignored, since it matches `ignore_danmaku`")
-            if self.settings.show_ignore:
-                if self.settings.ui is not None:
-                    self.ui.add_record(Record(segments=[
-                        ColorSeeSee(text=f"[{room_id}] "),
-                        User(name=uname, uid=message.info.uid),
-                        PlainText(text=f": "),
-                        PlainText(text=msg),
-                        PlainText(text=f" (ignored)"),
-                    ]))
-                else:
-                    logger.info(
-                        rf"\[[bright_cyan]{room_id}[/]] {uname} (uid={message.info.uid}): [grey]{escape(msg)}[/]")
+                logger.info(
+                    rf"\[[bright_cyan]{room_id}[/]] {uname} (uid={message.info.uid}): [grey]{escape(msg)}[/]")
         else:
             if self.settings.ui is not None:
                 self.ui.add_record(Record(segments=[
