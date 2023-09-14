@@ -157,6 +157,7 @@ def main(
         sentry: bool = True,
         log: bool = True,
         verbose: Annotated[int, typer.Option('--verbose', '-v', count=True)] = 0,
+        remote_debug_with_port: int = 0,
 ):
     main.config = config = load_config(cd)
     if log:
@@ -165,3 +166,6 @@ def main(
         init_logging(config)
     if sentry:
         init_sentry(config)
+    if 0 < remote_debug_with_port < 65536:
+        import pdb_attach
+        pdb_attach.listen(remote_debug_with_port)
