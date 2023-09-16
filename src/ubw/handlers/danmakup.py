@@ -77,6 +77,14 @@ class DanmakuPHandlerSettings(blivedm.HandlerSettings):
 
     show_interact_word: bool = False
 
+    test_flags: list[str] = []
+
+    @pydantic.validator('test_flags', pre=True)
+    def split_flags(cls, v):  # noqa
+        if isinstance(v, str):
+            v = v.split(',')
+        return v
+
     ui: UI | None = None
 
 

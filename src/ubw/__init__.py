@@ -65,6 +65,7 @@ async def danmakup(
         dim_rate: float = .2,
         use_ui: bool = False,
         show_interact_word: bool = False,
+        test_flags: str = "",
 ):
     from .handlers import DanmakuPHandler, DanmakuPHandlerSettings
     if ignore_danmaku:
@@ -77,6 +78,7 @@ async def danmakup(
         'ignore_rate': ignore_rate,
         'dim_rate': dim_rate,
         'show_interact_word': show_interact_word,
+        'test_flags': test_flags,
     }
 
     if use_ui:
