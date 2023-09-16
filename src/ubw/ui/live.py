@@ -94,7 +94,7 @@ class LiveUI(BLiveUI):
             former_k = None
             for k in reversed(self._records):
                 v = self._records[k]
-                if former_k in v['unstick_before']:
+                if former_k in v['unstick_before'] or any(u not in self._records for u in v['unstick_before']):
                     v['is_sticky'] = False
                 former_k = k
 
