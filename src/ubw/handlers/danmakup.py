@@ -156,17 +156,13 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
             return -1
         if info.mode_info.extra.emoticon_unique:  # 单一表情
             return 0.1
-        orig_msg = msg = info.msg
-        msg = self.kaomoji_regex.sub("", msg)
-        orig_msg = self.kaomoji_regex.sub(".", orig_msg)
-        msg = msg.replace("打卡", "")
-        orig_msg = orig_msg.replace("打卡", ".")
-        msg = msg.replace(".", "", 1)
+        msg = info.msg
+        msg = self.kaomoji_regex.sub("\ue000\ue000", msg)  # U+E000 is in private use area
+        msg = msg.replace("打卡", "\ue000")
         if info.mode_info.extra.emots is not None:
             for emot in info.mode_info.extra.emots.keys():
-                msg = msg.replace(emot, "")
-                orig_msg = orig_msg.replace(emot, "$")
-        return len(msg) / len(orig_msg)
+                msg = msg.replace(emot, "\ue000")
+        return len(msg.replace("\ue000", "")) / len(msg)
 
     async def on_danmu_msg(self, client, message: blivedm.DanmakuCommand):
         uname = message.info.uname
