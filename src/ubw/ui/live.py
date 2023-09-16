@@ -88,7 +88,7 @@ class LiveUI(BLiveUI):
             height = options.height or console.height
             rendered: dict[Key, list[list[RichSegment]]] = {k: console.render_lines(v['renderable'], options)
                                                             for k, v in self._records.items()}
-            extra_lines = sum(len(r) for r in rendered.values()) - height
+            extra_lines = sum(map(len, rendered.values())) - height
 
             # process unstick_before
             former_k = None
