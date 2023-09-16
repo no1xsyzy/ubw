@@ -67,7 +67,7 @@ class DanmakuPHandlerSettings(blivedm.HandlerSettings):
     validate_ignore_danmaku = pydantic.validator('ignore_danmaku', pre=True, allow_reuse=True)(try_compile)
 
     ignore_rate: float = 0.0
-    dim_rate: float = 0.2
+    dim_rate: float = 0.25
 
     @pydantic.validator('dim_rate')
     def ignore_less_than_dim(cls, v, values):

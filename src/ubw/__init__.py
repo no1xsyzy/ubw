@@ -62,7 +62,7 @@ async def danmakup(
         rooms: list[int],
         ignore_danmaku: Annotated[list[str], typer.Option("--ignore", "-i")] = None,
         ignore_rate: float = 0.,
-        dim_rate: float = .2,
+        dim_rate: float = .25,
         use_ui: bool = False,
         show_interact_word: bool = False,
         test_flags: str = "",
