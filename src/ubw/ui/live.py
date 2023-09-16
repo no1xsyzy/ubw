@@ -21,7 +21,7 @@ Key = str
 
 class Info(TypedDict):
     is_sticky: bool
-    unstick_before: set
+    unstick_before: set[Key]
     renderable: RichRenderable
 
 
