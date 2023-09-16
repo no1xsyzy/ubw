@@ -1,4 +1,5 @@
 import logging
+import math
 import re
 from functools import cached_property
 
@@ -43,6 +44,40 @@ KAOMOJIS = [
     "( ◡‿◡)",
     "( *・ω・)✄",
 ]
+
+
+class TokenEntropy:
+    def __init__(self, dispersion=0.9, disappear=0.01):
+        self.dispersion = dispersion
+        self.disappear = disappear
+        self.generation = 0
+        self.cgs: dict[str, tuple[float, int]] = {}
+        self.total = 0
+
+    def get_current(self, token: str) -> float:
+        if token not in self.cgs:
+            return 0
+        c, g = self.cgs[token]
+        c = c * (self.dispersion ** (self.generation - g))
+        if c < self.disappear:
+            del self.cgs[token]
+            self.total -= c
+            return 0
+        return c
+
+    def calculate_and_add_tokens(self, tokens: list[str]):
+        self.generation += 1
+        self.total = self.total * self.dispersion + len(tokens)
+        entropy = 0
+        for token in tokens:
+            c = self.get_current(token)
+            c += 1.
+            entropy += -math.log2(c / self.total)
+            self.cgs[token] = c, self.generation
+        return entropy
+
+    def cleanup(self):
+        pass
 
 
 class RichClientAdapter(logging.LoggerAdapter):
@@ -97,11 +132,24 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
 
     @cached_property
     def kaomojis(self):
-        return KAOMOJIS[:]
+        return set(KAOMOJIS)
 
     @property
     def kaomoji_regex(self):
         return re.compile('|'.join(re.escape(kaomoji) for kaomoji in self.kaomojis))
+
+    @cached_property
+    def entropy(self):
+        return TokenEntropy()
+
+    @cached_property
+    def tokenizer(self):
+        import jieba
+        tok = jieba.Tokenizer()
+        for kmj in KAOMOJIS:
+            tok.add_word(kmj, tag='e')
+            tok.suggest_freq(kmj, True)
+        return tok
 
     def trivial_rate(self, info: blivedm.models.danmu_msg.DanmakuInfo) -> float:
         if self.settings.ignore_danmaku is not None and self.settings.ignore_danmaku.match(info.msg):
@@ -125,6 +173,34 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
         msg = message.info.msg
         room_id = client.room_id
         trivial_rate = self.trivial_rate(message.info)
+
+        # ==== testing: entropy ====
+        if 'entropy' in self.settings.test_flags:
+            tokens = []
+            if message.info.mode_info.extra.emots is not None:
+                self.kaomojis.update(message.info.mode_info.extra.emots.keys())
+            for s in re.split('(' + '|'.join(re.escape(kaomoji) for kaomoji in self.kaomojis) + ')', msg):
+                if s in self.kaomojis:
+                    tokens.append(s)
+                else:
+                    tokens.extend(self.tokenizer.lcut(msg))
+            entropy = self.entropy.calculate_and_add_tokens(tokens)
+            if self.settings.ui is not None:
+                self.ui.add_record(Record(segments=[
+                    ColorSeeSee(text=f"[{room_id}] "),
+                    User(name=uname, uid=message.info.uid),
+                    PlainText(text=f": "),
+                    PlainText(text=f"{tokens}"),
+                    PlainText(
+                        text=f" ({entropy=:.3f}, {entropy/len(tokens)=:.3f}, {trivial_rate=:.3f})"),
+                ]))
+            else:
+                logger.info(
+                    rf"\[[bright_cyan]{room_id}[/]] {uname} (uid={message.info.uid}): {escape(str(tokens))}"
+                    f" ({entropy=:.3f}, {entropy/len(tokens)=:.3f}, {trivial_rate=:.3f})")
+            return
+        # ==== testing: entropy ====
+
         if trivial_rate < self.settings.ignore_rate:
             pass
         elif trivial_rate < self.settings.dim_rate:
