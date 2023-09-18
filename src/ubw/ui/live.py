@@ -1,4 +1,5 @@
 import itertools
+import logging
 import threading
 from collections import OrderedDict
 from functools import cached_property
@@ -17,6 +18,8 @@ from rich.text import Text
 from ._base import *
 
 Key = str
+
+logger = logging.getLogger('live')
 
 
 class Info(TypedDict):
@@ -88,7 +91,13 @@ class LiveUI(BLiveUI):
             height = options.height or console.height
             rendered: dict[Key, list[list[RichSegment]]] = {k: console.render_lines(v['renderable'], options)
                                                             for k, v in self._records.items()}
-            extra_lines = sum(map(len, rendered.values())) - height
+            nlines = sum(map(len, rendered.values()))
+            extra_lines = nlines - height
+
+            logger.info('rendering %d lines in height %d', nlines, height)
+
+            if extra_lines > 0:
+                logger.info('removing %d lines', extra_lines)
 
             # process unstick_before
             former_k = None
