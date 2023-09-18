@@ -99,41 +99,41 @@ class LiveUI(BLiveUI):
             if extra_lines > 0:
                 logger.info('removing %d lines', extra_lines)
 
-            # process unstick_before
-            former_k = None
-            for k in reversed(self._records):
-                v = self._records[k]
-                if former_k in v['unstick_before'] or any(u not in self._records for u in v['unstick_before']):
-                    v['is_sticky'] = False
-                former_k = k
+                # process unstick_before
+                former_k = None
+                for k in reversed(self._records):
+                    v = self._records[k]
+                    if former_k in v['unstick_before'] or any(u not in self._records for u in v['unstick_before']):
+                        v['is_sticky'] = False
+                    former_k = k
 
-            def remove_rendered(k):
-                nonlocal extra_lines
-                if extra_lines >= len(rendered[k]):
-                    logger.info('removing line[%s]: %s', k, rendered[k])
-                    extra_lines -= len(rendered[k])
-                    del rendered[k]
-                    to_be_removed_keys.append(k)
-                else:
-                    logger.info('partially removing line[%s]: %s', k, rendered[k][:extra_lines])
-                    rendered[k] = rendered[k][extra_lines:]
-                    extra_lines = 0
+                def remove_rendered(k):
+                    nonlocal extra_lines
+                    if extra_lines >= len(rendered[k]):
+                        logger.info('removing line[%s]: %s', k, rendered[k])
+                        extra_lines -= len(rendered[k])
+                        del rendered[k]
+                        to_be_removed_keys.append(k)
+                    else:
+                        logger.info('partially removing line[%s]: %s', k, rendered[k][:extra_lines])
+                        rendered[k] = rendered[k][extra_lines:]
+                        extra_lines = 0
 
-            to_be_removed_keys = []
-            for k, v in self._records.items():
-                if not v['is_sticky']:
-                    remove_rendered(k)
-                    if extra_lines == 0:
-                        break
-            else:  # too much sticky
+                to_be_removed_keys = []
                 for k, v in self._records.items():
-                    if v['is_sticky']:
+                    if not v['is_sticky']:
                         remove_rendered(k)
                         if extra_lines == 0:
                             break
+                else:  # too much sticky
+                    for k, v in self._records.items():
+                        if v['is_sticky']:
+                            remove_rendered(k)
+                            if extra_lines == 0:
+                                break
 
-            for k in to_be_removed_keys:
-                del self._records[k]
+                for k in to_be_removed_keys:
+                    del self._records[k]
 
             new_line = RichSegment.line()
             for k, v in self._records.items():
