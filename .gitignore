@@ -5,3 +5,4 @@ output/
 /*.toml
 !/config.example.toml
 dist/
+*.log

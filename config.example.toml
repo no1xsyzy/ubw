@@ -12,11 +12,16 @@ disable_existing_loggers = false
 class = 'rich.logging.RichHandler'
 tracebacks_suppress = ['logging', 'rich']
 show_path = false
+[logging.handlers.file]
+class = 'logging.FileHandler'
+filename = 'ubw.log'
+encoding = 'utf-8'
 [logging.root]
 level = "INFO"
 handlers = ['richconsole']
-#[logging.loggers.strange_stalker]
-#level = "INFO"
+[logging.loggers.live]
+level = "INFO"
+handlers = ['file']
 
 [strange_stalker.elza]
 rooms = [81004]
