@@ -105,7 +105,7 @@ class DanmakuPHandlerSettings(blivedm.HandlerSettings):
     dim_rate: float = 0.25
 
     @pydantic.validator('dim_rate')
-    def ignore_less_than_dim(cls, v, values):
+    def ignore_less_than_dim(cls, v, values):  # noqa
         if values['ignore_rate'] > v:
             raise ValueError('must contain a space')
         return v
@@ -159,6 +159,7 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
         msg = info.msg
         msg = self.kaomoji_regex.sub("\ue000\ue000", msg)  # U+E000 is in private use area
         msg = msg.replace("打卡", "\ue000")
+        msg = msg.replace(".", "\ue000", 1)
         if info.mode_info.extra.emots is not None:
             for emot in info.mode_info.extra.emots.keys():
                 msg = msg.replace(emot, "\ue000")
@@ -176,10 +177,12 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
             if message.info.mode_info.extra.emots is not None:
                 self.kaomojis.update(message.info.mode_info.extra.emots.keys())
             for s in re.split('(' + '|'.join(re.escape(kaomoji) for kaomoji in self.kaomojis) + ')', msg):
-                if s in self.kaomojis:
+                if s == "":
+                    pass
+                elif s in self.kaomojis:
                     tokens.append(s)
                 else:
-                    tokens.extend(self.tokenizer.lcut(msg))
+                    tokens.extend(self.tokenizer.lcut(s))
             entropy = self.entropy.calculate_and_add_tokens(tokens)
             if self.settings.ui is not None:
                 self.ui.add_record(Record(segments=[
