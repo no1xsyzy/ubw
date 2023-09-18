@@ -107,28 +107,28 @@ class LiveUI(BLiveUI):
                     v['is_sticky'] = False
                 former_k = k
 
+            def remove_rendered(k):
+                nonlocal extra_lines
+                if extra_lines >= len(rendered[k]):
+                    logger.info('removing line[%s]: %s', k, rendered[k])
+                    extra_lines -= len(rendered[k])
+                    del rendered[k]
+                    to_be_removed_keys.append(k)
+                else:
+                    logger.info('partially removing line[%s]: %s', k, rendered[k][:extra_lines])
+                    rendered[k] = rendered[k][extra_lines:]
+                    extra_lines = 0
+
             to_be_removed_keys = []
             for k, v in self._records.items():
                 if not v['is_sticky']:
-                    if extra_lines >= len(rendered[k]):
-                        extra_lines -= len(rendered[k])
-                        del rendered[k]
-                        to_be_removed_keys.append(k)
-                    else:
-                        rendered[k] = rendered[k][extra_lines:]
-                        extra_lines = 0
+                    remove_rendered(k)
                     if extra_lines == 0:
                         break
             else:  # too much sticky
                 for k, v in self._records.items():
                     if v['is_sticky']:
-                        if extra_lines >= len(rendered[k]):
-                            extra_lines -= len(rendered[k])
-                            del rendered[k]
-                            to_be_removed_keys.append(k)
-                        else:
-                            rendered[k] = rendered[k][extra_lines:]
-                            extra_lines = 0
+                        remove_rendered(k)
                         if extra_lines == 0:
                             break
 
