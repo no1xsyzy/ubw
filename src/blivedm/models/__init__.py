@@ -97,7 +97,7 @@ from .user_panel_red_alarm import UserPanelRedAlarmCommand
 from .user_task_progress import UserTaskProgressCommand
 from .user_toast_msg import UserToastMsgCommand
 from .video_connection import VideoConnectionMsgCommand, VideoConnectionJoinEndCommand, VideoConnectionJoinStartCommand
-from .voice_join import VoiceJoinStatusCommand
+from .voice_join import VoiceJoinStatusCommand, VoiceJoinListCommand, VoiceJoinRoomCountInfoCommand
 from .warning import WarningCommand
 from .watched_change import WatchedChangeCommand
 from .wealth_notify import WealthNotifyCommand
@@ -198,7 +198,7 @@ AnnotatedCommandModel = Annotated[Union[
     UserTaskProgressCommand,
     UserToastMsgCommand,
     VideoConnectionMsgCommand, VideoConnectionJoinEndCommand, VideoConnectionJoinStartCommand,
-    VoiceJoinStatusCommand,
+    VoiceJoinStatusCommand, VoiceJoinListCommand, VoiceJoinRoomCountInfoCommand,
     WarningCommand,
     WatchedChangeCommand,
     WealthNotifyCommand,
@@ -299,7 +299,7 @@ __all__ = (
     'UserTaskProgressCommand',
     'UserToastMsgCommand',
     'VideoConnectionMsgCommand', 'VideoConnectionJoinEndCommand', 'VideoConnectionJoinStartCommand',
-    'VoiceJoinStatusCommand',
+    'VoiceJoinStatusCommand', 'VoiceJoinListCommand', 'VoiceJoinRoomCountInfoCommand',
     'WarningCommand',
     'WatchedChangeCommand',
     'WealthNotifyCommand',
