@@ -6,8 +6,7 @@ from typing import *
 import sentry_sdk
 from pydantic import parse_obj_as, ValidationError, BaseSettings
 
-from . import client as client_
-from . import models
+from . import models, ClientABC
 
 __all__ = (
     'BaseHandler',
@@ -18,11 +17,7 @@ __all__ = (
 
 logger = logging.getLogger('blivedm')
 
-# 常见可忽略的cmd
-IGNORED_CMDS = (
-)
-
-ctx_client = ContextVar[client_.BLiveClient]('client')
+ctx_client = ContextVar[ClientABC]('client')
 ctx_command = ContextVar[Union[dict, models.CommandModel]]('command')
 
 
@@ -49,7 +44,7 @@ class BaseHandler(Generic[T]):
         logger.debug(f'{settings=}')
         self.settings = settings or HandlerSettings()
 
-    async def handle(self, client: client_.BLiveClient, command: dict):
+    async def handle(self, client: ClientABC, command: dict):
         tok_client_set = ctx_client.set(client)
         tok_command_set = ctx_command.set(command)
         try:
@@ -81,7 +76,7 @@ class BaseHandler(Generic[T]):
             ctx_command.reset(tok_command_set)
             ctx_client.reset(tok_client_set)
 
-    async def on_known_cmd(self, client: client_.BLiveClient, model: models.CommandModel):
+    async def on_known_cmd(self, client: ClientABC, model: models.CommandModel):
         """默认的 dispatcher，自省寻找 on_{model.cmd}"""
         cmd = model.cmd.lower().strip("_")
         if hasattr(self, f'on_{cmd}'):
@@ -95,7 +90,7 @@ class BaseHandler(Generic[T]):
             logger.debug(f"got a {cmd}, processing with {func_info(self.on_else)})")
             return await self.on_else(client, model)
 
-    async def on_unknown_cmd(self, client: client_.BLiveClient, command: dict, err: ValidationError):
+    async def on_unknown_cmd(self, client: ClientABC, command: dict, err: ValidationError):
         import json
         import aiofiles.os
         cmd = command.get('cmd', None)
@@ -116,52 +111,52 @@ class BaseHandler(Generic[T]):
                   'cmd': cmd, 'room_id': client.room_id, 'user_id': uid},
         )
 
-    async def on_summary(self, client: client_.BLiveClient, summary: models.Summary):
+    async def on_summary(self, client: ClientABC, summary: models.Summary):
         """可摘要消息"""
         await self.on_else(client, summary.raw)
 
-    async def on_maybe_summarizer(self, client: client_.BLiveClient, model: models.CommandModel):
+    async def on_maybe_summarizer(self, client: ClientABC, model: models.CommandModel):
         if isinstance(model, models.Summarizer):
             return await self.on_summary(client, model.summarize())
         else:
             return await self.on_else(client, model)
 
-    async def on_else(self, client: client_.BLiveClient, model: models.CommandModel):
+    async def on_else(self, client: ClientABC, model: models.CommandModel):
         """未处理、不可摘要消息"""
 
-    async def on_heartbeat(self, client: client_.BLiveClient, message: models.HeartbeatCommand):
+    async def on_heartbeat(self, client: ClientABC, message: models.HeartbeatCommand):
         """收到心跳包（人气值）"""
         await self.on_maybe_summarizer(client, message)
 
-    async def on_danmu_msg(self, client: client_.BLiveClient, message: models.DanmakuCommand):
+    async def on_danmu_msg(self, client: ClientABC, message: models.DanmakuCommand):
         """收到弹幕"""
         await self.on_maybe_summarizer(client, message)
 
-    async def on_send_gift(self, client: client_.BLiveClient, message: models.GiftCommand):
+    async def on_send_gift(self, client: ClientABC, message: models.GiftCommand):
         """收到礼物"""
         await self.on_maybe_summarizer(client, message)
 
-    async def on_guard_buy(self, client: client_.BLiveClient, message: models.GuardBuyCommand):
+    async def on_guard_buy(self, client: ClientABC, message: models.GuardBuyCommand):
         """有人上舰"""
         await self.on_maybe_summarizer(client, message)
 
-    async def on_super_chat_message(self, client: client_.BLiveClient, message: models.SuperChatCommand):
+    async def on_super_chat_message(self, client: ClientABC, message: models.SuperChatCommand):
         """醒目留言"""
         await self.on_maybe_summarizer(client, message)
 
-    async def on_super_chat_message_delete(self, client: client_.BLiveClient, message: models.SuperChatDeleteCommand):
+    async def on_super_chat_message_delete(self, client: ClientABC, message: models.SuperChatDeleteCommand):
         """删除醒目留言"""
         await self.on_maybe_summarizer(client, message)
 
-    async def on_room_change(self, client: client_.BLiveClient, message: models.RoomChangeCommand):
+    async def on_room_change(self, client: ClientABC, message: models.RoomChangeCommand):
         """房间信息改变"""
         await self.on_maybe_summarizer(client, message)
 
-    async def on_live(self, client: client_.BLiveClient, message: models.LiveCommand):
+    async def on_live(self, client: ClientABC, message: models.LiveCommand):
         """开始直播"""
         await self.on_maybe_summarizer(client, message)
 
-    async def on_preparing(self, client: client_.BLiveClient, message: models.PreparingCommand):
+    async def on_preparing(self, client: ClientABC, message: models.PreparingCommand):
         """直播准备中"""
         await self.on_maybe_summarizer(client, message)
 
@@ -169,48 +164,48 @@ class BaseHandler(Generic[T]):
         """超管警告"""
         await self.on_maybe_summarizer(client, message)
 
-    async def on_hot_rank_settlement_v2(self, client: client_.BLiveClient, message: models.HotRankSettlementV2Command):
+    async def on_hot_rank_settlement_v2(self, client: ClientABC, message: models.HotRankSettlementV2Command):
         await self.on_maybe_summarizer(client, message)
 
-    async def on_hot_rank_settlement(self, client: client_.BLiveClient, message: models.HotRankSettlementCommand):
+    async def on_hot_rank_settlement(self, client: ClientABC, message: models.HotRankSettlementCommand):
         await self.on_maybe_summarizer(client, message)
 
-    async def on_room_block_msg(self, client: client_.BLiveClient, message: models.RoomBlockCommand):
+    async def on_room_block_msg(self, client: ClientABC, message: models.RoomBlockCommand):
         """观众被封禁"""
         await self.on_maybe_summarizer(client, message)
 
-    async def on_room_skin_msg(self, client: client_.BLiveClient, message: models.RoomSkinCommand):
+    async def on_room_skin_msg(self, client: ClientABC, message: models.RoomSkinCommand):
         await self.on_maybe_summarizer(client, message)
 
-    async def on_trading_score(self, client: client_.BLiveClient, message: models.TradingScoreCommand):
+    async def on_trading_score(self, client: ClientABC, message: models.TradingScoreCommand):
         await self.on_maybe_summarizer(client, message)
 
-    async def on_room_admins(self, client: client_.BLiveClient, message: models.RoomAdminsCommand):
+    async def on_room_admins(self, client: ClientABC, message: models.RoomAdminsCommand):
         """房管"""
         await self.on_maybe_summarizer(client, message)
 
-    async def on_room_admin_entrance(self, client: client_.BLiveClient, message: models.RoomAdminEntranceCommand):
+    async def on_room_admin_entrance(self, client: ClientABC, message: models.RoomAdminEntranceCommand):
         """新房管"""
         await self.on_maybe_summarizer(client, message)
 
-    async def on_ring_status_change(self, client: client_.BLiveClient, message: models.RingStatusChangeCommand):
+    async def on_ring_status_change(self, client: ClientABC, message: models.RingStatusChangeCommand):
         """未知"""
         await self.on_maybe_summarizer(client, message)
 
-    async def on_ring_status_change_v2(self, client: client_.BLiveClient, message: models.RingStatusChangeCommandV2):
+    async def on_ring_status_change_v2(self, client: ClientABC, message: models.RingStatusChangeCommandV2):
         """未知"""
         await self.on_maybe_summarizer(client, message)
 
-    async def on_notice_msg(self, client: client_.BLiveClient, model: models.NoticeMsgCommand):
+    async def on_notice_msg(self, client: ClientABC, model: models.NoticeMsgCommand):
         """未知"""
         await self.on_maybe_summarizer(client, model)
 
-    async def on_interact_word(self, client: client_.BLiveClient, model: models.InteractWordCommand):
+    async def on_interact_word(self, client: ClientABC, model: models.InteractWordCommand):
         """进入，关注，分享，特别关注，互相关注"""
         await self.on_maybe_summarizer(client, model)
 
-    async def on_card_msg(self, client: client_.BLiveClient, model: models.CardMsgCommand):
+    async def on_card_msg(self, client: ClientABC, model: models.CardMsgCommand):
         await self.on_maybe_summarizer(client, model)
 
-    async def on_anchor_helper_danmu(self, client: client_.BLiveClient, model: models.AnchorHelperDanmuCommand):
+    async def on_anchor_helper_danmu(self, client: ClientABC, model: models.AnchorHelperDanmuCommand):
         await self.on_maybe_summarizer(client, model)
