@@ -4,6 +4,7 @@ import re
 from functools import cached_property
 
 import pydantic
+import rich
 from rich.markup import escape
 
 import blivedm
@@ -194,7 +195,8 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                         text=f" ({entropy=:.3f}, {entropy/len(tokens)=:.3f}, {trivial_rate=:.3f})"),
                 ]))
             else:
-                logger.info(
+                rich.print(
+                    rf"\[{message.ct.strftime('[%Y-%m-%d %H:%M:%S]')}]"
                     rf"\[[bright_cyan]{room_id}[/]] {uname} (uid={message.info.uid}): {escape(str(tokens))}"
                     f" ({entropy=:.3f}, {entropy/len(tokens)=:.3f}, {trivial_rate=:.3f})")
             return
@@ -212,7 +214,8 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                     PlainText(text=f" (trivial {trivial_rate})"),
                 ]))
             else:
-                logger.info(
+                rich.print(
+                    rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}]"
                     rf"\[[bright_cyan]{room_id}[/]] {uname} (uid={message.info.uid}): [grey]{escape(msg)}[/]")
         else:
             if self.settings.ui is not None:
@@ -223,7 +226,8 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                     PlainText(text=msg),
                 ]))
             else:
-                logger.info(
+                rich.print(
+                    rf"\[{message.ct.strftime('[%Y-%m-%d %H:%M:%S]')}]"
                     rf"\[[bright_cyan]{room_id}[/]] {uname} (uid={message.info.uid}): [bright_white]{escape(msg)}[/]")
 
     async def on_room_change(self, client, message):
@@ -240,7 +244,8 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                 PlainText(text=f"，分区：{parent_area_name}/{area_name}"),
             ]))
         else:
-            logger.info(
+            rich.print(
+                rf"\[{message.ct.strftime('[%Y-%m-%d %H:%M:%S]')}]"
                 rf"\[[bright_cyan]{room_id}[/]] "
                 f"直播间信息变更《[rgb(255,212,50)]{escape(title)}[/]》，分区：{parent_area_name}/{area_name}")
 
@@ -252,7 +257,9 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                 PlainText(text=f"受到警告 {message.msg}"),
             ]))
         else:
-            logger.info(rf"\[[bright_cyan]{room_id}[/]] [white on red]{message}[/]")
+            rich.print(
+                rf"\[{message.ct.strftime('[%Y-%m-%d %H:%M:%S]')}]"
+                rf"\[[bright_cyan]{room_id}[/]] [white on red]{message}[/]")
 
     async def on_super_chat_message(self, client, message):
         uname = message.data.user_info.uname
@@ -267,7 +274,9 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                 PlainText(text=f"[¥{price}]: {msg}")
             ]))
         else:
-            logger.info(rf"\[[bright_cyan]{room_id}[/]] {uname} \[[bright_cyan]¥{price}[/]]: [{color}]{escape(msg)}[/]")
+            rich.print(
+                rf"\[{message.ct.strftime('[%Y-%m-%d %H:%M:%S]')}]"
+                rf"\[[bright_cyan]{room_id}[/]] {uname} \[[bright_cyan]¥{price}[/]]: [{color}]{escape(msg)}[/]")
 
     async def on_room_block_msg(self, client, message):
         room_id = client.room_id
@@ -278,8 +287,10 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                 User(name=message.data.uname, uid=message.data.uid),
             ]))
         else:
-            logger.info(rf"\[[bright_cyan]{room_id}[/]] "
-                        f"[red]用户 {message.data.uname}（uid={message.data.uid}）被封禁[/]")
+            rich.print(
+                rf"\[{message.ct.strftime('[%Y-%m-%d %H:%M:%S]')}]"
+                rf"\[[bright_cyan]{room_id}[/]] "
+                f"[red]用户 {message.data.uname}（uid={message.data.uid}）被封禁[/]")
 
     async def on_live(self, client, message):
         room_id = client.room_id
@@ -289,8 +300,10 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                 PlainText(text="\N{Black Right-Pointing Triangle With Double Vertical Bar}\N{VS16}直播开始"),
             ]))
         else:
-            logger.info(rf"\[[bright_cyan]{room_id}[/]] "
-                        "[black on #eeaaaa]:black_right__pointing_triangle_with_double_vertical_bar-text:直播开始[/]")
+            rich.print(
+                rf"\[{message.ct.strftime('[%Y-%m-%d %H:%M:%S]')}]"
+                rf"\[[bright_cyan]{room_id}[/]] "
+                "[black on #eeaaaa]:black_right__pointing_triangle_with_double_vertical_bar-text:直播开始[/]")
 
     async def on_preparing(self, client, message):
         room_id = client.room_id
@@ -300,7 +313,9 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                 PlainText(text="\N{Black Square For Stop}\N{VS16}直播结束"),
             ]))
         else:
-            logger.info(rf"\[[bright_cyan]{room_id}[/]] [black on #eeaaaa]:black_square_for_stop-text:直播结束[/]")
+            rich.print(
+                rf"\[{message.ct.strftime('[%Y-%m-%d %H:%M:%S]')}]"
+                rf"\[[bright_cyan]{room_id}[/]] [black on #eeaaaa]:black_square_for_stop-text:直播结束[/]")
 
     async def on_interact_word(self, client, model):
         if not self.settings.show_interact_word:
@@ -315,5 +330,7 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                 PlainText(text="了直播间"),
             ]))
         else:
-            logger.info(rf"\[[bright_cyan]{room_id}[/]] 用户 {model.data.uname}（uid={model.data.uid}）"
-                        rf"{c[model.data.msg_type]}了直播间")
+            rich.print(
+                rf"\[{model.ct.strftime('[%Y-%m-%d %H:%M:%S]')}]"
+                rf"\[[bright_cyan]{room_id}[/]] 用户 {model.data.uname}（uid={model.data.uid}）"
+                rf"{c[model.data.msg_type]}了直播间")
