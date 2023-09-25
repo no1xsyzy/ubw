@@ -196,7 +196,7 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                 ]))
             else:
                 rich.print(
-                    rf"\[{message.ct.strftime('[%Y-%m-%d %H:%M:%S]')}]"
+                    rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
                     rf"\[[bright_cyan]{room_id}[/]] {uname} (uid={message.info.uid}): {escape(str(tokens))}"
                     f" ({entropy=:.3f}, {entropy/len(tokens)=:.3f}, {trivial_rate=:.3f})")
             return
@@ -215,7 +215,7 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                 ]))
             else:
                 rich.print(
-                    rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}]"
+                    rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
                     rf"\[[bright_cyan]{room_id}[/]] {uname} (uid={message.info.uid}): [grey]{escape(msg)}[/]")
         else:
             if self.settings.ui is not None:
@@ -227,7 +227,7 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                 ]))
             else:
                 rich.print(
-                    rf"\[{message.ct.strftime('[%Y-%m-%d %H:%M:%S]')}]"
+                    rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
                     rf"\[[bright_cyan]{room_id}[/]] {uname} (uid={message.info.uid}): [bright_white]{escape(msg)}[/]")
 
     async def on_room_change(self, client, message):
@@ -245,7 +245,7 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
             ]))
         else:
             rich.print(
-                rf"\[{message.ct.strftime('[%Y-%m-%d %H:%M:%S]')}]"
+                rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
                 rf"\[[bright_cyan]{room_id}[/]] "
                 f"直播间信息变更《[rgb(255,212,50)]{escape(title)}[/]》，分区：{parent_area_name}/{area_name}")
 
@@ -258,7 +258,7 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
             ]))
         else:
             rich.print(
-                rf"\[{message.ct.strftime('[%Y-%m-%d %H:%M:%S]')}]"
+                rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
                 rf"\[[bright_cyan]{room_id}[/]] [white on red]{message}[/]")
 
     async def on_super_chat_message(self, client, message):
@@ -275,7 +275,7 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
             ]))
         else:
             rich.print(
-                rf"\[{message.ct.strftime('[%Y-%m-%d %H:%M:%S]')}]"
+                rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
                 rf"\[[bright_cyan]{room_id}[/]] {uname} \[[bright_cyan]¥{price}[/]]: [{color}]{escape(msg)}[/]")
 
     async def on_room_block_msg(self, client, message):
@@ -288,7 +288,7 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
             ]))
         else:
             rich.print(
-                rf"\[{message.ct.strftime('[%Y-%m-%d %H:%M:%S]')}]"
+                rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
                 rf"\[[bright_cyan]{room_id}[/]] "
                 f"[red]用户 {message.data.uname}（uid={message.data.uid}）被封禁[/]")
 
@@ -301,7 +301,7 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
             ]))
         else:
             rich.print(
-                rf"\[{message.ct.strftime('[%Y-%m-%d %H:%M:%S]')}]"
+                rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
                 rf"\[[bright_cyan]{room_id}[/]] "
                 "[black on #eeaaaa]:black_right__pointing_triangle_with_double_vertical_bar-text:直播开始[/]")
 
@@ -314,7 +314,7 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
             ]))
         else:
             rich.print(
-                rf"\[{message.ct.strftime('[%Y-%m-%d %H:%M:%S]')}]"
+                rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
                 rf"\[[bright_cyan]{room_id}[/]] [black on #eeaaaa]:black_square_for_stop-text:直播结束[/]")
 
     async def on_interact_word(self, client, model):
@@ -331,6 +331,6 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
             ]))
         else:
             rich.print(
-                rf"\[{model.ct.strftime('[%Y-%m-%d %H:%M:%S]')}]"
+                rf"\[{model.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
                 rf"\[[bright_cyan]{room_id}[/]] 用户 {model.data.uname}（uid={model.data.uid}）"
                 rf"{c[model.data.msg_type]}了直播间")
