@@ -99,6 +99,11 @@ class LiveUI(BLiveUI):
             if extra_lines > 0:
                 logger.info('removing %d lines', extra_lines)
 
+                import json
+                logger.info('renderables %s', json.dumps(
+                    {k: str(v['renderable'].renderables) for k, v in self._records.items()}, indent=2))
+                logger.info('rendered %s', rendered)
+
                 # process unstick_before
                 former_k = None
                 for k in reversed(self._records):
