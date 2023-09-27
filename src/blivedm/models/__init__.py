@@ -46,6 +46,7 @@ from .log_in_notice import LogInNoticeCommand
 from .messagebox_user_gain_medal import MessageboxUserGainMedalCommand
 from .messagebox_user_medal_change import MessageboxUserMedalChangeCommand
 from .notice_msg import NoticeMsgCommand
+from .official_room_event import OfficialRoomEventCommand
 from .online_rank_count import OnlineRankCountCommand
 from .online_rank_top3 import OnlineRankTop3Command
 from .online_rank_v2 import OnlineRankV2Command
@@ -148,6 +149,7 @@ AnnotatedCommandModel = Annotated[Union[
     MessageboxUserGainMedalCommand,
     MessageboxUserMedalChangeCommand,
     NoticeMsgCommand,
+    OfficialRoomEventCommand,
     OnlineRankCountCommand,
     OnlineRankTop3Command,
     OnlineRankV2Command,
@@ -249,6 +251,7 @@ __all__ = (
     'MessageboxUserGainMedalCommand',
     'MessageboxUserMedalChangeCommand',
     'NoticeMsgCommand',
+    'OfficialRoomEventCommand',
     'OnlineRankCountCommand',
     'OnlineRankTop3Command',
     'OnlineRankV2Command',
