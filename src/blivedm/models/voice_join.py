@@ -33,6 +33,7 @@ class VoiceJoinListData(BaseModel):
 class VoiceJoinListCommand(CommandModel):
     cmd: Literal['VOICE_JOIN_LIST']
     data: VoiceJoinListData
+    room_id: int
 
 
 class VoiceJoinRoomCountInfoData(BaseModel):
@@ -41,9 +42,9 @@ class VoiceJoinRoomCountInfoData(BaseModel):
     root_status: int
     room_status: int
     apply_count: int
-    category: int
 
 
 class VoiceJoinRoomCountInfoCommand(CommandModel):
     cmd: Literal['VOICE_JOIN_ROOM_COUNT_INFO']
     data: VoiceJoinRoomCountInfoData
+    room_id: int
