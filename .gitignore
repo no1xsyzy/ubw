@@ -6,3 +6,4 @@ output/
 !/config.example.toml
 dist/
 *.log
+.env
