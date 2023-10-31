@@ -223,6 +223,11 @@ class WSClient(ClientABC):
         return True
 
     async def _init_buvid(self):
+        import os
+        if (s := os.environ.get('UBW_BUVID')) is not None:
+            self._buvid3 = s
+            self._uid = int(os.environ.get('UBW_UID', 0))
+            return True
         try:
             c: bilibili.FingerSPI = await bilibili.get_finger_spi()
             self._buvid3 = c.b_3
@@ -336,10 +341,10 @@ class WSClient(ClientABC):
         发送认证包
         """
         auth_params = {
-            'uid': 0,
+            'uid': self._uid,
             'roomid': self._room_id,
             'protover': 3,
-            'platform': 'danmuji',
+            'platform': 'web',
             'type': 2
         }
         if self._host_server_token is not None:
