@@ -3,7 +3,7 @@ import sys
 from functools import wraps
 from typing import Callable
 
-from blivedm import HandlerInterface
+from blivedm import HandlerInterface, ClientABC
 from blivedm.handlers import BaseHandler
 from blivedm.wsclient import WSClient
 
@@ -14,7 +14,7 @@ async def listen_to_all(room_ids: list[int],
                         handler: BaseHandler = None, handler_factory: Callable[[int], HandlerInterface] = None):
     if handler is None and handler_factory is None:
         raise ValueError("neither handler nor handler_factory is specified, useless")
-    clients = {}
+    clients: dict[int, ClientABC] = {}
     for room_id in room_ids:
         clients[room_id] = client = WSClient(room_id)
         client.add_handler(handler if handler is not None else handler_factory(room_id))
