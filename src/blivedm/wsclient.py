@@ -315,13 +315,54 @@ class WSClient(WSMessageParserMixin, ClientABC):
         :return: True代表没有降级，如果需要降级后还可用，重载这个函数返回True
         """
         res = True
+        if not await self._try_init_from_environ() and not await self._init_buvid():
+            res = False
         if not await self._init_room_id_and_owner():
             res = False
         if not await self._init_host_server():
             res = False
-        if not await self._init_buvid():
-            res = False
         return res
+
+    async def _try_init_from_environ(self):
+        if (s := os.environ.get('UBW_COOKIE_FILE')) is not None:
+            cookie_jar = self._session.cookie_jar
+            cookie_jar._quote_cookie = False
+            async with aiofiles.open(s, mode='rt', encoding='utf-8') as f:
+                async for line in f:
+                    line = line.strip()
+                    if line.startswith('#HttpOnly_'):
+                        line = line[len('#HttpOnly_'):]
+                    if not line or line.startswith('#'):
+                        continue
+                    domain, subdomains, path, httponly, expires, name, value = line.split('\t')
+                    # subdomains = subdomains == 'TRUE'
+                    # httponly = httponly == 'TRUE'
+                    # from email.utils import formatdate
+                    # expires = formatdate(int(expires), usegmt=True)
+                    # value = urllib.parse.unquote(value)
+                    # tmp: SimpleCookie[str] = SimpleCookie()
+                    # tmp[name] = value
+                    # tmp[name]['domain'] = domain
+                    # tmp[name]['expires'] = expires
+                    # tmp[name]['path'] = path
+                    # tmp[name]['httponly'] = httponly
+                    cookie_jar.update_cookies({name: value})
+                    if name == 'buvid3':
+                        self._buvid3 = value
+                    elif name == 'DedeUserID':
+                        self._uid = int(value)
+            return True
+        return False
+
+    async def _init_buvid(self):
+        try:
+            c: bilibili.FingerSPI = await bilibili.get_finger_spi(session=self._session)
+            self._buvid3 = c.b_3
+        except (aiohttp.ClientConnectionError, asyncio.TimeoutError, bilibili.BilibiliApiError):
+            logger.exception('room=%d _init_buvid() failed:', self._room_id)
+            self._buvid3 = None
+            return False
+        return True
 
     async def _init_room_id_and_owner(self):
         try:
@@ -338,28 +379,13 @@ class WSClient(WSMessageParserMixin, ClientABC):
 
     async def _init_host_server(self):
         try:
-            server: bilibili.DanmuInfo = await bilibili.get_danmaku_server(self._room_id)
+            server: bilibili.DanmuInfo = await bilibili.get_danmaku_server(self._room_id, session=self._session)
             self._host_server_list = server.host_list
             self._host_server_token = server.token
         except (aiohttp.ClientConnectionError, asyncio.TimeoutError, bilibili.BilibiliApiError):
             logger.exception('room=%d _init_host_server() failed:', self._room_id)
             self._host_server_list = DEFAULT_DANMAKU_SERVER_LIST
             self._host_server_token = None
-            return False
-        return True
-
-    async def _init_buvid(self):
-        import os
-        if (s := os.environ.get('UBW_BUVID')) is not None:
-            self._buvid3 = s
-            self._uid = int(os.environ.get('UBW_UID', 0))
-            return True
-        try:
-            c: bilibili.FingerSPI = await bilibili.get_finger_spi()
-            self._buvid3 = c.b_3
-        except (aiohttp.ClientConnectionError, asyncio.TimeoutError, bilibili.BilibiliApiError):
-            logger.exception('room=%d _init_buvid() failed:', self._room_id)
-            self._buvid3 = None
             return False
         return True
 

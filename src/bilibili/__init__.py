@@ -52,7 +52,7 @@ async def get_info_by_room(room_id: int, type_: Type[_Type] = InfoByRoom, *, ses
 @auto_session
 async def get_danmaku_server(room_id: int, type_: Type[_Type] = DanmuInfo, *, session: aiohttp.ClientSession) -> _Type:
     async with session.get(DANMAKU_SERVER_CONF_URL,
-                           params={'id': room_id},
+                           params={'id': room_id, 'type': 0},
                            headers={'User-Agent': USER_AGENT}) as res:
         data = parse_obj_as(Response[type_], await res.json())
         if data.code == 0:
@@ -75,7 +75,8 @@ async def get_emoticons(room_id: int, platform: str = 'pc', type_: Type[_Type] =
 
 
 @auto_session
-async def get_finger_spi(type_: Type[_Type] = FingerSPI, *, session: aiohttp.ClientSession) -> _Type:
+async def get_finger_spi(type_: Type[_Type] = FingerSPI,
+                         *, session: aiohttp.ClientSession) -> _Type:
     async with session.get(FINGER_SPI_URL, headers={'User-Agent': USER_AGENT}) as res:
         data = parse_obj_as(Response[type_], await res.json())
         if data.code == 0:
