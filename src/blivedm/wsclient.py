@@ -1,9 +1,12 @@
 import asyncio
 import json
 import logging
+import os
 import ssl as ssl_
 import struct
+from abc import ABC
 
+import aiofiles
 import aiohttp
 import brotli
 
@@ -20,7 +23,7 @@ DEFAULT_DANMAKU_SERVER_LIST = [
 HEADER_STRUCT = struct.Struct('>I2H2I')
 
 
-class WSMessageParserMixin:
+class WSMessageParserMixin(ClientABC, ABC):
     async def _on_ws_message(self, message: aiohttp.WSMessage):
         """
         收到websocket消息
@@ -143,7 +146,7 @@ class WSMessageParserMixin:
                 logger.exception('room=%d _handle_command() failed, command=%s', self.room_id, command, exc_info=res)
 
 
-class WSClient(ClientABC, WSMessageParserMixin):
+class WSClient(WSMessageParserMixin, ClientABC):
     """
     B站直播弹幕客户端，负责连接房间
 

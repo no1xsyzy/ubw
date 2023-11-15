@@ -134,7 +134,7 @@ class AppDirect(AppABC):
                 raise bilibili.BilibiliApiError(j.code, j.message)
 
 
-class OpenLiveClient(ClientABC, WSMessageParserMixin):
+class OpenLiveClient(WSMessageParserMixin, ClientABC):
     def __init__(self,
                  access_key_id: str, access_key_secret: str,
                  app_id: int,
