@@ -77,7 +77,7 @@ class SuperChatMessage(BaseModel):
 class SuperChatCommand(CommandModel):
     cmd: Literal['SUPER_CHAT_MESSAGE']
     data: SuperChatMessage
-    roomid: int
+    roomid: int | None = None
 
     def summarize(self) -> Summary:
         return Summary(
