@@ -151,10 +151,12 @@ class TcpClient(ClientABC):
 
     async def stop_and_close(self):
         task = self._task
-        if task:
-            self.stop()
-            await task
-        await self.close()
+        try:
+            if task:
+                self.stop()
+                await task
+        finally:
+            await self.close()
 
 
 class DummyClient(ClientABC):
