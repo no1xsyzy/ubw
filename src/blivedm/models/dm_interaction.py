@@ -1,0 +1,32 @@
+from ._base import *
+
+
+class ComboData(BaseModel):
+    id: int
+    status: int
+    content: str
+    cnt: int
+    guide: str
+    left_duration: int
+    fade_duration: int
+
+
+class DataData(BaseModel):
+    combo: list[ComboData]
+    merge_interval: int
+    card_appear_interval: int
+    send_interval: int
+
+
+class Data(BaseModel):
+    id: int
+    status: int
+    type: int
+    data: DataData
+
+    validate_extra = validator('data', pre=True, allow_reuse=True)(strange_dict)
+
+
+class DmInteractionCommand(CommandModel):
+    cmd: Literal['DM_INTERACTION']
+    data: Data

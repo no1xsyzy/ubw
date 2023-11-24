@@ -19,6 +19,7 @@ from .confirm_auto_follow import ConfirmAutoFollowCommand
 from .cut_off import CutOffCommand
 from .danmu_aggregation import DanmuAggregationCommand
 from .danmu_msg import DanmakuCommand
+from .dm_interaction import DmInteractionCommand
 from .entry_effect import EntryEffectCommand, EntryEffectMustReceiveCommand
 from .full_screen_special_effect import FullScreenSpecialEffectCommand
 from .gift_board_red_dot import GiftBoardRedDotCommand
@@ -122,6 +123,7 @@ AnnotatedCommandModel = Annotated[Union[
     CutOffCommand,
     DanmuAggregationCommand,
     DanmakuCommand,
+    DmInteractionCommand,
     EntryEffectCommand, EntryEffectMustReceiveCommand,
     FullScreenSpecialEffectCommand,
     GiftBoardRedDotCommand,
@@ -224,6 +226,7 @@ __all__ = (
     'CutOffCommand',
     'DanmuAggregationCommand',
     'DanmakuCommand',
+    'DmInteractionCommand',
     'EntryEffectCommand', 'EntryEffectMustReceiveCommand',
     'FullScreenSpecialEffectCommand',
     'GiftBoardRedDotCommand',
