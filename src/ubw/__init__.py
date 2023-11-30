@@ -1,4 +1,5 @@
 import asyncio
+from enum import Enum
 from pathlib import Path
 from typing import Annotated
 
@@ -145,6 +146,54 @@ async def run(cc: list[str]):
             case _:
                 print(f"unknown mod {c}, skipped")
     await asyncio.gather(*coroutines)
+
+
+class _OutputChoice(str, Enum):
+    url_only = 'url_only'
+    info_link = 'info_link'
+    info_link_url = 'info_link_url'
+    tsv = 'tsv'
+
+
+@app.command()
+@sync
+async def get_play_url(room_id: int,
+                       output: _OutputChoice = _OutputChoice.info_link,
+                       filter_protocol: str = '',
+                       filter_format: str = '',
+                       filter_codec: str = '',
+                       print_first: bool = False,
+                       ):
+    from bilibili import get_room_play_info, RoomPlayInfo
+    from rich import get_console
+    from rich.text import Text
+    console = get_console()
+    play_info: RoomPlayInfo = await get_room_play_info(room_id)
+    for stream in play_info.playurl_info.playurl.stream:
+        if filter_protocol != '' and stream.protocol_name not in filter_protocol:
+            continue
+        for fmt in stream.format:
+            if filter_format != '' and fmt.format_name not in filter_format:
+                continue
+            for cdc in fmt.codec:
+                if filter_codec != '' and cdc.codec_name not in filter_codec:
+                    continue
+                for url_info in cdc.url_info:
+                    url = f"{url_info.host}{cdc.base_url}{url_info.extra}"
+                    info = f"({stream.protocol_name}|{fmt.format_name}|{cdc.codec_name}|{cdc.current_qn}|{url_info.host})"
+                    match output:
+                        case _OutputChoice.info_link:
+                            console.print(Text(info), style=f"link {url}")
+                        case _OutputChoice.info_link_url:
+                            console.print(Text(f"{info}\t{url}"), style=f"link {url}")
+                        case _OutputChoice.url_only:
+                            print(url)
+                        case _OutputChoice.tsv:
+                            print('\t'.join(
+                                [stream.protocol_name, fmt.format_name, cdc.codec_name, str(cdc.current_qn),
+                                 url_info.host, url]))
+                    if print_first:
+                        return
 
 
 @app.command()
