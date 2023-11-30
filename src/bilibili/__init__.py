@@ -1,6 +1,8 @@
 import functools
+import os
 from typing import *
 
+import aiofiles
 import aiohttp
 from pydantic import parse_obj_as
 
@@ -88,6 +90,17 @@ async def get_finger_spi(type_: Type[_Type] = FingerSPI,
 @auto_session
 async def get_room_play_info(room_id: int, quality: int = 10000,
                              type_: Type[_Type] = RoomPlayInfo, *, session: aiohttp.ClientSession) -> _Type:
+    cookies = {}
+    if (s := os.environ.get('UBW_COOKIE_FILE')) is not None:
+        async with aiofiles.open(s, mode='rt', encoding='utf-8') as f:
+            async for line in f:
+                line = line.strip()
+                if line.startswith('#HttpOnly_'):
+                    line = line[len('#HttpOnly_'):]
+                if not line or line.startswith('#'):
+                    continue
+                domain, subdomains, path, httponly, expires, name, value = line.split('\t')
+                cookies[name] = value
     async with session.get(ROOM_PLAY_INFO_URL, params={
         'build': 6215200,
         'codec': "0,1",
@@ -97,7 +110,7 @@ async def get_room_play_info(room_id: int, quality: int = 10000,
         'protocol': "0,1,2,3,4,5,6,7",
         'qn': quality,
         'room_id': room_id,
-    }) as res:
+    }, cookies=cookies) as res:
         data = parse_obj_as(Response[type_], await res.json())
         if data.code == 0:
             return data.data
