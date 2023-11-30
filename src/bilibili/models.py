@@ -121,7 +121,7 @@ class QnDesc(BaseModel):
 
 class P2PData(BaseModel):
     m_p2p: bool
-    m_servers: list[str]
+    m_servers: list[str] | None
     p2p: bool
     p2p_type: int
 
