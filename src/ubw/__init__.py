@@ -1,4 +1,5 @@
 import asyncio
+import sys
 from enum import Enum
 from pathlib import Path
 from typing import Annotated
@@ -153,12 +154,16 @@ class _OutputChoice(str, Enum):
     info_link = 'info_link'
     info_link_url = 'info_link_url'
     tsv = 'tsv'
+    m3u = 'm3u'
+    raw = 'raw'
+    raw_pretty = 'raw_pretty'
 
 
 @app.command()
 @sync
 async def get_play_url(room_id: int,
                        output: _OutputChoice = _OutputChoice.info_link,
+                       qn: int = 10000,
                        filter_protocol: str = '',
                        filter_format: str = '',
                        filter_codec: str = '',
@@ -168,7 +173,23 @@ async def get_play_url(room_id: int,
     from rich import get_console
     from rich.text import Text
     console = get_console()
-    play_info: RoomPlayInfo = await get_room_play_info(room_id)
+    play_info: RoomPlayInfo = await get_room_play_info(room_id, qn)
+
+    # raw-like print
+    if output is _OutputChoice.raw:
+        print(play_info.json())
+        return
+    elif output is _OutputChoice.raw_pretty:
+        from rich.pretty import pprint
+        pprint(play_info)
+
+    if play_info.playurl_info is None:
+        print(f'No Play Info for room {room_id}', file=sys.stderr)
+        return
+
+    if output is _OutputChoice.m3u:
+        print("#EXTM3U")
+
     for stream in play_info.playurl_info.playurl.stream:
         if filter_protocol != '' and stream.protocol_name not in filter_protocol:
             continue
@@ -176,6 +197,8 @@ async def get_play_url(room_id: int,
             if filter_format != '' and fmt.format_name not in filter_format:
                 continue
             for cdc in fmt.codec:
+                if qn != cdc.current_qn:
+                    continue
                 if filter_codec != '' and cdc.codec_name not in filter_codec:
                     continue
                 for url_info in cdc.url_info:
@@ -192,6 +215,9 @@ async def get_play_url(room_id: int,
                             print('\t'.join(
                                 [stream.protocol_name, fmt.format_name, cdc.codec_name, str(cdc.current_qn),
                                  url_info.host, url]))
+                        case _OutputChoice.m3u:
+                            print(f"#EXTINF:,{info}")
+                            print(url)
                     if print_first:
                         return
 
