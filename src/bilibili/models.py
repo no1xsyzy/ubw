@@ -176,4 +176,4 @@ class RoomPlayInfo(BaseModel):
     room_id: int
     short_id: int
     uid: int
-    playurl_info: PlayUrlInfo
+    playurl_info: PlayUrlInfo | None
