@@ -18,12 +18,20 @@ class WinnerInfo(NamedTuple):
     gift_id: int
 
 
+class NewWinnerInfo(NamedTuple):
+    uid: int
+    uname: str
+    entrance: int
+    gift_id: int
+    field5: bool
+
+
 class Data(BaseModel):
     awards: dict[str, Award]
     lot_id: int
     total_num: int
     version: int
-    winner_info: list[WinnerInfo]
+    winner_info: list[WinnerInfo | NewWinnerInfo]
 
 
 class PopularityRedPocketWinnerListCommand(CommandModel):
