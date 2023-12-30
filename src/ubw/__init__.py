@@ -1,4 +1,5 @@
 import asyncio
+import re
 import sys
 from enum import Enum
 from pathlib import Path
@@ -159,6 +160,22 @@ class _OutputChoice(str, Enum):
     raw_pretty = 'raw_pretty'
 
 
+def extend_urlinfo(stream, fmt, cdc, url_info, real_original):
+    host = url_info.host.replace('https://', '')
+    url = f"{url_info.host}{cdc.base_url}{url_info.extra}"
+    info = f"E|{stream.protocol_name}|{fmt.format_name}|{cdc.codec_name}|{cdc.current_qn}|{host}"
+    yield url, info
+    if real_original:
+        if stream.protocol_name == 'http_stream':
+            return  # seems unsupported
+        yield (re.sub(r"(\d+)_(?:minihevc|prohevc)", r'\1',
+                      re.sub(r"(live-bvc\/\d+\/live_\d+_\d+)_\w+", r'\1', url))), \
+            f"ROA|{stream.protocol_name}|{fmt.format_name}|{cdc.codec_name}|{cdc.current_qn}|{host}"
+        yield (re.sub(r"(\d+)_(?:minihevc|prohevc|bluray)", r'\1',
+                      re.sub(r"(live-bvc\/\d+\/live_\d+_\d+)_\w+", r'\1', url))), \
+            f"ROB|{stream.protocol_name}|{fmt.format_name}|{cdc.codec_name}|{cdc.current_qn}|{host}"
+
+
 @app.command()
 @sync
 async def get_play_url(room_id: int,
@@ -168,6 +185,7 @@ async def get_play_url(room_id: int,
                        filter_format: str = '',
                        filter_codec: str = '',
                        print_first: bool = False,
+                       real_original: bool = True,
                        ):
     from bilibili import get_room_play_info, RoomPlayInfo
     from rich import get_console
@@ -190,6 +208,8 @@ async def get_play_url(room_id: int,
     if output is _OutputChoice.m3u:
         print("#EXTM3U")
 
+    s = 0
+
     for stream in play_info.playurl_info.playurl.stream:
         if filter_protocol != '' and stream.protocol_name not in filter_protocol:
             continue
@@ -202,24 +222,21 @@ async def get_play_url(room_id: int,
                 if filter_codec != '' and cdc.codec_name not in filter_codec:
                     continue
                 for url_info in cdc.url_info:
-                    url = f"{url_info.host}{cdc.base_url}{url_info.extra}"
-                    info = f"({stream.protocol_name}|{fmt.format_name}|{cdc.codec_name}|{cdc.current_qn}|{url_info.host})"
-                    match output:
-                        case _OutputChoice.info_link:
-                            console.print(Text(info), style=f"link {url}")
-                        case _OutputChoice.info_link_url:
-                            console.print(Text(f"{info}\t{url}"), style=f"link {url}")
-                        case _OutputChoice.url_only:
-                            print(url)
-                        case _OutputChoice.tsv:
-                            print('\t'.join(
-                                [stream.protocol_name, fmt.format_name, cdc.codec_name, str(cdc.current_qn),
-                                 url_info.host, url]))
-                        case _OutputChoice.m3u:
-                            print(f"#EXTINF:,{info}")
-                            print(url)
-                    if print_first:
-                        return
+                    for url, info in extend_urlinfo(stream, fmt, cdc, url_info, real_original):
+                        match output:
+                            case _OutputChoice.info_link:
+                                console.print(Text(info), style=f"link {url}")
+                            case _OutputChoice.info_link_url:
+                                console.print(Text(f"{info}\t{url}"), style=f"link {url}")
+                            case _OutputChoice.url_only:
+                                print(url)
+                            case _OutputChoice.tsv:
+                                print('\t'.join([info, *info[1:-1].split("|"), "", url]))
+                            case _OutputChoice.m3u:
+                                print(f"#EXTINF:,[{s}]{info}\n{url}\n")
+                        if print_first:  # should remove?
+                            return
+                        s += 1
 
 
 @app.command()
