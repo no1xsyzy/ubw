@@ -1284,6 +1284,22 @@ files = [
 ]
 
 [[package]]
+name = "mpv"
+version = "1.0.5"
+description = "A python interface to the mpv media player"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    { file = "mpv-1.0.5-py3-none-any.whl", hash = "sha256:52f3c804bd8aa18b941d220b2d8a3484a1406bd9aeae003e277671c6ad054b38" },
+    { file = "mpv-1.0.5.tar.gz", hash = "sha256:4269cc8c72fb682013340c55506d08a98ab9f4b537f2ea9735bf1620d2124b28" },
+]
+
+[package.extras]
+screenshot-raw = ["Pillow"]
+test = ["PyVirtualDisplay"]
+
+[[package]]
 name = "msgpack"
 version = "1.0.5"
 description = "MessagePack serializer"
@@ -2419,4 +2435,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "df3b9232b13eba2ee15094c8bc43b6273f9646be779f7748cba127334d9920a9"
+content-hash = "8fcdb66ca26c6176a960465503789c39034e52ac95e2995c37779f7cd5787502"

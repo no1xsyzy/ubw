@@ -24,6 +24,7 @@ lxml = "^4.9.2"
 typer = { extras = ["all"], version = "^0.9.0" }
 textual = "^0.34.0"
 jieba = "^0.42.1"
+mpv = "^1.0.5"
 
 [tool.poetry.group.saver.dependencies]
 tinydb = "^4.7.1"

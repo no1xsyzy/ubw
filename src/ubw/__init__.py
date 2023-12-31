@@ -1,4 +1,5 @@
 import asyncio
+import os
 import re
 import sys
 from enum import Enum
@@ -159,6 +160,7 @@ class _OutputChoice(str, Enum):
     raw = 'raw'
     raw_pretty = 'raw_pretty'
     analyzer = 'analyzer'
+    libmpv = 'libmpv'
 
 
 def extend_urlinfo(stream, fmt, cdc, url_info, real_original):
@@ -236,6 +238,23 @@ async def get_play_url(room_id: int,
                 print(f"#EXTINF:,[{next(s)}]{info}\n{url}\n")
 
             after = None
+
+        case _OutputChoice.libmpv:
+            # experimental
+            os.environ["PATH"] = os.path.dirname(__file__) + os.pathsep + os.environ["PATH"]
+            import mpv
+
+            player = mpv.MPV(ytdl=True,
+                             input_default_bindings=True, input_vo_keyboard=True,
+                             osc=True, osd_font_size=35,
+                             msg_level="ffmpeg/demuxer=error")
+
+            def each(url, info):
+                print(info, url)
+                player.loadfile(url, 'append-play', title=info, force_media_title=info)
+
+            def after():
+                player.wait_for_shutdown()
 
         case _OutputChoice.analyzer:
             from urllib.parse import urlparse
