@@ -158,6 +158,7 @@ class _OutputChoice(str, Enum):
     m3u = 'm3u'
     raw = 'raw'
     raw_pretty = 'raw_pretty'
+    analyzer = 'analyzer'
 
 
 def extend_urlinfo(stream, fmt, cdc, url_info, real_original):
@@ -168,12 +169,9 @@ def extend_urlinfo(stream, fmt, cdc, url_info, real_original):
     if real_original:
         if stream.protocol_name == 'http_stream':
             return  # seems unsupported
-        yield (re.sub(r"(\d+)_(?:minihevc|prohevc)", r'\1',
-                      re.sub(r"(live-bvc\/\d+\/live_\d+_\d+)_\w+", r'\1', url))), \
-            f"ROA|{stream.protocol_name}|{fmt.format_name}|{cdc.codec_name}|{cdc.current_qn}|{host}"
-        yield (re.sub(r"(\d+)_(?:minihevc|prohevc|bluray)", r'\1',
-                      re.sub(r"(live-bvc\/\d+\/live_\d+_\d+)_\w+", r'\1', url))), \
-            f"ROB|{stream.protocol_name}|{fmt.format_name}|{cdc.codec_name}|{cdc.current_qn}|{host}"
+        if re.search(r"(\d+)_(?:minihevc|prohevc|bluray)", url):
+            yield (re.sub(r"(\d+)_(?:minihevc|prohevc|bluray)", r'\1', url),
+                   f"RO|{stream.protocol_name}|{fmt.format_name}|{cdc.codec_name}|{cdc.current_qn}|{host}")
 
 
 @app.command()
@@ -193,50 +191,99 @@ async def get_play_url(room_id: int,
     console = get_console()
     play_info: RoomPlayInfo = await get_room_play_info(room_id, qn)
 
-    # raw-like print
-    if output is _OutputChoice.raw:
-        print(play_info.json())
-        return
-    elif output is _OutputChoice.raw_pretty:
-        from rich.pretty import pprint
-        pprint(play_info)
+    match output:
+        case _OutputChoice.raw:
+            print(play_info.json())
+            each = None
+            after = None
 
-    if play_info.playurl_info is None:
-        print(f'No Play Info for room {room_id}', file=sys.stderr)
-        return
+        case _OutputChoice.raw_pretty:
+            from rich.pretty import pprint
+            pprint(play_info)
+            each = None
+            after = None
 
-    if output is _OutputChoice.m3u:
-        print("#EXTM3U")
+        case _OutputChoice.info_link:
+            def each(url, info):
+                console.print(Text(info), style=f"link {url}")
 
-    s = 0
+            after = None
 
-    for stream in play_info.playurl_info.playurl.stream:
-        if filter_protocol != '' and stream.protocol_name not in filter_protocol:
-            continue
-        for fmt in stream.format:
-            if filter_format != '' and fmt.format_name not in filter_format:
-                continue
-            for cdc in fmt.codec:
-                if qn != cdc.current_qn:
+        case _OutputChoice.info_link_url:
+            def each(url, info):
+                console.print(Text(f"{info}\t{url}"), style=f"link {url}")
+
+            after = None
+
+        case _OutputChoice.url_only:
+            def each(url, info):
+                print(url)
+
+            after = None
+
+        case _OutputChoice.tsv:
+            def each(url, info):
+                print('\t'.join([info, *info[1:-1].split("|"), "", url]))
+
+            after = None
+
+        case _OutputChoice.m3u:
+            from itertools import count
+            print("#EXTM3U")
+            s = count()
+
+            def each(url, info):
+                print(f"#EXTINF:,[{next(s)}]{info}\n{url}\n")
+
+            after = None
+
+        case _OutputChoice.analyzer:
+            from urllib.parse import urlparse
+            columns = set()
+            records = []
+
+            def each(url, info):
+                scheme, netloc, path, _, query, _ = urlparse(url)
+                r = {'Name': info, 'Host': netloc, 'Url': url}
+                for p in query.split('&'):
+                    a, b = p.split('=')
+                    if a not in columns:
+                        columns.add(a)
+                    r[a] = b
+                records.append(r)
+
+            def after():
+                import csv
+                writer = csv.DictWriter(sys.stdout, fieldnames=('Name', 'Host', 'Url', *sorted(columns)))
+                writer.writeheader()
+                writer.writerows(records)
+
+        case _:
+            raise NotImplementedError(f'{output} is not implemented')
+
+    if callable(each):
+        if play_info.playurl_info is None:
+            print(f'No Play Info for room {room_id}', file=sys.stderr)
+        else:
+            for stream in play_info.playurl_info.playurl.stream:
+                if filter_protocol != '' and stream.protocol_name not in filter_protocol:
                     continue
-                if filter_codec != '' and cdc.codec_name not in filter_codec:
-                    continue
-                for url_info in cdc.url_info:
-                    for url, info in extend_urlinfo(stream, fmt, cdc, url_info, real_original):
-                        match output:
-                            case _OutputChoice.info_link:
-                                console.print(Text(info), style=f"link {url}")
-                            case _OutputChoice.info_link_url:
-                                console.print(Text(f"{info}\t{url}"), style=f"link {url}")
-                            case _OutputChoice.url_only:
-                                print(url)
-                            case _OutputChoice.tsv:
-                                print('\t'.join([info, *info[1:-1].split("|"), "", url]))
-                            case _OutputChoice.m3u:
-                                print(f"#EXTINF:,[{s}]{info}\n{url}\n")
-                        if print_first:  # should remove?
-                            return
-                        s += 1
+                for fmt in stream.format:
+                    if filter_format != '' and fmt.format_name not in filter_format:
+                        continue
+                    for cdc in fmt.codec:
+                        if qn != cdc.current_qn:
+                            continue
+                        if filter_codec != '' and cdc.codec_name not in filter_codec:
+                            continue
+                        for url_info in cdc.url_info:
+                            for u, i in extend_urlinfo(stream, fmt, cdc, url_info, real_original):
+                                each(u, i)
+                                if print_first:  # should remove?
+                                    return
+
+    if callable(after):
+        after()
 
 
 @app.command()
