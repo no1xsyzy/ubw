@@ -217,3 +217,57 @@ class DanmakuCommand(CommandModel):
                 "privilege_type": v[7],
             }
         return v
+
+
+class Danmaku371111Command(DanmakuCommand):
+    cmd: Literal['DANMU_MSG:3:7:1:1:1:1']
+
+    @validator('info', pre=True)
+    def parse_dankamu_info(cls, v):
+        if isinstance(v, list):
+            return {
+                # .0.0
+                "mode": v[0][1],
+                "font_size": v[0][2],
+                "color": v[0][3],
+                "timestamp": v[0][4],
+                "rnd": v[0][5],
+                # .0.6
+                "uid_crc32": v[0][7],
+                # .0.8
+                "msg_type": 0,
+                "bubble": 0,
+                # .0.11
+                "dm_type": v[0][12],
+                "emoticon_options": v[0][13],
+                "voice_config": v[0][14],
+                "mode_info": v[0][15],
+
+                "msg": v[1],
+
+                "uid": v[2][0],
+                "uname": v[2][1],
+                "admin": v[2][2],
+                "vip": v[2][3],
+                "svip": v[2][4],
+                "urank": v[2][5],
+                "mobile_verify": v[2][6],
+                "uname_color": v[2][7],
+
+                "medal_level": 0,
+                "medal_name": '',
+                "runame": '',
+                "medal_room_id": 0,
+                "mcolor": 0,
+                "special_medal": 0,
+
+                "user_level": 0,
+                "ulevel_color": 0xffffff,
+                "ulevel_rank": ">50000",
+
+                "old_title": "",
+                "title": "",
+
+                "privilege_type": v[7],
+            }
+        return v
