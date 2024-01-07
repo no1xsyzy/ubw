@@ -244,10 +244,13 @@ async def get_play_url(room_id: int,
             os.environ["PATH"] = os.path.dirname(__file__) + os.pathsep + os.environ["PATH"]
             import mpv
 
-            player = mpv.MPV(ytdl=True,
-                             input_default_bindings=True, input_vo_keyboard=True,
-                             osc=True, osd_font_size=35,
-                             msg_level="ffmpeg/demuxer=error")
+            mpv_configs = main.config.get('mpv_configs', {})
+
+            player = mpv.MPV(
+                ytdl=True,
+                input_default_bindings=True, input_vo_keyboard=True, osc=True, osd_font_size=35,
+                **mpv_configs,
+            )
 
             def each(url, info):
                 print(info, url)
