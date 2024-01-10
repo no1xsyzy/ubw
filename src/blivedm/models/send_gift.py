@@ -38,6 +38,8 @@ class GiftMessage(BaseModel):
 class GiftCommand(CommandModel):
     cmd: Literal['SEND_GIFT']
     data: GiftMessage
+    p_is_ack: bool | None = None
+    p_msg_type: int | None = None
 
     def summarize(self) -> Summary:
         return Summary(
