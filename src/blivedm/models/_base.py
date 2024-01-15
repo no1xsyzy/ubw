@@ -22,7 +22,7 @@ class CommandModel(BaseModel):
     ct: datetime = Field(default_factory=lambda: datetime.now(timezone(timedelta(seconds=8 * 3600))))
 
     is_report: bool | None = None
-    msg_id: int | None = None
+    msg_id: str | None = None
     send_time: datetime | None = None
 
     class Config:
