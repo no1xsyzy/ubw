@@ -24,6 +24,8 @@ class CommandModel(BaseModel):
     is_report: bool | None = None
     msg_id: str | None = None
     send_time: datetime | None = None
+    p_is_ack: bool | None = None
+    p_msg_type: int | None = None
 
     class Config:
         extra = 'forbid'

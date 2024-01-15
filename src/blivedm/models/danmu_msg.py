@@ -144,8 +144,6 @@ class DanmakuCommand(CommandModel):
     cmd: Literal['DANMU_MSG']
     info: DanmakuInfo
     dm_v2: str | None = None
-    p_is_ack: bool | None = None
-    p_msg_type: int | None = None
 
     def summarize(self) -> Summary:
         return Summary(
