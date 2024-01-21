@@ -13,7 +13,7 @@ DANMAKU_SERVER_CONF_URL = 'https://api.live.bilibili.com/xlive/web-room/v1/index
 EMOTICON_URL = 'https://api.live.bilibili.com/xlive/web-ucenter/v2/emoticon/GetEmoticons'
 FINGER_SPI_URL = 'https://api.bilibili.com/x/frontend/finger/spi'
 ROOM_PLAY_INFO_URL = 'https://api.live.bilibili.com/xlive/app-room/v2/index/getRoomPlayInfo'
-USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36'
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
 
 F = TypeVar('F')
 
@@ -110,7 +110,7 @@ async def get_room_play_info(room_id: int, quality: int = 10000,
         'protocol': "0,1,2,3,4,5,6,7",
         'qn': quality,
         'room_id': room_id,
-    }, cookies=cookies) as res:
+    }, cookies=cookies, headers={'user-agent': USER_AGENT}) as res:
         data = parse_obj_as(Response[type_], await res.json())
         if data.code == 0:
             return data.data
