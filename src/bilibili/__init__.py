@@ -26,12 +26,14 @@ def auto_session(func: F) -> F:
     @functools.wraps(func)
     async def wrapper(*args, **kwargs):
         session = None
-        if 'session' not in kwargs:
-            session = kwargs['session'] = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10))
-        result = await func(*args, **kwargs)
-        if session is not None:
-            await session.close()
-        return result
+        try:
+            if 'session' not in kwargs:
+                session = kwargs['session'] = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10))
+            result = await func(*args, **kwargs)
+            return result
+        finally:
+            if session is not None:
+                await session.close()
 
     return wrapper
 
