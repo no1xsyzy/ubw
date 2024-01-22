@@ -4,7 +4,7 @@ import re
 import sys
 from enum import Enum
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Callable, Any
 
 import typer
 
@@ -193,41 +193,36 @@ async def get_play_url(room_id: int,
     console = get_console()
     play_info: RoomPlayInfo = await get_room_play_info(room_id, qn)
 
+    each: Callable[[str, str], Any] | None = None
+    after: Callable[[], Any] | None = None
+    empty: Callable[[], Any] | None
+
+    def empty():
+        print(f'Play info of room {room_id} is empty or filtered', file=sys.stderr)
+
     match output:
         case _OutputChoice.raw:
             print(play_info.json())
-            each = None
-            after = None
 
         case _OutputChoice.raw_pretty:
             from rich.pretty import pprint
             pprint(play_info)
-            each = None
-            after = None
 
         case _OutputChoice.info_link:
             def each(url, info):
                 console.print(Text(info), style=f"link {url}")
 
-            after = None
-
         case _OutputChoice.info_link_url:
             def each(url, info):
                 console.print(Text(f"{info}\t{url}"), style=f"link {url}")
-
-            after = None
 
         case _OutputChoice.url_only:
             def each(url, info):
                 print(url)
 
-            after = None
-
         case _OutputChoice.tsv:
             def each(url, info):
                 print('\t'.join([info, *info[1:-1].split("|"), "", url]))
-
-            after = None
 
         case _OutputChoice.m3u:
             from itertools import count
@@ -236,8 +231,6 @@ async def get_play_url(room_id: int,
 
             def each(url, info):
                 print(f"#EXTINF:,[{next(s)}]{info}\n{url}\n")
-
-            after = None
 
         case _OutputChoice.libmpv:
             # experimental
@@ -284,9 +277,8 @@ async def get_play_url(room_id: int,
             raise NotImplementedError(f'{output} is not implemented')
 
     if callable(each):
-        if play_info.playurl_info is None:
-            print(f'No Play Info for room {room_id}', file=sys.stderr)
-        else:
+        each_is_called = False
+        if play_info.playurl_info is not None:
             for stream in play_info.playurl_info.playurl.stream:
                 if filter_protocol != '' and stream.protocol_name not in filter_protocol:
                     continue
@@ -300,9 +292,12 @@ async def get_play_url(room_id: int,
                             continue
                         for url_info in cdc.url_info:
                             for u, i in extend_urlinfo(stream, fmt, cdc, url_info, real_original):
+                                each_is_called = True
                                 each(u, i)
                                 if print_first:  # should remove?
                                     return
+        if not each_is_called and empty is not None:
+            empty()
 
     if callable(after):
         after()
