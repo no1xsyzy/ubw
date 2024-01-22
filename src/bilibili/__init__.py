@@ -4,7 +4,7 @@ from typing import *
 
 import aiofiles
 import aiohttp
-from pydantic import parse_obj_as
+from pydantic import TypeAdapter
 
 from bilibili.models import Response, InfoByRoom, DanmuInfo, RoomEmoticons, FingerSPI, Host, RoomPlayInfo
 
@@ -44,7 +44,7 @@ async def get_info_by_room(room_id: int, type_: Type[_Type] = InfoByRoom, *, ses
     async with session.get(ROOM_INIT_URL,
                            params={'room_id': room_id},
                            headers={'User-Agent': USER_AGENT}) as res:
-        data = parse_obj_as(Response[type_], await res.json())
+        data = TypeAdapter(Response[type_]).validate_python(await res.json())
         if data.code == 0:
             return data.data
         else:
@@ -56,7 +56,7 @@ async def get_danmaku_server(room_id: int, type_: Type[_Type] = DanmuInfo, *, se
     async with session.get(DANMAKU_SERVER_CONF_URL,
                            params={'id': room_id, 'type': 0},
                            headers={'User-Agent': USER_AGENT}) as res:
-        data = parse_obj_as(Response[type_], await res.json())
+        data = TypeAdapter(Response[type_]).validate_python(await res.json())
         if data.code == 0:
             return data.data
         else:
@@ -69,7 +69,7 @@ async def get_emoticons(room_id: int, platform: str = 'pc', type_: Type[_Type] =
     async with session.get(EMOTICON_URL,
                            params={'platform': platform, 'id': room_id},
                            headers={'User-Agent': USER_AGENT}) as res:
-        data = parse_obj_as(Response[type_], await res.json())
+        data = TypeAdapter(Response[type_]).validate_python(await res.json())
         if data.code == 0:
             return data.data
         else:
@@ -80,7 +80,7 @@ async def get_emoticons(room_id: int, platform: str = 'pc', type_: Type[_Type] =
 async def get_finger_spi(type_: Type[_Type] = FingerSPI,
                          *, session: aiohttp.ClientSession) -> _Type:
     async with session.get(FINGER_SPI_URL, headers={'User-Agent': USER_AGENT}) as res:
-        data = parse_obj_as(Response[type_], await res.json())
+        data = TypeAdapter(Response[type_]).validate_python(await res.json())
         if data.code == 0:
             return data.data
         else:
@@ -111,7 +111,7 @@ async def get_room_play_info(room_id: int, quality: int = 10000,
         'qn': quality,
         'room_id': room_id,
     }, cookies=cookies, headers={'user-agent': USER_AGENT}) as res:
-        data = parse_obj_as(Response[type_], await res.json())
+        data = TypeAdapter(Response[type_]).validate_python(await res.json())
         if data.code == 0:
             return data.data
         else:

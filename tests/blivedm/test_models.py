@@ -1,4 +1,4 @@
-from pydantic import parse_obj_as
+from pydantic.v1 import parse_obj_as
 
 from blivedm import models
 

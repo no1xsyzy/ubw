@@ -3,8 +3,8 @@ import math
 import re
 from functools import cached_property
 
-import pydantic
 import rich
+from pydantic.v1 import validator
 from rich.markup import escape
 
 import blivedm
@@ -97,7 +97,7 @@ class DanmakuPHandlerSettings(blivedm.HandlerSettings):
     ignore_rate: float = 0.0
     dim_rate: float = 0.25
 
-    @pydantic.validator('dim_rate')
+    @validator('dim_rate')
     def ignore_less_than_dim(cls, v, values):  # noqa
         if values['ignore_rate'] > v:
             raise ValueError('must contain a space')
@@ -107,7 +107,7 @@ class DanmakuPHandlerSettings(blivedm.HandlerSettings):
 
     test_flags: list[str] = []
 
-    @pydantic.validator('test_flags', pre=True)
+    @validator('test_flags', pre=True)
     def split_flags(cls, v):  # noqa
         if isinstance(v, str):
             v = v.split(',')

@@ -7,7 +7,7 @@ from datetime import datetime
 from typing import Optional
 
 import aiohttp
-from pydantic import BaseModel, parse_obj_as
+from pydantic.v1 import BaseModel, parse_obj_as
 
 import bilibili
 from ._base import *

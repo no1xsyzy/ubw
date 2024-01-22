@@ -4,7 +4,7 @@ from contextvars import ContextVar
 from typing import *
 
 import sentry_sdk
-from pydantic import parse_obj_as, ValidationError, BaseSettings
+from pydantic.v1 import parse_obj_as, ValidationError, BaseSettings
 
 from . import models, ClientABC
 

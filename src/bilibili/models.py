@@ -1,13 +1,12 @@
 from datetime import datetime, timezone, timedelta
 from typing import *
 
-from pydantic import BaseModel, validator, Field
-from pydantic.generics import GenericModel
+from pydantic import BaseModel, Field, field_validator
 
 DataV = TypeVar('DataV')
 
 
-class Response(GenericModel, Generic[DataV]):
+class Response(BaseModel, Generic[DataV]):
     code: int
     message: str
     ttl: int = -1
@@ -38,7 +37,8 @@ class RoomInfo(BaseModel):
     keyframe: str
     """关键帧URL"""
 
-    @validator('live_start_time', pre=True)
+    @field_validator('live_start_time', mode='before')
+    @classmethod
     def live_start_time_zero_means_none(cls, v):
         if v == 0:
             return None
