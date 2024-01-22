@@ -187,11 +187,15 @@ async def get_play_url(room_id: int,
                        print_first: bool = False,
                        real_original: bool = True,
                        ):
-    from bilibili import get_room_play_info, RoomPlayInfo
     from rich import get_console
     from rich.text import Text
+    from .models.bilibili import RoomPlayInfo
+    from .clients.bilibili import BilibiliCookieClient
+
     console = get_console()
-    play_info: RoomPlayInfo = await get_room_play_info(room_id, qn)
+    client = BilibiliCookieClient(**main.config['accounts']['default'])
+    await client.read_cookie()
+    play_info = await client.get_room_play_info(room_id, qn)
 
     each: Callable[[str, str], Any] | None = None
     after: Callable[[], Any] | None = None
