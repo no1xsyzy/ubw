@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from datetime import datetime, timezone, timedelta
+from typing import Literal
 
 import aiocsv
 import aiofiles
@@ -40,6 +41,7 @@ def create_csv_writer(room_id: int) -> asyncio.Queue:
             dirname = f"output/bhashm/{room_id}"
             await aiofiles.os.makedirs(dirname, exist_ok=True)
             filename = f"{dirname}/{room_id}_{datetime.now(timezone(timedelta(seconds=8 * 3600))).strftime('%Y年%m月%d日%H点%M%S')}.csv"
+            mode: Literal['a', 'w']
             if await aiofiles.os.path.isfile(filename):
                 mode = 'a'
             else:
