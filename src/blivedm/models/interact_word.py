@@ -42,6 +42,14 @@ class InteractWordData(BaseModel):
     uname_color: str
     roomid: int
 
+    @field_validator('trigger_time', mode='before')
+    @classmethod
+    def convert_ns(cls, v):
+        if isinstance(v, int):
+            if v > 2e13 or v < -2e13:
+                v = v / 1e6
+        return v
+
 
 class InteractWordCommand(CommandModel):
     cmd: Literal['INTERACT_WORD']

@@ -52,8 +52,8 @@ class Data(BaseModel):
     msg_type: str
     timestamp: datetime
 
-    validate_game_msg = validator('game_msg', pre=True, allow_reuse=True)(strange_dict)
-    validate_interactive_panel_conf = validator('interactive_panel_conf', pre=True, allow_reuse=True)(strange_dict)
+    validate_game_msg = field_validator('game_msg', mode='before')(strange_dict)
+    validate_interactive_panel_conf = field_validator('interactive_panel_conf', mode='before')(strange_dict)
 
 
 class LiveOpenPlatformGameCommand(CommandModel):

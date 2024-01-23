@@ -2,7 +2,7 @@ import abc
 from datetime import datetime
 from typing import Literal
 
-from pydantic.v1 import BaseModel, Field
+from pydantic import BaseModel, Field
 
 
 class Segment(BaseModel):

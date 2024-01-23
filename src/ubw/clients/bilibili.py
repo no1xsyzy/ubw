@@ -1,6 +1,7 @@
 import abc
 import functools
 import http.cookies
+import logging
 import os
 import urllib.parse
 from pathlib import Path
@@ -22,6 +23,8 @@ ROOM_PLAY_INFO_URL = 'https://api.live.bilibili.com/xlive/app-room/v2/index/getR
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
 
 F = TypeVar('F')
+
+logger = logging.getLogger('ubw.bilibili')
 
 
 class BilibiliApiError(Exception):
@@ -50,48 +53,48 @@ _Type = TypeVar('_Type')
 class BilibiliClientABC(BaseModel, abc.ABC):
     auth_type: str
 
+    @property
     @abc.abstractmethod
-    def make_session(self):
+    def session(self):
         ...
 
+    async def close(self):
+        await self.session.close()
+
     async def get_info_by_room(self, room_id: int) -> InfoByRoom:
-        async with self.make_session() as session:
-            async with session.get('https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom',
-                                   params={'room_id': room_id}) as res:
-                data = TypeAdapter(Response[InfoByRoom]).validate_python(await res.json())
-                if data.code == 0:
-                    return data.data
-                else:
-                    raise BilibiliApiError(data.message)
+        async with self.session.get('https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom',
+                                    params={'room_id': room_id}) as res:
+            data = TypeAdapter(Response[InfoByRoom]).validate_python(await res.json())
+            if data.code == 0:
+                return data.data
+            else:
+                raise BilibiliApiError(data.message)
 
     async def get_danmaku_server(self, room_id: int) -> DanmuInfo:
-        async with self.make_session() as session:
-            async with session.get(DANMAKU_SERVER_CONF_URL,
-                                   params={'id': room_id, 'type': 0}) as res:
-                data = TypeAdapter(Response[DanmuInfo]).validate_python(await res.json())
-                if data.code == 0:
-                    return data.data
-                else:
-                    raise BilibiliApiError(data.message)
+        async with self.session.get(DANMAKU_SERVER_CONF_URL,
+                                    params={'id': room_id, 'type': 0}) as res:
+            data = TypeAdapter(Response[DanmuInfo]).validate_python(await res.json())
+            if data.code == 0:
+                return data.data
+            else:
+                raise BilibiliApiError(data.message)
 
     async def get_emoticons(self, room_id: int, platform: str = 'pc') -> RoomEmoticons:
-        async with self.make_session() as session:
-            async with session.get(EMOTICON_URL,
-                                   params={'platform': platform, 'id': room_id}) as res:
-                data = TypeAdapter(Response[RoomEmoticons]).validate_python(await res.json())
-                if data.code == 0:
-                    return data.data
-                else:
-                    raise BilibiliApiError(data.message)
+        async with self.session.get(EMOTICON_URL,
+                                    params={'platform': platform, 'id': room_id}) as res:
+            data = TypeAdapter(Response[RoomEmoticons]).validate_python(await res.json())
+            if data.code == 0:
+                return data.data
+            else:
+                raise BilibiliApiError(data.message)
 
     async def get_finger_spi(self, ) -> FingerSPI:
-        async with self.make_session() as session:
-            async with session.get(FINGER_SPI_URL, headers={'User-Agent': USER_AGENT}) as res:
-                data = TypeAdapter(Response[FingerSPI]).validate_python(await res.json())
-                if data.code == 0:
-                    return data.data
-                else:
-                    raise BilibiliApiError(data.message)
+        async with self.session.get(FINGER_SPI_URL, headers={'User-Agent': USER_AGENT}) as res:
+            data = TypeAdapter(Response[FingerSPI]).validate_python(await res.json())
+            if data.code == 0:
+                return data.data
+            else:
+                raise BilibiliApiError(data.message)
 
     async def get_room_play_info(self, room_id: int, quality: int = 10000) -> RoomPlayInfo:
         cookies = {}
@@ -105,27 +108,30 @@ class BilibiliClientABC(BaseModel, abc.ABC):
                         continue
                     domain, subdomains, path, httponly, expires, name, value = line.split('\t')
                     cookies[name] = value
-        async with self.make_session() as session:
-            async with session.get(ROOM_PLAY_INFO_URL, params={
-                'build': 6215200,
-                'codec': "0,1",
-                'device_name': "VTR-AL00",
-                'format': "0,1,2,3,4,5,6,7",
-                'platform': 'android',
-                'protocol': "0,1,2,3,4,5,6,7",
-                'qn': quality,
-                'room_id': room_id,
-            }, cookies=cookies, headers={'user-agent': USER_AGENT}) as res:
-                data = TypeAdapter(Response[RoomPlayInfo]).validate_python(await res.json())
-                if data.code == 0:
-                    return data.data
-                else:
-                    raise BilibiliApiError(data.message)
+        async with self.session.get(ROOM_PLAY_INFO_URL, params={
+            'build': 6215200,
+            'codec': "0,1",
+            'device_name': "VTR-AL00",
+            'format': "0,1,2,3,4,5,6,7",
+            'platform': 'android',
+            'protocol': "0,1,2,3,4,5,6,7",
+            'qn': quality,
+            'room_id': room_id,
+        }, cookies=cookies, headers={'user-agent': USER_AGENT}) as res:
+            data = TypeAdapter(Response[RoomPlayInfo]).validate_python(await res.json())
+            if data.code == 0:
+                return data.data
+            else:
+                raise BilibiliApiError(data.message)
 
 
 class BilibiliCookieClient(BilibiliClientABC):
     auth_type: Literal['cookie'] = 'cookie'
     cookie_file: Path | None = None
+
+    @functools.cached_property
+    def session(self):
+        return self.make_session()
 
     @functools.cached_property
     def _cookies(self):

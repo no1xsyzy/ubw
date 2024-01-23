@@ -1,14 +1,13 @@
 import json
-import re
 from datetime import datetime, timezone, timedelta
 from typing import Annotated, runtime_checkable, Protocol, Union, Literal
 
-from pydantic.v1 import BaseModel, Field, root_validator, validator, Field
+from pydantic import BaseModel, Field, model_validator, field_validator, Field, RootModel
 
 __all__ = (
     'BaseModel', 'CommandModel', 'datetime', 'timedelta', 'timezone', 'Literal', 'Annotated', 'Union',
     'Summary', 'Summarizer',
-    'Scatter', 'strange_dict', 'Color', 'root_validator', 'validator', 'Field', 'MedalInfo',
+    'Scatter', 'strange_dict', 'Color', 'model_validator', 'field_validator', 'Field', 'MedalInfo',
 )
 
 
@@ -31,39 +30,50 @@ class CommandModel(BaseModel):
         extra = 'forbid'
 
 
-class Color(BaseModel):
-    __root__: Union[str, int]
+class Color(RootModel):
+    root: tuple[int, int, int] | tuple[int, int, int, int]
 
-    @root_validator(pre=True)
-    def parse_color(cls, values):
-        data = values['__root__']
-        if isinstance(data, str) and data.startswith("#"):
-            data = data.lstrip("#")
-            if len(data) == 3:
-                r, g, b = data
-                data = r + r + g + g + b + b
+    @model_validator(mode='before')
+    def parse_color(cls, data):
+        if isinstance(data, str):
+            s = data.lstrip("#")
+            if len(s) == 3:
+                r, g, b = s
+                return int(r, 16) * 17, int(g, 16) * 17, int(b, 16) * 17
+            elif len(s) == 6:
+                r = s[:2]
+                g = s[2:4]
+                b = s[4:6]
+                return int(r), int(g), int(b)
+            elif len(s) == 8:
+                r = s[:2]
+                g = s[2:4]
+                b = s[4:6]
+                a = s[6:8]
+                return int(r), int(g), int(b), int(a)
         elif isinstance(data, int):
-            data = ("000000" + hex(data)[2:])[-6:]
-        if re.match("[0-9a-fA-F]{6}", data) or re.match("[0-9a-fA-F]{8}", data):
-            return {'__root__': data}
-        else:
-            raise ValueError(f"`{values['__root__']}` is not a valid color")
+            if 0 <= data < 2 ** 24:
+                return data // 65536, data // 256 % 256, data % 256
+        elif isinstance(data, tuple):
+            if len(data) in [3, 4]:
+                return data
+        raise ValueError(f"`{data!r}` is not a color")
 
     @property
     def hashcolor(self):
-        return "#" + self.__root__
+        return "#" + ''.join(hex(p)[2:] for p in self.root)
 
     @property
     def red(self) -> int:
-        return int(self.__root__[:2], 16)
+        return self.root[0]
 
     @property
     def green(self) -> int:
-        return int(self.__root__[2:4], 16)
+        return self.root[1]
 
     @property
     def blue(self) -> int:
-        return int(self.__root__[4:6], 16)
+        return self.root[2]
 
     @property
     def alpha(self) -> int | None:

@@ -1,7 +1,7 @@
 from json import JSONDecoder
 from pathlib import Path
 
-from pydantic.v1 import parse_obj_as
+from pydantic import TypeAdapter
 
 from blivedm import models
 
@@ -14,6 +14,6 @@ def test_with_history():
         idx = 0
         while idx < len(jsons):
             json, idx = decoder.raw_decode(jsons, idx)
-            m = parse_obj_as(models.AnnotatedCommandModel, json)
+            m = TypeAdapter(models.AnnotatedCommandModel).validate_python(json)
             c = m.__class__
             assert models.CommandModel in c.mro() and c is not models.CommandModel

@@ -13,8 +13,8 @@ class OnlineRankV2Data(BaseModel):
     rank_type: str
     list: list[OnlineRankV2Info]
 
-    @root_validator(pre=True)
-    def online_list_is_list(cls, values):  # TODO: use validation_alias=AliasChoice(...) after pydantic v2.0
+    @model_validator(mode='before')
+    def online_list_is_list(cls, values):  # TODO: use validation_alias=AliasChoice(...)
         if 'online_list' in values:
             values['list'] = values['online_list']
             del values['online_list']

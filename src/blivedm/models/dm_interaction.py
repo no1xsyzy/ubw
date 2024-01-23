@@ -24,7 +24,7 @@ class Data(BaseModel):
     type: int
     data: DataData
 
-    validate_extra = validator('data', pre=True, allow_reuse=True)(strange_dict)
+    validate_extra = field_validator('data', mode='before')(strange_dict)
 
 
 class DmInteractionCommand(CommandModel):

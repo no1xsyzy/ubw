@@ -56,7 +56,7 @@ class DanmakuInfoModeInfo(BaseModel):
     show_player_type: int | None = None
     extra: DanmakuInfoModeInfoExtra | None = None
 
-    validate_extra = validator('extra', pre=True, allow_reuse=True)(strange_dict)
+    validate_extra = field_validator('extra', mode='before')(strange_dict)
 
 
 class DanmakuInfo(BaseModel):
@@ -107,7 +107,7 @@ class DanmakuInfo(BaseModel):
     uname_color: str
     """用户名颜色"""
 
-    medal_level: str
+    medal_level: int
     """勋章等级"""
     medal_name: str
     """勋章名"""
@@ -135,9 +135,9 @@ class DanmakuInfo(BaseModel):
     privilege_type: int
     """舰队类型，0非舰队，1总督，2提督，3舰长"""
 
-    validate_emoticon_options = validator('emoticon_options', pre=True, allow_reuse=True)(strange_dict)
+    validate_emoticon_options = field_validator('emoticon_options', mode='before')(strange_dict)
 
-    validate_voice_config = validator('voice_config', pre=True, allow_reuse=True)(strange_dict)
+    validate_voice_config = field_validator('voice_config', mode='before')(strange_dict)
 
 
 class DanmakuCommand(CommandModel):
@@ -153,7 +153,7 @@ class DanmakuCommand(CommandModel):
             raw=self,
         )
 
-    @validator('info', pre=True)
+    @field_validator('info', mode='before')
     def parse_dankamu_info(cls, v):
         if isinstance(v, list):
             if len(v[3]) != 0:
@@ -222,7 +222,7 @@ class DanmakuCommand(CommandModel):
 class Danmaku371111Command(DanmakuCommand):
     cmd: Literal['DANMU_MSG:3:7:1:1:1:1']
 
-    @validator('info', pre=True)
+    @field_validator('info', mode='before')
     def parse_dankamu_info(cls, v):
         if isinstance(v, list):
             return {

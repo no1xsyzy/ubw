@@ -4,7 +4,7 @@ import re
 from functools import cached_property
 
 import rich
-from pydantic.v1 import validator
+from pydantic import field_validator, model_validator
 from rich.markup import escape
 
 import blivedm
@@ -97,18 +97,19 @@ class DanmakuPHandlerSettings(blivedm.HandlerSettings):
     ignore_rate: float = 0.0
     dim_rate: float = 0.25
 
-    @validator('dim_rate')
-    def ignore_less_than_dim(cls, v, values):  # noqa
-        if values['ignore_rate'] > v:
-            raise ValueError('must contain a space')
-        return v
+    @model_validator(mode='after')
+    def ignore_less_than_dim(self):
+        if self.ignore_rate > self.dim_rate:
+            raise ValueError('dim rate should not be less than ignore rate')
+        return self
 
     show_interact_word: bool = False
 
     test_flags: list[str] = []
 
-    @validator('test_flags', pre=True)
-    def split_flags(cls, v):  # noqa
+    @field_validator('test_flags', mode='before')
+    @classmethod
+    def split_flags(cls, v):
         if isinstance(v, str):
             v = v.split(',')
         return v

@@ -4,7 +4,7 @@ from contextvars import ContextVar
 from typing import *
 
 import sentry_sdk
-from pydantic.v1 import parse_obj_as, ValidationError, BaseSettings
+from pydantic import ValidationError, BaseModel, TypeAdapter
 
 from . import models, ClientABC
 
@@ -28,7 +28,7 @@ def func_info(func: Callable):
         return f"{func.__qualname__} (???:???)"
 
 
-class HandlerSettings(BaseSettings):
+class HandlerSettings(BaseModel):
     ignored_cmd: list[str] = []
 
 
@@ -61,7 +61,7 @@ class BaseHandler(Generic[T]):
                 return
 
             try:
-                model: models.CommandModel = parse_obj_as(models.AnnotatedCommandModel, command)
+                model: models.CommandModel = TypeAdapter(models.AnnotatedCommandModel).validate_python(command)
             except ValidationError as e:
                 logger.debug(f"got a {cmd}, processed with {func_info(self.on_unknown_cmd)}")
                 return await self.on_unknown_cmd(client, command, e)
