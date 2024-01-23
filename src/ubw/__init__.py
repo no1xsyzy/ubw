@@ -8,7 +8,7 @@ from typing import Annotated, Callable, Any
 
 import typer
 
-from .utils import sync, listen_to_all
+from .utils import sync, listen_to_all, listen_to_all_new_client
 
 app = typer.Typer()
 
@@ -91,11 +91,10 @@ async def danmakup(
         handler = DanmakuPHandler(
             DanmakuPHandlerSettings(**settings, ui=ui))
         with ui:
-            await listen_to_all(rooms, handler)
+            await listen_to_all_new_client(rooms, handler)
     else:
-        handler = DanmakuPHandler(
-            DanmakuPHandlerSettings(**settings))
-        await listen_to_all(rooms, handler)
+        handler = DanmakuPHandler(DanmakuPHandlerSettings(**settings))
+        await listen_to_all_new_client(rooms, handler)
 
 
 @app.command('pian')
