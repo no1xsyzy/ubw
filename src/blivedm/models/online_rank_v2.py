@@ -11,14 +11,7 @@ class OnlineRankV2Info(BaseModel):
 
 class OnlineRankV2Data(BaseModel):
     rank_type: str
-    list: list[OnlineRankV2Info]
-
-    @model_validator(mode='before')
-    def online_list_is_list(cls, values):  # TODO: use validation_alias=AliasChoice(...)
-        if 'online_list' in values:
-            values['list'] = values['online_list']
-            del values['online_list']
-        return values
+    online_list: list[OnlineRankV2Info] = Field(validation_alias=AliasChoices('online_list', 'list'))
 
 
 class OnlineRankV2Command(CommandModel):

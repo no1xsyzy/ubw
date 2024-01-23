@@ -2,12 +2,19 @@ import json
 from datetime import datetime, timezone, timedelta
 from typing import Annotated, runtime_checkable, Protocol, Union, Literal
 
-from pydantic import BaseModel, Field, model_validator, field_validator, Field, RootModel
+from pydantic import BaseModel, Field, model_validator, field_validator, Field, RootModel, AliasChoices
 
 __all__ = (
-    'BaseModel', 'CommandModel', 'datetime', 'timedelta', 'timezone', 'Literal', 'Annotated', 'Union',
+    # pydantic
+    'BaseModel', 'CommandModel', 'model_validator', 'field_validator', 'Field', 'AliasChoices',
+    # stdlib
+    'datetime', 'timedelta', 'timezone', 'Literal', 'Annotated', 'Union',
+    # interface
     'Summary', 'Summarizer',
-    'Scatter', 'strange_dict', 'Color', 'model_validator', 'field_validator', 'Field', 'MedalInfo',
+    # common types
+    'Scatter', 'MedalInfo', 'Color',
+    # common validator
+    'strange_dict', 'convert_ns',
 )
 
 
@@ -44,13 +51,13 @@ class Color(RootModel):
                 r = s[:2]
                 g = s[2:4]
                 b = s[4:6]
-                return int(r), int(g), int(b)
+                return int(r, 16), int(g, 16), int(b, 16)
             elif len(s) == 8:
                 r = s[:2]
                 g = s[2:4]
                 b = s[4:6]
                 a = s[6:8]
-                return int(r), int(g), int(b), int(a)
+                return int(r, 16), int(g, 16), int(b, 16), int(a, 16)
         elif isinstance(data, int):
             if 0 <= data < 2 ** 24:
                 return data // 65536, data // 256 % 256, data % 256
@@ -92,6 +99,13 @@ def strange_dict(cls, v):
         return v
     except (json.JSONDecodeError, TypeError):
         return {}
+
+
+def convert_ns(cls, v):
+    if isinstance(v, int):
+        if v > 2e13 or v < -2e13:
+            v = v / 1e6
+    return v
 
 
 class MedalInfo(BaseModel):

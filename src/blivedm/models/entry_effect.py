@@ -30,6 +30,8 @@ class EntryEffectData(BaseModel):
     web_dynamic_url_apng: str
     mobile_dynamic_url_webp: str
 
+    trigger_time_ns = field_validator('trigger_time', mode='before')(convert_ns)
+
 
 class EntryEffectCommand(CommandModel):
     cmd: Literal['ENTRY_EFFECT']

@@ -169,7 +169,7 @@ class DanmakuCommand(CommandModel):
                 runame = ''
                 room_id = 0
                 mcolor = 0
-                special_medal = 0
+                special_medal = ""
 
             return {
                 # .0.0
