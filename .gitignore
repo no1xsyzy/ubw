@@ -8,3 +8,4 @@ dist/
 *.log
 .env
 cookies.txt
+libmpv*.dll
