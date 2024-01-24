@@ -12,7 +12,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "~3.11.0"
 aiohttp = { version = "^3.8.3", extras = ["speedups"] }
 aiofiles = "^22.1.0"
 aiocsv = "^1.2.3"
@@ -28,6 +28,7 @@ mpv = "^1.0.5"
 tinydb = "^4.7.1"
 tinydb-serialization = "^2.1.0"
 aiotinydb = "^2.0.0"
+pyinstaller = "^6.3.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"
