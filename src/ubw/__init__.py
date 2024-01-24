@@ -165,14 +165,18 @@ class _OutputChoice(str, Enum):
 def extend_urlinfo(stream, fmt, cdc, url_info, real_original):
     host = url_info.host.replace('https://', '')
     url = f"{url_info.host}{cdc.base_url}{url_info.extra}"
-    info = f"E|{stream.protocol_name}|{fmt.format_name}|{cdc.codec_name}|{cdc.current_qn}|{host}"
+    real = re.search(r"(\d+)_(?:minihevc|prohevc|bluray)", url)
+    if real:
+        info = f"A|{stream.protocol_name}|{fmt.format_name}|{cdc.codec_name}|{cdc.current_qn}|{host}"
+    else:
+        info = f"C|{stream.protocol_name}|{fmt.format_name}|{cdc.codec_name}|{cdc.current_qn}|{host}"
     yield url, info
     if real_original:
         if stream.protocol_name == 'http_stream':
             return  # seems unsupported
-        if re.search(r"(\d+)_(?:minihevc|prohevc|bluray)", url):
+        if real:
             yield (re.sub(r"(\d+)_(?:minihevc|prohevc|bluray)", r'\1', url),
-                   f"RO|{stream.protocol_name}|{fmt.format_name}|{cdc.codec_name}|{cdc.current_qn}|{host}")
+                   f"T|{stream.protocol_name}|{fmt.format_name}|{cdc.codec_name}|{cdc.current_qn}|{host}")
 
 
 @app.command()
