@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone, timedelta, date
 from typing import Annotated, runtime_checkable, Protocol, Union, Literal
 
 from pydantic import BaseModel, Field, model_validator, field_validator, Field, RootModel, AliasChoices
@@ -8,7 +8,7 @@ __all__ = (
     # pydantic
     'BaseModel', 'CommandModel', 'model_validator', 'field_validator', 'Field', 'AliasChoices',
     # stdlib
-    'datetime', 'timedelta', 'timezone', 'Literal', 'Annotated', 'Union',
+    'datetime', 'timedelta', 'timezone', 'date', 'Literal', 'Annotated', 'Union',
     # interface
     'Summary', 'Summarizer',
     # common types

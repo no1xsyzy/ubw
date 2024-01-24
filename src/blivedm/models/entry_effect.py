@@ -25,7 +25,7 @@ class EntryEffectData(BaseModel):
     trigger_time: datetime
     identities: int
     effect_silent_time: int
-    effective_time_new: int
+    effective_time_new: float
     web_dynamic_url_webp: str
     web_dynamic_url_apng: str
     mobile_dynamic_url_webp: str

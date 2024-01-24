@@ -124,7 +124,7 @@ class DanmakuInfo(BaseModel):
     """用户等级"""
     ulevel_color: int
     """用户等级颜色"""
-    ulevel_rank: str
+    ulevel_rank: int | Literal['>50000']
     """用户等级排名，>50000时为'>50000'"""
 
     old_title: str
