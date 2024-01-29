@@ -54,7 +54,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
 
     @property
     @abc.abstractmethod
-    def session(self):
+    def session(self) -> aiohttp.ClientSession:
         ...
 
     async def close(self):
