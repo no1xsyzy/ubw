@@ -242,6 +242,22 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                 rf"\[[bright_cyan]{room_id}[/]] "
                 f"直播间信息变更《[rgb(255,212,50)]{escape(title)}[/]》，分区：{parent_area_name}/{area_name}")
 
+    async def on_notice_msg(self, client, message):
+        if self.settings.ui is None:
+            rich.print(
+                rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
+                rf"\[[bright_cyan]{client.room_id}[/]] "
+                rf"{message!r}"
+            )
+
+    async def on_summary(self, client, summary):
+        if self.settings.ui is None:
+            rich.print(
+                rf"\[{summary.t.strftime('%Y-%m-%d %H:%M:%S')}] "
+                rf"\[[bright_cyan]{client.room_id}[/]] "
+                rf"{summary.msg} ({summary.raw.cmd})"
+            )
+
     async def on_warning(self, client, message: blivedm.models.WarningCommand):
         room_id = client.room_id
         if self.settings.ui is not None:
