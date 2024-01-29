@@ -3,7 +3,6 @@ import functools
 import http.cookies
 import logging
 import os
-import urllib.parse
 from pathlib import Path
 from typing import *
 
@@ -168,7 +167,6 @@ class BilibiliCookieClient(BilibiliClientABC):
                 httponly = httponly == 'TRUE'
                 from email.utils import formatdate
                 expires = formatdate(int(expires), usegmt=True)
-                value = urllib.parse.unquote(value)
                 self._cookies[name] = value
                 self._cookies[name]['domain'] = domain
                 self._cookies[name]['expires'] = expires
