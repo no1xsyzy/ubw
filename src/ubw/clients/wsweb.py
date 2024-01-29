@@ -141,6 +141,7 @@ class WSWebCookieClient(WSMessageParserMixin, ClientABC):
             try:
                 # 连接
                 host_server = self._host_server_list[retry_count % len(self._host_server_list)]
+                logger.debug(f'connecting wss://{host_server.host}:{host_server.wss_port}/sub')
                 async with self._session.ws_connect(
                         f"wss://{host_server.host}:{host_server.wss_port}/sub",
                         headers={'User-Agent': USER_AGENT},
@@ -196,7 +197,7 @@ class WSWebCookieClient(WSMessageParserMixin, ClientABC):
         发送认证包
         """
         auth_params = {
-            'uid': 0,
+            'uid': self._uid,
             'roomid': self.room_id,
             'protover': 3,
             'platform': 'web',
