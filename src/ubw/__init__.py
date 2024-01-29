@@ -85,16 +85,21 @@ async def danmakup(
         'test_flags': test_flags,
     }
 
+    if 'new_client' in test_flags:
+        listen = listen_to_all_new_client
+    else:
+        listen = listen_to_all
+
     if use_ui:
         from .ui import LiveUI
         ui = LiveUI(alternate_screen=True)
         handler = DanmakuPHandler(
             DanmakuPHandlerSettings(**settings, ui=ui))
         with ui:
-            await listen_to_all_new_client(rooms, handler)
+            await listen(rooms, handler)
     else:
         handler = DanmakuPHandler(DanmakuPHandlerSettings(**settings))
-        await listen_to_all_new_client(rooms, handler)
+        await listen(rooms, handler)
 
 
 @app.command('pian')
