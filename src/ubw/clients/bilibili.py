@@ -150,6 +150,12 @@ class BilibiliCookieClient(BilibiliClientABC):
             case _:
                 raise ValueError('`use` must be one of `env`, `config`, `default`')
 
+        if s is None:
+            raise ValueError('no cookie file provided, use UBW_COOKIE_FILE or config.toml to specify')
+
+        s = Path(s).resolve()
+        logger.debug(f"reading cookies from {s}")
+
         async with aiofiles.open(s, mode='rt', encoding='utf-8') as f:
             async for line in f:
                 line = line.strip()
