@@ -333,6 +333,7 @@ def main(
     if log:
         if verbose > 0:
             config['logging']['root']['level'] = 'DEBUG'
+            config['logging']['root']['handlers'] = ['richconsole']
         init_logging(config)
     if sentry:
         init_sentry(config)
