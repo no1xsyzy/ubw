@@ -1,21 +1,15 @@
 import asyncio
 import logging
-import sys
 from datetime import datetime, timezone, timedelta
 from functools import cached_property
 
-try:
-    from tinydb import TinyDB, Query
-    from tinydb.storages import JSONStorage
-    from tinydb_serialization import SerializationMiddleware as _SyncSerializationMiddleware
-    from tinydb_serialization.serializers import DateTimeSerializer, Serializer
-    from aiotinydb import AIOTinyDB, AIOJSONStorage
-    from aiotinydb.middleware import AIOMiddleware
-except ImportError as e:
-    sys.exit(f"{e.name} is not installed, try install this with extra `tinydb`")
+from aiotinydb import AIOTinyDB, AIOJSONStorage
+from aiotinydb.middleware import AIOMiddleware
+from tinydb_serialization import SerializationMiddleware as _SyncSerializationMiddleware
+from tinydb_serialization.serializers import DateTimeSerializer, Serializer
 
-from ..clients import BilibiliUnauthorizedClient
 from ._base import *
+from ..clients import BilibiliUnauthorizedClient
 
 logger = logging.getLogger('blive_saver')
 

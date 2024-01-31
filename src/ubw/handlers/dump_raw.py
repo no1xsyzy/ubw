@@ -1,16 +1,12 @@
 import asyncio
 import logging
-import sys
 from datetime import datetime, timezone, timedelta
 from functools import cached_property
 
-try:
-    from aiotinydb import AIOTinyDB
-except ImportError as e:
-    sys.exit(f"{e.name} is not installed, try install this with extra `tinydb`")
+from aiotinydb import AIOTinyDB
 
-from ..clients import BilibiliUnauthorizedClient
 from ._base import *
+from ..clients import BilibiliUnauthorizedClient
 
 logger = logging.getLogger('blive_dumpraw')
 
