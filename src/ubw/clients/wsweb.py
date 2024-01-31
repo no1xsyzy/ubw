@@ -9,15 +9,15 @@ import yarl
 from pydantic import Field
 
 from ._wsbase import *
-from .bilibili import BilibiliCookieClient, BilibiliApiError, USER_AGENT
+from .bilibili import BilibiliCookieClient, BilibiliApiError, USER_AGENT, BilibiliClient
 from ..models.bilibili import Host
 
 logger = logging.getLogger('ubw.clients.wsweb')
 
 
-class WSWebCookieClient(WSMessageParserMixin, ClientABC):
+class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
     clientc: Literal['wsweb'] = 'wsweb'
-    bilibili_client: BilibiliCookieClient = Field(default_factory=BilibiliCookieClient)
+    bilibili_client: BilibiliClient = Field(default_factory=BilibiliCookieClient)
 
     # defaults
     heartbeat_interval: int = 30

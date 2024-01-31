@@ -1,22 +1,21 @@
 import asyncio
 import logging
 from datetime import datetime, timezone, timedelta
-from typing import Literal
 
 import aiocsv
 import aiofiles
 import aiofiles.os
 from rich.markup import escape
 
-import blivedm
-from bilibili import get_info_by_room
+from ._base import *
+from ..clients import BilibiliUnauthorizedClient
 
 live_start_times: dict[int, datetime | None] = {}
 
 
 class RichClientAdapter(logging.LoggerAdapter):
     def process(self, msg, kwargs):
-        client = blivedm.ctx_client.get(None)
+        client = ctx_client.get(None)
         if client is None:
             room_id = 'NO_ROOM'
         else:
@@ -30,7 +29,7 @@ logger = RichClientAdapter(logging.getLogger('bhashm'), {})
 
 
 async def get_live_start_time(room_id: int) -> datetime | None:
-    return (await get_info_by_room(room_id)).room_info.live_start_time
+    return (await BilibiliUnauthorizedClient().get_info_by_room(room_id)).room_info.live_start_time
 
 
 def create_csv_writer(room_id: int) -> asyncio.Queue:
@@ -68,19 +67,15 @@ def create_csv_writer(room_id: int) -> asyncio.Queue:
     return queue
 
 
-class HashMarkHandlerSettings(blivedm.HandlerSettings):
+class HashMarkHandler(BaseHandler):
+    cls: Literal['bhashm'] = 'bhashm'
     famous_people: list[int] = []
-
-
-class HashMarkHandler(blivedm.BaseHandler[HashMarkHandlerSettings]):
-    def __init__(self, settings):
-        super().__init__(settings)
-        self.csv_queues: dict[int, asyncio.Queue] = {}
+    _csv_queues: dict[int, asyncio.Queue] = {}
 
     def get_csv_queue_for(self, room_id) -> asyncio.Queue:
-        if room_id not in self.csv_queues:
-            self.csv_queues[room_id] = create_csv_writer(room_id)
-        return self.csv_queues[room_id]
+        if room_id not in self._csv_queues:
+            self._csv_queues[room_id] = create_csv_writer(room_id)
+        return self._csv_queues[room_id]
 
     async def on_summary(self, client, summary):
         line = f"{summary.user[1]}(uid={summary.user[0]}): {escape(summary.msg)}"
@@ -108,7 +103,7 @@ class HashMarkHandler(blivedm.BaseHandler[HashMarkHandlerSettings]):
                     .isoformat(sep=" ", timespec='seconds')),
                 't': t, 'marker': uname, 'symbol': msg
             })
-        elif message.info.uid in self.settings.famous_people:
+        elif message.info.uid in self.famous_people:
             logger.info(f"[red]famous[/] {uname}: [bright_white]{escape(msg)}[/][bright_green]{live_start_suffix}[/]")
 
     async def on_room_change(self, client, message):

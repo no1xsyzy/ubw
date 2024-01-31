@@ -3,7 +3,7 @@ import re
 
 from rich.markup import escape
 
-import blivedm
+from ._base import *
 
 
 class RichClientAdapter(logging.LoggerAdapter):
@@ -16,27 +16,26 @@ class RichClientAdapter(logging.LoggerAdapter):
 logger = RichClientAdapter(logging.getLogger('strange_stalker'), {})
 
 
-class StrangeStalkerHandlerSettings(blivedm.HandlerSettings):
+class StrangeStalkerHandler(BaseHandler):
+    cls: Literal['strange_stalker'] = 'strange_stalker'
     uids: list[int] = []
     regex: re.Pattern | None = None
     ignore_danmaku: re.Pattern | None = None
 
-
-class StrangeStalkerHandler(blivedm.BaseHandler[StrangeStalkerHandlerSettings]):
     async def on_summary(self, client, summary):
         json = summary.raw.json(ensure_ascii=False)
-        if self.settings.regex is not None and self.settings.regex.match(json):
+        if self.regex is not None and self.regex.match(json):
             logger.info(rf"[{summary.room_id}] {summary.msg} ({summary.raw.cmd})")
 
     async def on_maybe_summarizer(self, client, model):
         json = model.json(ensure_ascii=False)
-        if self.settings.regex is not None and self.settings.regex.match(json):
+        if self.regex is not None and self.regex.match(json):
             logger.info(rf"\[[bright_cyan]{client.room_id}[/]] " + json)
 
     async def on_danmu_msg(self, client, message):
-        if message.info.uid not in self.settings.uids and not self.settings.regex.match(message.info.msg):
+        if message.info.uid not in self.uids and not self.regex.match(message.info.msg):
             return
-        if self.settings.ignore_danmaku is not None and self.settings.ignore_danmaku.match(message.info.msg):
+        if self.ignore_danmaku is not None and self.ignore_danmaku.match(message.info.msg):
             return
         logger.info(rf"\[[bright_cyan]{client.room_id}[/]] "
                     rf"[cyan]{message.info.uname}[/]: [bright_white]{escape(message.info.msg)}[/]")
@@ -67,7 +66,7 @@ class StrangeStalkerHandler(blivedm.BaseHandler[StrangeStalkerHandlerSettings]):
         logger.info(rf"\[[bright_cyan]{room_id}[/]] [black on #eeaaaa]:black_square_for_stop-text:直播结束[/]")
 
     async def on_interact_word(self, client, model):
-        if model.data.uid not in self.settings.uids:
+        if model.data.uid not in self.uids:
             return
         return await super().on_interact_word(client, model)
 

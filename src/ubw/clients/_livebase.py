@@ -2,12 +2,18 @@ from __future__ import annotations
 
 import abc
 import enum
+import logging
+import struct
+from asyncio import Task
+from functools import cached_property
 from typing import Protocol, NamedTuple
+
+from pydantic import BaseModel
 
 __all__ = (
     # types
     'HandlerInterface',
-    'ClientABC',
+    'LiveClientABC',
     'HeaderTuple',
 
     # exceptions
@@ -18,22 +24,33 @@ __all__ = (
     'ProtoVer',
     'Operation',
     'AuthReplyCode',
+
+    # consts
+    'DEFAULT_DANMAKU_SERVER_LIST',
+    'HEADER_STRUCT',
 )
+
+logger = logging.getLogger('ubw.clients')
 
 
 class HandlerInterface(Protocol):
     """直播消息处理器接口"""
 
-    async def handle(self, client: ClientABC, command: dict):
+    async def handle(self, client: LiveClientABC, command: dict):
         raise NotImplementedError
 
 
-class ClientABC(abc.ABC):
+class LiveClientABC(BaseModel, abc.ABC):
+    clientc: str
     room_id: int
 
-    def __init__(self):
-        self._handlers: list[HandlerInterface] = []
-        self._task = None
+    @cached_property
+    def _handlers(self) -> list[HandlerInterface]:
+        return []
+
+    @cached_property
+    def _task(self) -> Task | None:
+        return None
 
     def add_handler(self, handler: HandlerInterface):
         if handler not in self._handlers:
@@ -67,12 +84,10 @@ class ClientABC(abc.ABC):
 
     async def stop_and_close(self):
         task = self._task
-        try:
-            if task:
-                self.stop()
-                await task
-        finally:
-            await self.close()
+        if task:
+            self.stop()
+            await task
+        await self.close()
 
 
 class InitError(Exception):
@@ -128,3 +143,9 @@ class Operation(enum.IntEnum):
 class AuthReplyCode(enum.IntEnum):
     OK = 0
     TOKEN_ERROR = -101
+
+
+DEFAULT_DANMAKU_SERVER_LIST = [
+    {'host': 'broadcastlv.chat.bilibili.com', 'port': 2243, 'wss_port': 443, 'ws_port': 2244}
+]
+HEADER_STRUCT = struct.Struct('>I2H2I')

@@ -9,23 +9,21 @@ try:
 except ImportError as e:
     sys.exit(f"{e.name} is not installed, try install this with extra `tinydb`")
 
-import blivedm
-from bilibili import get_info_by_room
+from ..clients import BilibiliUnauthorizedClient
+from ._base import *
 
 logger = logging.getLogger('blive_dumpraw')
 
 
-class DumpRawHandlerSettings(blivedm.HandlerSettings):
+class DumpRawHandler(BaseHandler):
+    cls: Literal['dump_raw'] = 'dump_raw'
     max_shard_length: timedelta = timedelta(days=1)
+    room_id: int
+    _living = False
+    _wait_sharding: asyncio.Task | None = None
 
-
-class DumpRawHandler(blivedm.BaseHandler[DumpRawHandlerSettings]):
-    def __init__(self, *, room_id, **p):
-        super().__init__(**p)
-        self.room_id = room_id
-        self._living = False
-        asyncio.create_task(self.m_new_shard())
-        self._wait_sharding: asyncio.Task | None = None
+    async def start(self):
+        await self.m_new_shard()
 
     @cached_property
     def shard_start(self):
@@ -45,10 +43,10 @@ class DumpRawHandler(blivedm.BaseHandler[DumpRawHandlerSettings]):
     async def m_new_shard(self):
         self.__dict__.pop('shard_start', None)
         self.__dict__.pop('db', None)
-        info: dict = await get_info_by_room(self.room_id, type_=dict)
-        self._living = info['room_info']['live_start_time'] is not None
+        info = await BilibiliUnauthorizedClient().get_info_by_room(self.room_id)
+        self._living = info.room_info.live_start_time is not None
         async with self.db as db:
-            db.insert(info)
+            db.insert(info.model_dump())
         if self._wait_sharding is not None:
             self._wait_sharding.cancel("new shard")
         self._wait_sharding = asyncio.create_task(self.m_new_shard_waiting())
@@ -56,13 +54,9 @@ class DumpRawHandler(blivedm.BaseHandler[DumpRawHandlerSettings]):
     async def m_new_shard_waiting(self):
         if 'shard_start' not in self.__dict__:
             return
-        next_sharding = self.shard_start + self.settings.max_shard_length
+        next_sharding = self.shard_start + self.max_shard_length
         logger.info(f"[{self.room_id}] scheduled sharding: {next_sharding}")
         delay = next_sharding - datetime.now(timezone(timedelta(seconds=8 * 3600)))
-        try:
-            await asyncio.sleep(delay.total_seconds())
-        except asyncio.CancelledError:
-            raise
-        else:
-            logger.info(f"[{self.room_id}] sharding")
-            asyncio.create_task(self.m_new_shard())
+        await asyncio.sleep(delay.total_seconds())
+        logger.info(f"[{self.room_id}] sharding")
+        await asyncio.shield(self.m_new_shard())

@@ -7,8 +7,9 @@ import rich
 from pydantic import field_validator, model_validator
 from rich.markup import escape
 
-import blivedm
 from ubw.ui import Record, PlainText, User, RoomTitle, UI, ColorSeeSee
+from ._base import *
+from ..models import blive as models
 
 KAOMOJIS = [
     "(⌒▽⌒)",
@@ -91,11 +92,16 @@ class RichClientAdapter(logging.LoggerAdapter):
 logger = RichClientAdapter(logging.getLogger('danmakup'), {})
 
 
-class DanmakuPHandlerSettings(blivedm.HandlerSettings):
+class DanmakuPHandler(BaseHandler):
+    cls: Literal['danmakup'] = 'danmakup'
     ignore_danmaku: re.Pattern | None = None
 
     ignore_rate: float = 0.0
     dim_rate: float = 0.25
+
+    show_interact_word: bool = False
+    test_flags: list[str] = []
+    ui: UI | None = None
 
     @model_validator(mode='after')
     def ignore_less_than_dim(self):
@@ -103,26 +109,12 @@ class DanmakuPHandlerSettings(blivedm.HandlerSettings):
             raise ValueError('dim rate should not be less than ignore rate')
         return self
 
-    show_interact_word: bool = False
-
-    test_flags: list[str] = []
-
     @field_validator('test_flags', mode='before')
     @classmethod
     def split_flags(cls, v):
         if isinstance(v, str):
             v = v.split(',')
         return v
-
-    ui: UI | None = None
-
-
-class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
-    @cached_property
-    def ui(self):
-        if self.settings.ui is None:
-            raise ValueError('this handler do not use ui')
-        return self.settings.ui
 
     @cached_property
     def kaomojis(self):
@@ -145,8 +137,8 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
             tok.suggest_freq(kmj, True)
         return tok
 
-    def trivial_rate(self, info: blivedm.models.danmu_msg.DanmakuInfo) -> float:
-        if self.settings.ignore_danmaku is not None and self.settings.ignore_danmaku.match(info.msg):
+    def trivial_rate(self, info: models.danmu_msg.DanmakuInfo) -> float:
+        if self.ignore_danmaku is not None and self.ignore_danmaku.match(info.msg):
             return -1
         if info.mode_info.extra.emoticon_unique:  # 单一表情
             return 0.1
@@ -159,14 +151,14 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                 msg = msg.replace(emot, "\ue000")
         return len(msg.replace("\ue000", "")) / len(msg)
 
-    async def on_danmu_msg(self, client, message: blivedm.DanmakuCommand):
+    async def on_danmu_msg(self, client, message: models.DanmakuCommand):
         uname = message.info.uname
         msg = message.info.msg
         room_id = client.room_id
         trivial_rate = self.trivial_rate(message.info)
 
         # ==== testing: entropy ====
-        if 'entropy' in self.settings.test_flags:
+        if 'entropy' in self.test_flags:
             tokens = []
             if message.info.mode_info.extra.emots is not None:
                 self.kaomojis.update(message.info.mode_info.extra.emots.keys())
@@ -178,7 +170,7 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                 else:
                     tokens.extend(self.tokenizer.lcut(s))
             entropy = self.entropy.calculate_and_add_tokens(tokens)
-            if self.settings.ui is not None:
+            if self.ui is not None:
                 self.ui.add_record(Record(segments=[
                     ColorSeeSee(text=f"[{room_id}] "),
                     User(name=uname, uid=message.info.uid),
@@ -195,10 +187,10 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
             return
         # ==== testing: entropy ====
 
-        if trivial_rate < self.settings.ignore_rate:
+        if trivial_rate < self.ignore_rate:
             pass
-        elif trivial_rate < self.settings.dim_rate:
-            if self.settings.ui is not None:
+        elif trivial_rate < self.dim_rate:
+            if self.ui is not None:
                 self.ui.add_record(Record(segments=[
                     ColorSeeSee(text=f"[{room_id}] "),
                     User(name=uname, uid=message.info.uid),
@@ -211,7 +203,7 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                     rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
                     rf"\[[bright_cyan]{room_id}[/]] {uname} (uid={message.info.uid}): [grey]{escape(msg)}[/]")
         else:
-            if self.settings.ui is not None:
+            if self.ui is not None:
                 self.ui.add_record(Record(segments=[
                     ColorSeeSee(text=f"[{room_id}] "),
                     User(name=uname, uid=message.info.uid),
@@ -229,7 +221,7 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
         area_name = message.data.area_name
         room_id = client.room_id
 
-        if self.settings.ui is not None:
+        if self.ui is not None:
             self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 PlainText(text=f"直播间信息变更"),
@@ -243,16 +235,16 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                 f"直播间信息变更《[rgb(255,212,50)]{escape(title)}[/]》，分区：{parent_area_name}/{area_name}")
 
     async def on_summary(self, client, summary):
-        if self.settings.ui is None:
+        if self.ui is None:
             rich.print(
                 rf"\[{summary.t.strftime('%Y-%m-%d %H:%M:%S')}] "
                 rf"\[[bright_cyan]{client.room_id}[/]] "
                 rf"{summary.msg} ({summary.raw.cmd})"
             )
 
-    async def on_warning(self, client, message: blivedm.models.WarningCommand):
+    async def on_warning(self, client, message: models.WarningCommand):
         room_id = client.room_id
-        if self.settings.ui is not None:
+        if self.ui is not None:
             self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 PlainText(text=f"受到警告 {message.msg}"),
@@ -268,7 +260,7 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
         msg = message.data.message
         color = message.data.message_font_color
         room_id = client.room_id
-        if self.settings.ui is not None:
+        if self.ui is not None:
             self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 User(name=uname, uid=message.data.uid),
@@ -281,7 +273,7 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
 
     async def on_room_block_msg(self, client, message):
         room_id = client.room_id
-        if self.settings.ui is not None:
+        if self.ui is not None:
             self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 PlainText(text="用户被封禁"),
@@ -295,7 +287,7 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
 
     async def on_live(self, client, message):
         room_id = client.room_id
-        if self.settings.ui is not None:
+        if self.ui is not None:
             self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 PlainText(text="\N{Black Right-Pointing Triangle With Double Vertical Bar}\N{VS16}直播开始"),
@@ -308,7 +300,7 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
 
     async def on_preparing(self, client, message):
         room_id = client.room_id
-        if self.settings.ui is not None:
+        if self.ui is not None:
             self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 PlainText(text="\N{Black Square For Stop}\N{VS16}直播结束"),
@@ -319,11 +311,11 @@ class DanmakuPHandler(blivedm.BaseHandler[DanmakuPHandlerSettings]):
                 rf"\[[bright_cyan]{room_id}[/]] [black on #eeaaaa]:black_square_for_stop-text:直播结束[/]")
 
     async def on_interact_word(self, client, model):
-        if not self.settings.show_interact_word:
+        if not self.show_interact_word:
             return
         room_id = client.room_id
         c = ["", "进入", "关注", "分享", "特别关注", "互相关注"]
-        if self.settings.ui is not None:
+        if self.ui is not None:
             self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 User(name=model.data.uname, uid=model.data.uid),

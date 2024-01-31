@@ -6,8 +6,6 @@ authors = ["Xu Siyuan <inqb@protonmail.com>"]
 license = "MIT"
 readme = "Readme.md"
 packages = [
-    { include = "blivedm", from = "src" },
-    { include = "bilibili", from = "src" },
     { include = "ubw", from = "src" },
 ]
 

@@ -7,12 +7,12 @@ import struct
 import aiohttp
 import brotli
 
-from ._base import *
+from ._livebase import *
 
 __all__ = (
     # types
     'HandlerInterface',
-    'ClientABC',
+    'LiveClientABC',
     'HeaderTuple',
     'WSMessageParserMixin',
 
@@ -33,7 +33,7 @@ __all__ = (
 logger = logging.getLogger('wsclient')
 
 
-class WSMessageParserMixin(ClientABC, abc.ABC):
+class WSMessageParserMixin(LiveClientABC, abc.ABC):
     async def _on_ws_message(self, message: aiohttp.WSMessage):
         """
         收到websocket消息

@@ -8,7 +8,7 @@ from typing import Annotated, Callable, Any
 
 import typer
 
-from .utils import sync, listen_to_all, listen_to_all_new_client
+from .utils import sync, listen_to_all, Application
 
 app = typer.Typer()
 
@@ -40,7 +40,7 @@ async def strange_stalker(
         derive_uids: bool = True,
         derive_regex: bool = True,
 ):
-    from .handlers import StrangeStalkerHandler, StrangeStalkerHandlerSettings
+    from .handlers import StrangeStalkerHandler
     if regex is None:
         regex = []
     if uids is None:
@@ -48,15 +48,16 @@ async def strange_stalker(
     if ignore_danmaku is None:
         ignore_danmaku = []
     if derive_uids:
-        from bilibili import get_info_by_room
-        uids.extend([i.room_info.uid for i in await asyncio.gather(*(get_info_by_room(room) for room in rooms))])
+        from .clients import BilibiliUnauthorizedClient
+        uids.extend([i.room_info.uid
+                     for i in await asyncio.gather(*(BilibiliUnauthorizedClient().get_info_by_room(room)
+                                                     for room in rooms))])
     if derive_regex:
         regex.extend(map(str, uids))
         regex.extend(map(str, rooms))
     regex = '|'.join(regex)
     ignore_danmaku = '|'.join(ignore_danmaku)
-    settings = StrangeStalkerHandlerSettings(uids=uids, regex=regex, ignore_danmaku=ignore_danmaku)
-    return await listen_to_all(rooms, StrangeStalkerHandler(settings))
+    return await listen_to_all(rooms, StrangeStalkerHandler(uids=uids, regex=regex, ignore_danmaku=ignore_danmaku))
 
 
 @app.command('p')
@@ -70,7 +71,7 @@ async def danmakup(
         show_interact_word: bool = False,
         test_flags: str = "",
 ):
-    from .handlers import DanmakuPHandler, DanmakuPHandlerSettings
+    from .handlers import DanmakuPHandler
     if ignore_danmaku:
         ignore_danmaku = '|'.join(ignore_danmaku)
     else:
@@ -84,21 +85,15 @@ async def danmakup(
         'test_flags': test_flags,
     }
 
-    if 'new_client' in test_flags:
-        listen = listen_to_all_new_client
-    else:
-        listen = listen_to_all
-
     if 'use_ui' in test_flags:
         from .ui import LiveUI
         ui = LiveUI(alternate_screen=True)
-        handler = DanmakuPHandler(
-            DanmakuPHandlerSettings(**settings, ui=ui))
+        handler = DanmakuPHandler(**settings, ui=ui)
         with ui:
-            await listen(rooms, handler)
+            await listen_to_all(rooms, handler)
     else:
-        handler = DanmakuPHandler(DanmakuPHandlerSettings(**settings))
-        await listen(rooms, handler)
+        handler = DanmakuPHandler(**settings)
+        await listen_to_all(rooms, handler)
 
 
 @app.command('pian')
@@ -111,8 +106,8 @@ async def pian(rooms: list[int]):
 @app.command('bhashm')
 @sync
 async def bhashm(rooms: list[int], famous_people: Annotated[list[int], typer.Option("--famous", "-f")] = None):
-    from .handlers import HashMarkHandler, HashMarkHandlerSettings
-    await listen_to_all(rooms, HashMarkHandler(HashMarkHandlerSettings(famous_people=famous_people)))
+    from .handlers import HashMarkHandler
+    await listen_to_all(rooms, HashMarkHandler(famous_people=famous_people))
 
 
 @app.command('dump_raw')
@@ -152,6 +147,14 @@ async def run(cc: list[str]):
             case _:
                 print(f"unknown mod {c}, skipped")
     await asyncio.gather(*coroutines)
+
+
+@app.command('app_show')
+@sync
+async def app_show(app_name: str):
+    application = Application.model_validate(main.config['apps'].get(app_name))
+    from rich.pretty import pprint
+    pprint(application)
 
 
 class _OutputChoice(str, Enum):
@@ -327,6 +330,7 @@ def main(
         log: bool = True,
         verbose: Annotated[int, typer.Option('--verbose', '-v', count=True)] = 0,
         remote_debug_with_port: int = 0,
+        config_override: list[str] = (),
 ):
     main.config = config = load_config(cd)
     if log:
@@ -334,6 +338,20 @@ def main(
             config['logging']['root']['level'] = 'DEBUG'
             config['logging']['root']['handlers'] = ['richconsole']
         init_logging(config)
+    if config_override is not None:
+        for c in config_override:
+            ks, v = c.split("=", 1)
+            from ast import literal_eval
+            v = literal_eval(v)
+            p = config
+            *kk, lk = ks.split('.')
+            for k in kk:
+                if k in p:
+                    p = p[k]
+                else:
+                    break
+            else:
+                p[lk] = v
     if sentry:
         init_sentry(config)
     if 0 < remote_debug_with_port < 65536:

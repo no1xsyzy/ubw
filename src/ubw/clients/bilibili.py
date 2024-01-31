@@ -9,7 +9,7 @@ from typing import *
 import aiofiles
 import aiohttp
 from multidict import CIMultiDict
-from pydantic import BaseModel, Field, TypeAdapter
+from pydantic import BaseModel, Field
 from yarl import URL
 
 from ubw.models.bilibili import Response, InfoByRoom, DanmuInfo, RoomEmoticons, FingerSPI, RoomPlayInfo
@@ -51,19 +51,32 @@ _Type = TypeVar('_Type')
 
 class BilibiliClientABC(BaseModel, abc.ABC):
     auth_type: str
+    headers: dict[str, str] = {}
+    user_agent: str = USER_AGENT
+    _session: aiohttp.ClientSession | None = None
 
-    @property
     @abc.abstractmethod
-    def session(self) -> aiohttp.ClientSession:
+    def make_session(self):
         ...
 
+    @property
+    def session(self):
+        if self._session is None:
+            self._session = self.make_session()
+        return self._session
+
+    @session.setter
+    def session(self, v):
+        self._session = v
+
     async def close(self):
-        await self.session.close()
+        if self._session is not None:
+            await self._session.close()
 
     async def get_info_by_room(self, room_id: int) -> InfoByRoom:
         async with self.session.get('https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom',
                                     params={'room_id': room_id}) as res:
-            data = TypeAdapter(Response[InfoByRoom]).validate_python(await res.json())
+            data = Response[InfoByRoom].model_validate(await res.json())
             if data.code == 0:
                 return data.data
             else:
@@ -72,7 +85,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
     async def get_danmaku_server(self, room_id: int) -> DanmuInfo:
         async with self.session.get(DANMAKU_SERVER_CONF_URL,
                                     params={'id': room_id, 'type': 0}) as res:
-            data = TypeAdapter(Response[DanmuInfo]).validate_python(await res.json())
+            data = Response[DanmuInfo].model_validate(await res.json())
             if data.code == 0:
                 return data.data
             else:
@@ -81,32 +94,21 @@ class BilibiliClientABC(BaseModel, abc.ABC):
     async def get_emoticons(self, room_id: int, platform: str = 'pc') -> RoomEmoticons:
         async with self.session.get(EMOTICON_URL,
                                     params={'platform': platform, 'id': room_id}) as res:
-            data = TypeAdapter(Response[RoomEmoticons]).validate_python(await res.json())
+            data = Response[RoomEmoticons].model_validate(await res.json())
             if data.code == 0:
                 return data.data
             else:
                 raise BilibiliApiError(data.message)
 
     async def get_finger_spi(self, ) -> FingerSPI:
-        async with self.session.get(FINGER_SPI_URL, headers={'User-Agent': USER_AGENT}) as res:
-            data = TypeAdapter(Response[FingerSPI]).validate_python(await res.json())
+        async with self.session.get(FINGER_SPI_URL) as res:
+            data = Response[FingerSPI].model_validate(await res.json())
             if data.code == 0:
                 return data.data
             else:
                 raise BilibiliApiError(data.message)
 
     async def get_room_play_info(self, room_id: int, quality: int = 10000) -> RoomPlayInfo:
-        cookies = {}
-        if (s := os.environ.get('UBW_COOKIE_FILE')) is not None:
-            async with aiofiles.open(s, mode='rt', encoding='utf-8') as f:
-                async for line in f:
-                    line = line.strip()
-                    if line.startswith('#HttpOnly_'):
-                        line = line[len('#HttpOnly_'):]
-                    if not line or line.startswith('#'):
-                        continue
-                    domain, subdomains, path, httponly, expires, name, value = line.split('\t')
-                    cookies[name] = value
         async with self.session.get(ROOM_PLAY_INFO_URL, params={
             'build': 6215200,
             'codec': "0,1",
@@ -116,21 +118,27 @@ class BilibiliClientABC(BaseModel, abc.ABC):
             'protocol': "0,1,2,3,4,5,6,7",
             'qn': quality,
             'room_id': room_id,
-        }, cookies=cookies, headers={'user-agent': USER_AGENT}) as res:
-            data = TypeAdapter(Response[RoomPlayInfo]).validate_python(await res.json())
+        }) as res:
+            data = Response[RoomPlayInfo].model_validate(await res.json())
             if data.code == 0:
                 return data.data
             else:
                 raise BilibiliApiError(data.message)
 
 
+class BilibiliUnauthorizedClient(BilibiliClientABC):
+    auth_type: Literal['no'] = 'no'
+
+    def make_session(self):
+        headers = CIMultiDict(self.headers)
+        headers.setdefault('User-Agent', self.user_agent)
+        cookie_jar = aiohttp.CookieJar()
+        return aiohttp.ClientSession(headers=headers, cookie_jar=cookie_jar)
+
+
 class BilibiliCookieClient(BilibiliClientABC):
     auth_type: Literal['cookie'] = 'cookie'
     cookie_file: Path | None = None
-
-    @functools.cached_property
-    def session(self):
-        return self.make_session()
 
     @functools.cached_property
     def _cookies(self):
@@ -173,20 +181,15 @@ class BilibiliCookieClient(BilibiliClientABC):
                 self._cookies[name]['path'] = path
                 self._cookies[name]['httponly'] = httponly
 
-    def make_session(self, default_cookies=True, headers=None, cookie_jar=None, **kwargs):
-        if headers:
-            headers = CIMultiDict(headers)
-        else:
-            headers = CIMultiDict()
+    def make_session(self, default_cookies=True, **kwargs):
+        headers = CIMultiDict(self.headers)
+        headers.setdefault('User-Agent', self.user_agent)
 
-        headers.setdefault('User-Agent', USER_AGENT)
-
-        if not cookie_jar:
-            cookie_jar = aiohttp.CookieJar()
+        cookie_jar = aiohttp.CookieJar()
         if default_cookies:
             cookie_jar.update_cookies(self._cookies, URL('https://www.bilibili.com'))
 
         return aiohttp.ClientSession(headers=headers, cookie_jar=cookie_jar, **kwargs)
 
 
-BilibiliClient = Annotated[BilibiliCookieClient, Field(discriminator='auth_type')]
+BilibiliClient = Annotated[BilibiliCookieClient | BilibiliUnauthorizedClient, Field(discriminator='auth_type')]

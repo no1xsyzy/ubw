@@ -2,7 +2,7 @@ import logging
 
 from rich.markup import escape
 
-import blivedm
+from ._base import *
 
 ROOM_IDS = [
     5252,  # 天堂
@@ -29,7 +29,9 @@ class RichClientAdapter(logging.LoggerAdapter):
 logger = RichClientAdapter(logging.getLogger('wocpian'), {})
 
 
-class PianHandler(blivedm.BaseHandler):
+class PianHandler(BaseHandler):
+    cls: Literal['pian'] = 'pian'
+
     @staticmethod
     def maybe_pian(uid: int, uname: str) -> bool:
         return uid > 3493280000000000 and uname.startswith("bili_") and uname[5:].isnumeric()
