@@ -49,9 +49,13 @@ async def strange_stalker(
         ignore_danmaku = []
     if derive_uids:
         from .clients import BilibiliUnauthorizedClient
-        uids.extend([i.room_info.uid
-                     for i in await asyncio.gather(*(BilibiliUnauthorizedClient().get_info_by_room(room)
-                                                     for room in rooms))])
+        client = BilibiliUnauthorizedClient()
+        try:
+            uids.extend([i.room_info.uid
+                         for i in await asyncio.gather(*(client.get_info_by_room(room)
+                                                         for room in rooms))])
+        finally:
+            await client.close()
     if derive_regex:
         regex.extend(map(str, uids))
         regex.extend(map(str, rooms))

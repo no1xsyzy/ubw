@@ -72,6 +72,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
     async def close(self):
         if self._session is not None:
             await self._session.close()
+        self._session = None
 
     async def get_info_by_room(self, room_id: int) -> InfoByRoom:
         async with self.session.get('https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom',

@@ -24,7 +24,11 @@ logger = RichClientAdapter(logging.getLogger('bhashm'), {})
 
 
 async def get_live_start_time(room_id: int) -> datetime | None:
-    return (await BilibiliUnauthorizedClient().get_info_by_room(room_id)).room_info.live_start_time
+    client = BilibiliUnauthorizedClient()
+    try:
+        return (await client.get_info_by_room(room_id)).room_info.live_start_time
+    finally:
+        await client.close()
 
 
 def create_csv_writer(room_id: int) -> asyncio.Queue:
