@@ -206,6 +206,7 @@ async def get_play_url(room_id: int,
     client = BilibiliCookieClient(**main.config['accounts']['default'])
     await client.read_cookie()
     play_info = await client.get_room_play_info(room_id, qn)
+    await client.close()
 
     each: Callable[[str, str], Any] | None = None
     after: Callable[[], Any] | None = None

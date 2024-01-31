@@ -32,6 +32,8 @@ async def listen_to_all(room_ids: list[int],
     finally:
         await asyncio.gather(*(client.stop_and_close() for client in clients.values()))
 
+    await bclient.close()
+
 
 def sync(f):
     @wraps(f)
