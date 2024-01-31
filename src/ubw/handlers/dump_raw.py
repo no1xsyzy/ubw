@@ -39,11 +39,8 @@ class DumpRawHandler(BaseHandler):
     async def m_new_shard(self):
         self.__dict__.pop('shard_start', None)
         self.__dict__.pop('db', None)
-        client = BilibiliUnauthorizedClient()
-        try:
+        async with BilibiliUnauthorizedClient() as client:
             info = await client.get_info_by_room(self.room_id)
-        finally:
-            await client.close()
         self._living = info.room_info.live_start_time is not None
         async with self.db as db:
             db.insert(info.model_dump())

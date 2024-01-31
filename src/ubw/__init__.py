@@ -49,13 +49,10 @@ async def strange_stalker(
         ignore_danmaku = []
     if derive_uids:
         from .clients import BilibiliUnauthorizedClient
-        client = BilibiliUnauthorizedClient()
-        try:
+        async with BilibiliUnauthorizedClient() as client:
             uids.extend([i.room_info.uid
                          for i in await asyncio.gather(*(client.get_info_by_room(room)
                                                          for room in rooms))])
-        finally:
-            await client.close()
     if derive_regex:
         regex.extend(map(str, uids))
         regex.extend(map(str, rooms))
@@ -207,10 +204,9 @@ async def get_play_url(room_id: int,
     from .clients.bilibili import BilibiliCookieClient
 
     console = get_console()
-    client = BilibiliCookieClient(**main.config['accounts']['default'])
-    await client.read_cookie()
-    play_info = await client.get_room_play_info(room_id, qn)
-    await client.close()
+    async with BilibiliCookieClient(**main.config['accounts']['default']) as client:
+        await client.read_cookie()
+        play_info = await client.get_room_play_info(room_id, qn)
 
     each: Callable[[str, str], Any] | None = None
     after: Callable[[], Any] | None = None

@@ -18,6 +18,7 @@ logger = logging.getLogger('ubw.clients.wsweb')
 class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
     clientc: Literal['wsweb'] = 'wsweb'
     bilibili_client: BilibiliClient = Field(default_factory=BilibiliCookieClient)
+    bilibili_client_owner: bool = True
 
     # defaults
     heartbeat_interval: int = 30
@@ -64,6 +65,8 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
         if self.is_running:
             logger.warning('room=%s is calling close(), but client is running', self.room_id)
         await self._session.close()
+        if self.bilibili_client_owner:
+            await self.bilibili_client.close()
 
     async def _init_room(self):
         res = True

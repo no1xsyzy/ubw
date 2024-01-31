@@ -17,14 +17,14 @@ async def listen_to_all(room_ids: list[int],
     if handler is None and handler_factory is None:
         raise ValueError("neither handler nor handler_factory is specified, useless")
     clients: dict[int, WSWebCookieLiveClient] = {}
-    bclient = BilibiliCookieClient(cookie_file='cookies.txt')
-    try:
+    async with BilibiliCookieClient(cookie_file='cookies.txt') as bclient:
         await bclient.read_cookie()
         for room_id in room_ids:
             if room_id in clients:
                 client = clients[room_id]
             else:
-                clients[room_id] = client = WSWebCookieLiveClient(bilibili_client=bclient, room_id=room_id)
+                clients[room_id] = client = \
+                    WSWebCookieLiveClient(bilibili_client=bclient, bilibili_client_owner=False, room_id=room_id)
             client.add_handler(handler if handler is not None else handler_factory(room_id))
             client.start()
 
@@ -32,8 +32,6 @@ async def listen_to_all(room_ids: list[int],
             await asyncio.gather(*(client.join() for client in clients.values()))
         finally:
             await asyncio.gather(*(client.stop_and_close() for client in clients.values()))
-    finally:
-        await bclient.close()
 
 
 def sync(f):

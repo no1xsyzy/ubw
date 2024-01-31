@@ -74,6 +74,12 @@ class BilibiliClientABC(BaseModel, abc.ABC):
             await self._session.close()
         self._session = None
 
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.close()
+
     async def get_info_by_room(self, room_id: int) -> InfoByRoom:
         async with self.session.get('https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom',
                                     params={'room_id': room_id}) as res:
