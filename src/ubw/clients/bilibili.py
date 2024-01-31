@@ -136,11 +136,13 @@ class BilibiliClientABC(BaseModel, abc.ABC):
 class BilibiliUnauthorizedClient(BilibiliClientABC):
     auth_type: Literal['no'] = 'no'
 
-    def make_session(self):
+    def make_session(self, timeout=None, **kwargs):
         headers = CIMultiDict(self.headers)
         headers.setdefault('User-Agent', self.user_agent)
         cookie_jar = aiohttp.CookieJar()
-        return aiohttp.ClientSession(headers=headers, cookie_jar=cookie_jar)
+        if timeout is None:
+            timeout = aiohttp.ClientTimeout(total=10)
+        return aiohttp.ClientSession(headers=headers, cookie_jar=cookie_jar, timeout=timeout, **kwargs)
 
 
 class BilibiliCookieClient(BilibiliClientABC):
@@ -188,7 +190,7 @@ class BilibiliCookieClient(BilibiliClientABC):
                 self._cookies[name]['path'] = path
                 self._cookies[name]['httponly'] = httponly
 
-    def make_session(self, default_cookies=True, **kwargs):
+    def make_session(self, default_cookies=True, timeout=None, **kwargs):
         headers = CIMultiDict(self.headers)
         headers.setdefault('User-Agent', self.user_agent)
 
@@ -196,7 +198,10 @@ class BilibiliCookieClient(BilibiliClientABC):
         if default_cookies:
             cookie_jar.update_cookies(self._cookies, URL('https://www.bilibili.com'))
 
-        return aiohttp.ClientSession(headers=headers, cookie_jar=cookie_jar, **kwargs)
+        if timeout is None:
+            timeout = aiohttp.ClientTimeout(total=10)
+
+        return aiohttp.ClientSession(headers=headers, cookie_jar=cookie_jar, timeout=timeout, **kwargs)
 
 
 BilibiliClient = Annotated[BilibiliCookieClient | BilibiliUnauthorizedClient, Field(discriminator='auth_type')]
