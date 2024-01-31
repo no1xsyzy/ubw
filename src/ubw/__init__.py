@@ -67,7 +67,6 @@ async def danmakup(
         ignore_danmaku: Annotated[list[str], typer.Option("--ignore", "-i")] = None,
         ignore_rate: float = 0.,
         dim_rate: float = .25,
-        use_ui: bool = False,
         show_interact_word: bool = False,
         test_flags: str = "",
 ):
@@ -90,7 +89,7 @@ async def danmakup(
     else:
         listen = listen_to_all
 
-    if use_ui:
+    if 'use_ui' in test_flags:
         from .ui import LiveUI
         ui = LiveUI(alternate_screen=True)
         handler = DanmakuPHandler(
