@@ -44,13 +44,11 @@ class LiveClientABC(BaseModel, abc.ABC):
     clientc: str
     room_id: int
 
+    _task: Task | None = None
+
     @cached_property
     def _handlers(self) -> list[HandlerInterface]:
         return []
-
-    @cached_property
-    def _task(self) -> Task | None:
-        return None
 
     def add_handler(self, handler: HandlerInterface):
         if handler not in self._handlers:
@@ -63,7 +61,7 @@ class LiveClientABC(BaseModel, abc.ABC):
             pass
 
     @property
-    def is_running(self):
+    def is_running(self) -> bool:
         return self._task is not None
 
     @abc.abstractmethod
@@ -83,11 +81,10 @@ class LiveClientABC(BaseModel, abc.ABC):
         ...
 
     async def stop_and_close(self):
-        task = self._task
-        if task:
-            self.stop()
-            await task
-        await self.close()
+        try:
+            await self.stop()
+        finally:
+            await self.close()
 
 
 class InitError(Exception):

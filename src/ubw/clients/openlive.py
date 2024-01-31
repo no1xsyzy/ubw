@@ -174,7 +174,7 @@ class OpenLiveClient(WSMessageParserMixin, LiveClientABC):
         if self.is_running:
             logger.warning('start() while running')
             return
-        self.__dict__['_task'] = asyncio.create_task(self._run())
+        self._task = asyncio.create_task(self._run())
 
     async def join(self):
         if not self.is_running:
@@ -186,7 +186,11 @@ class OpenLiveClient(WSMessageParserMixin, LiveClientABC):
         if not self.is_running:
             logger.warning('stop() while stopped')
             return
-        self._task.cancel()
+
+        task = self._task
+        if task.cancel('stop'):
+            self._task = None
+            return task
 
     async def close(self):
         if self.is_running:
