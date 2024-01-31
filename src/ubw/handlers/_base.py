@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import logging
-from contextvars import ContextVar
 from typing import *
 
 import sentry_sdk
@@ -12,14 +11,9 @@ from ..models import blive as models
 __all__ = (
     'BaseHandler',
     'Literal',
-    'ctx_client',
-    'ctx_command',
 )
 
 logger = logging.getLogger('ubw.handlers._base')
-
-ctx_client = ContextVar[LiveClientABC]('client')
-ctx_command = ContextVar[Union[dict, models.CommandModel]]('command')
 
 
 def func_info(func: Callable):
@@ -34,8 +28,6 @@ class BaseHandler(BaseModel):
     ignored_cmd: list[str] = []
 
     async def handle(self, client: LiveClientABC, command: dict):
-        tok_client_set = ctx_client.set(client)
-        tok_command_set = ctx_command.set(command)
         try:
             cmd = command.get('cmd', '')
 
@@ -55,15 +47,10 @@ class BaseHandler(BaseModel):
                 logger.debug(f"got a {cmd}, processed with {func_info(self.on_unknown_cmd)}")
                 return await self.on_unknown_cmd(client, command, e)
             else:
-                ctx_command.reset(tok_command_set)
-                tok_command_set = ctx_command.set(model)
                 return await self.on_known_cmd(client, model)
         except Exception:
             logger.debug(f"got a {command.get('cmd', '')}, and error in processing")
             logger.exception(f"Error command: {command!r}")
-        finally:
-            ctx_command.reset(tok_command_set)
-            ctx_client.reset(tok_client_set)
 
     async def on_known_cmd(self, client: LiveClientABC, model: models.CommandModel):
         """默认的 dispatcher，自省寻找 on_{model.cmd}"""
