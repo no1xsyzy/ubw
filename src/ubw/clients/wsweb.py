@@ -39,8 +39,6 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
             logger.warning('room=%s client is running, cannot start() again', self.room_id)
             return
 
-        self._session = self.bilibili_client.make_session()
-        # self._session = self.bilibili_client.make_session(timeout=aiohttp.ClientTimeout(total=10))
         self._task = asyncio.create_task(self.main())
 
     def stop(self):
@@ -115,6 +113,11 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
         return header + body
 
     async def main(self):
+        if self.bilibili_client_owner:
+            await self.bilibili_client.read_cookie()
+
+        self._session = self.bilibili_client.make_session()
+
         try:
             await self._network_coroutine()
         except Exception as e:  # noqa
