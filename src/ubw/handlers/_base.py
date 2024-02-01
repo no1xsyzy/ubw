@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import asyncio
 import logging
+from functools import cached_property
 from typing import *
 
 import sentry_sdk
@@ -27,7 +29,13 @@ class BaseHandler(BaseModel):
     cls: str
     ignored_cmd: list[str] = []
 
+    def start(self, client):
+        pass
+
     async def handle(self, client: LiveClientABC, command: dict):
+        await self.process_one(client, command)
+
+    async def process_one(self, client: LiveClientABC, command: dict):
         try:
             cmd = command.get('cmd', '')
 
@@ -59,7 +67,7 @@ class BaseHandler(BaseModel):
             callback = getattr(self, f'on_{cmd}')
             logger.debug(f"got a {cmd}, processing with {func_info(callback)})")
             return await callback(client, model)
-        if isinstance(model, models.Summarizer):
+        elif isinstance(model, models.Summarizer):
             logger.debug(f"got a {cmd}, summarized and processing with {func_info(self.on_summary)})")
             return await self.on_summary(client, model.summarize())
         else:
@@ -180,3 +188,27 @@ class BaseHandler(BaseModel):
 
     async def on_anchor_helper_danmu(self, client: LiveClientABC, model: models.AnchorHelperDanmuCommand):
         await self.on_maybe_summarizer(client, model)
+
+
+class QueuedProcessorMixin(BaseHandler):
+    """通过添加一个队列来处理"""
+    _process_task: asyncio.Task | None = None
+
+    @cached_property
+    def _queue(self) -> asyncio.Queue[tuple[LiveClientABC, dict]]:
+        return asyncio.Queue()
+
+    def start(self, client):
+        self._process_task = asyncio.create_task(self.t_process())
+        super().start(client)
+
+    async def handle(self, client: LiveClientABC, command: dict):
+        await self._queue.put((client, command))
+        qsize = self._queue.qsize()
+        if qsize > 20:
+            logger.warning(f'CANNOT KEEP UP queue size {qsize} > 20')
+
+    async def t_process(self):
+        while True:
+            client, command = await self._queue.get()
+            await self.process_one(client, command)
