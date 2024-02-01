@@ -101,3 +101,11 @@ rooms = [81004]
 
 [saver.elza]
 rooms = [81004]
+
+[apps.bls81004.client]
+room_id = 81004
+clientc = 'wsweb'
+bilibili_client = { auth_type = 'cookie', cookie_file = 'cookies.txt' }
+[apps.bls81004.handler]
+cls = 'saver'
+room_id = 81004

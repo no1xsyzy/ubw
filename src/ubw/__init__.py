@@ -156,6 +156,17 @@ async def app_show(app_name: str):
     application = Application.model_validate(main.config['apps'].get(app_name))
     from rich.pretty import pprint
     pprint(application)
+    return application
+
+
+@app.command('app_run')
+@sync
+async def app_run(app_name: str):
+    application = Application.model_validate(main.config['apps'].get(app_name))
+    try:
+        return await application.run()
+    finally:
+        await application.close()
 
 
 class _OutputChoice(str, Enum):
@@ -333,6 +344,7 @@ def main(
         remote_debug_with_port: int = 0,
         config_override: list[str] = (),
 ):
+    cd = Path(cd)
     main.config = config = load_config(cd)
     if log:
         if verbose > 0:

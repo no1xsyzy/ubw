@@ -50,4 +50,10 @@ class Application(BaseModel):
     handler: Handler
 
     async def run(self):
-        pass
+        self.client.add_handler(self.handler)
+        self.client.start()
+        self.handler.start(self.client)
+        await self.client.join()
+
+    async def close(self):
+        await self.client.stop_and_close()
