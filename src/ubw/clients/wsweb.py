@@ -211,7 +211,7 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
             if self._websocket is None or self._websocket.closed:
                 self._heartbeat_timer_task = None
                 return
-            asyncio.create_task(self._send_heartbeat())
+            await self._send_heartbeat()
 
     async def _send_heartbeat(self):
         """
