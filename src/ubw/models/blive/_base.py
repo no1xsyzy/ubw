@@ -2,7 +2,7 @@ import json
 from datetime import datetime, timezone, timedelta, date
 from typing import Annotated, runtime_checkable, Protocol, Union, Literal
 
-from pydantic import BaseModel, Field, model_validator, field_validator, Field, RootModel, AliasChoices
+from pydantic import BaseModel, Field, model_validator, field_validator, Field, RootModel, AliasChoices, ConfigDict
 
 __all__ = (
     # pydantic
@@ -24,6 +24,8 @@ class Scatter(BaseModel):
 
 
 class CommandModel(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+
     cmd: str
     ct: datetime = Field(default_factory=lambda: datetime.now(timezone(timedelta(seconds=8 * 3600))))
 
@@ -32,9 +34,6 @@ class CommandModel(BaseModel):
     send_time: datetime | None = None
     p_is_ack: bool | None = None
     p_msg_type: int | None = None
-
-    class Config:
-        extra = 'forbid'
 
 
 class Color(RootModel):
