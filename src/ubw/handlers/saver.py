@@ -33,10 +33,12 @@ class SaverHandler(BaseHandler):
     max_shard_length: timedelta = timedelta(days=1)
     room_id: int
     _living: bool = False
-    _wait_sharding: asyncio.Task | None = None
+    _wait_sharding: asyncio.Future | None = None
+    _sharder_task: asyncio.Task | None = None
 
-    async def start(self):
-        await self.m_new_shard()
+    def start(self, client):
+        self._sharder_task = asyncio.create_task(self.t_sharder())
+        super().start(client)
 
     @cached_property
     def shard_start(self):
@@ -54,8 +56,7 @@ class SaverHandler(BaseHandler):
         return db
 
     async def on_danmu_msg(self, client, message):
-        logger.info(f"[{self.room_id}] {message.info.uname} ({message.info.uid}): "
-                    f"{message.info.msg}")
+        logger.info(f"{message.info.uname} ({message.info.uid}): {message.info.msg}")
         async with self.db as db:
             db.insert(message.model_dump())
 
@@ -68,6 +69,8 @@ class SaverHandler(BaseHandler):
             db.insert(message.model_dump())
 
     async def on_super_chat_message(self, client, message):
+        logger.info(f"{message.data.user_info.uname} ({message.data.uid}): "
+                    f"{message.data.msg} (¥{message.data.price})")
         async with self.db as db:
             db.insert(message.model_dump())
 
@@ -77,11 +80,11 @@ class SaverHandler(BaseHandler):
 
     async def on_live(self, client, message):
         if not self._living:
-            await self.m_new_shard()
+            await self.m_shard_now()
 
     async def on_preparing(self, client, message):
         if self._living:
-            await self.m_new_shard()
+            await self.m_shard_now()
 
     async def on_room_block_msg(self, client, message):
         async with self.db as db:
@@ -91,24 +94,26 @@ class SaverHandler(BaseHandler):
         async with self.db as db:
             db.insert(message.model_dump())
 
+    async def t_sharder(self):
+        self._wait_sharding = asyncio.Future()
+        while True:
+            await self.m_new_shard()
+            try:
+                logger.debug(f"next sharding in {self.max_shard_length}")
+                async with asyncio.timeout(self.max_shard_length.total_seconds()):
+                    await self._wait_sharding
+                    self._wait_sharding = asyncio.Future()
+            except asyncio.TimeoutError:
+                pass
+
+    async def m_shard_now(self):
+        self._wait_sharding.set_result(None)
+
     async def m_new_shard(self):
-        self.__dict__.pop('shard_start', None)
-        self.__dict__.pop('db', None)
         async with BilibiliUnauthorizedClient() as client:
             info = await client.get_info_by_room(self.room_id)
         self._living = info.room_info.live_start_time is not None
+        self.__dict__.pop('shard_start', None)
+        self.__dict__.pop('db', None)
         async with self.db as db:
             db.insert(info.model_dump())
-        if self._wait_sharding is not None:
-            self._wait_sharding.cancel("new shard")
-        self._wait_sharding = asyncio.create_task(self.m_new_shard_waiting())
-
-    async def m_new_shard_waiting(self):
-        if 'shard_start' not in self.__dict__:
-            return
-        next_sharding = self.shard_start + self.max_shard_length
-        logger.info(f"[{self.room_id}] scheduled sharding: {next_sharding}")
-        delay = next_sharding - datetime.now(timezone(timedelta(seconds=8 * 3600)))
-        await asyncio.sleep(delay.total_seconds())
-        logger.info(f"[{self.room_id}] sharding")
-        await asyncio.shield(self.m_new_shard())
