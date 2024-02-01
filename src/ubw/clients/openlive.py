@@ -299,3 +299,7 @@ class OpenLiveClient(WSMessageParserMixin, LiveClientABC):
 
     async def _app_heartbeat(self):
         await self.app.heartbeat(self._session)
+
+    @property
+    def user_ident(self) -> str:
+        return f'a={self.room_owner_auth_code}'

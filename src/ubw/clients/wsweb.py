@@ -226,3 +226,7 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
             logger.warning('room=%d _send_heartbeat() failed: %r', self.room_id, e)
         except Exception:  # noqa
             logger.exception('room=%d _send_heartbeat() failed:', self.room_id)
+
+    @property
+    def user_ident(self) -> str:
+        return f'u={self._uid}|r={self.room_id}'

@@ -74,17 +74,12 @@ class BaseHandler(BaseModel):
         async with aiofiles.open(f"output/unknown_cmd/{cmd}.json", mode='a', encoding='utf-8') as afp:
             await afp.write(json.dumps(command, indent=2, ensure_ascii=False))
         # noinspection PyProtectedMember
-        uid = client._uid or client.room_owner_uid or 0
         sentry_sdk.capture_event(
-            event={'level': 'warning', 'message': f"unknown cmd {cmd}"},
-            user={'id': f"u{uid}:{client.room_id}"},
+            event={'level': 'warning', 'message': err.errors()[0]['msg']},
+            user={'id': client.user_ident},
             contexts={'ValidationError': {'command': command, 'error': err.errors()}},
-            tags={'module': 'bhashm',
-                  'unknown_cmd':
-                      "yes"
-                      if err.errors()[0]['type'] == 'value_error.discriminated_union.invalid_discriminator' else
-                      "no",
-                  'cmd': cmd, 'room_id': client.room_id, 'user_id': uid},
+            tags={'handler': self.cls, 'type': err.errors()[0]['type'],
+                  'cmd': cmd, 'room_id': client.room_id},
         )
 
     async def on_summary(self, client: LiveClientABC, summary: models.Summary):

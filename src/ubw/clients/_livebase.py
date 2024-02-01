@@ -46,6 +46,11 @@ class LiveClientABC(BaseModel, abc.ABC):
 
     _task: Task | None = None
 
+    @property
+    @abc.abstractmethod
+    def user_ident(self) -> str:
+        ...
+
     @cached_property
     def _handlers(self) -> list[HandlerInterface]:
         return []
