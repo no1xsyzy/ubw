@@ -70,7 +70,7 @@ class SaverHandler(BaseHandler):
 
     async def on_super_chat_message(self, client, message):
         logger.info(f"{message.data.user_info.uname} ({message.data.uid}): "
-                    f"{message.data.msg} (¥{message.data.price})")
+                    f"{message.data.message} (¥{message.data.price})")
         async with self.db as db:
             db.insert(message.model_dump())
 
