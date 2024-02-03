@@ -94,6 +94,11 @@ class SaverHandler(BaseHandler):
         async with self.db as db:
             db.insert(message.model_dump())
 
+    async def on_unknown_cmd(self, client, command, err):
+        async with self.db as db:
+            db.insert({**command, 'UNKNOWN': True})
+        await super().on_unknown_cmd(client, command, err)
+
     async def t_sharder(self):
         self._wait_sharding = asyncio.Future()
         while True:
