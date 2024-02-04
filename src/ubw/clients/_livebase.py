@@ -87,7 +87,9 @@ class LiveClientABC(BaseModel, abc.ABC):
 
     async def stop_and_close(self):
         try:
-            await self.stop()
+            task = self.stop()
+            if task is not None:
+                await task
         finally:
             await self.close()
 

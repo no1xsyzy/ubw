@@ -47,6 +47,8 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
             return
 
         task = self._task
+        if task is None:
+            return
         if task.cancel('stop'):
             self._task = None
             return task
