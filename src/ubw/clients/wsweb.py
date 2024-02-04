@@ -155,7 +155,7 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
                         # 至少成功处理1条消息
                         retry_count = 0
 
-            except (aiohttp.ClientConnectionError, asyncio.TimeoutError):
+            except (ConnectionError, aiohttp.ClientConnectionError, asyncio.TimeoutError):
                 # 掉线重连
                 pass
             except AuthError:
