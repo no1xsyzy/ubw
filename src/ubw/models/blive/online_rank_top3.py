@@ -4,6 +4,8 @@ from ._base import *
 class OnlineRankTop3Info(BaseModel):
     msg: str
     rank: int
+    is_mystery: bool = False
+    uid: int | None = None
 
 
 class OnlineRankTop3Data(BaseModel):
