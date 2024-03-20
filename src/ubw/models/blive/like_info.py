@@ -42,6 +42,9 @@ class LikeInfoV3ClickData(BaseModel):
     uid: int
     uname: str
     uname_color: str
+    group_medal: None = None
+    is_mystery: bool = False
+    uinfo: Uinfo | None = None
 
 
 class LikeInfoV3ClickCommand(CommandModel):
