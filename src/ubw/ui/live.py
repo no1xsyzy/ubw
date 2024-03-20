@@ -64,13 +64,13 @@ class LiveUI(BLiveUI):
                 case Anchor(text=text, href=href):
                     s += f"[blue u link={href}]{escape(text)}[/]"
                 case User(name=name, uid=uid):
-                    s += f"[rgb(251,114,153) u link=https://space.bilibili.com/{uid}]{escape(name)}[/]"
+                    s += f"[{self.color_of(str(uid))} u link=https://space.bilibili.com/{uid}]{escape(name)}[/]"
                 case Room(owner_name=name, room_id=room_id):
                     s += f"[rgb(255,212,50) u link=https://live.bilibili.com/{room_id}]{escape(name)}的直播间[/]"
                 case RoomTitle(title=title, room_id=room_id):
                     s += f"[u link=https://live.bilibili.com/{room_id}]《[rgb(255,212,50)]{escape(title)}[/]》[/]"
                 case ColorSeeSee(text=text):
-                    s += f"[{self.palette[hash(text) % len(self.palette)]}]{escape(text)}[/]"
+                    s += f"[{self.color_of(text)}]{escape(text)}[/]"
                 case DebugInfo(text=text, info=info):
                     if self.verbose > 0:
                         for i in count(1):
@@ -85,6 +85,9 @@ class LiveUI(BLiveUI):
             res.append(Panel.fit(JSON.from_data(v), title=f'[{k}]'))
         group = Group(*res, fit=True)
         return group  # noqa: RichRenderable is dynamic
+
+    def color_of(self, text):
+        return self.palette[hash(text) % len(self.palette)]
 
     def __rich_console__(self, console: Console, options: ConsoleOptions) -> RenderResult:
         with self._lock:
