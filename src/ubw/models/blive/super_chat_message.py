@@ -28,7 +28,13 @@ class UserInfo(BaseModel):
     """用户等级"""
 
 
-class SuperChatMessage(BaseModel):
+class GroupMedal(BaseModel):
+    is_lighted: int
+    medal_id: int = 0
+    name: str = ''
+
+
+class SuperChatData(BaseModel):
     """醒目留言消息"""
     price: int
     """价格（人民币）"""
@@ -73,10 +79,16 @@ class SuperChatMessage(BaseModel):
     color_point: float
     dmscore: int
 
+    group_medal: GroupMedal | None = None
+    is_mystery: bool = False
+    medal_info: MedalInfo | None = None
+
+    uinfo: Uinfo | None = None
+
 
 class SuperChatCommand(CommandModel):
     cmd: Literal['SUPER_CHAT_MESSAGE']
-    data: SuperChatMessage
+    data: SuperChatData
     roomid: int | None = None
 
     def summarize(self) -> Summary:

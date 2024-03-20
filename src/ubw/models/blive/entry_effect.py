@@ -1,6 +1,16 @@
 from ._base import *
 
 
+class WealthyInfo(BaseModel):
+    uid: int
+    level: int
+    level_total_score: int
+    cur_score: int
+    upgrade_need_score: int
+    status: int
+    dm_icon_key: str
+
+
 class EntryEffectData(BaseModel):
     id: int
     uid: int
@@ -29,6 +39,11 @@ class EntryEffectData(BaseModel):
     web_dynamic_url_webp: str
     web_dynamic_url_apng: str
     mobile_dynamic_url_webp: str
+    highlight_color: Color
+    wealthy_info: WealthyInfo | None = None
+    new_style: int
+    is_mystery: bool = False
+    uinfo: Uinfo
 
     trigger_time_ns = field_validator('trigger_time', mode='before')(convert_ns)
 

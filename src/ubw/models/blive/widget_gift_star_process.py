@@ -1,6 +1,13 @@
 from ._base import *
 
 
+class LevelInfo(BaseModel):
+    star_name: str
+    level_tip: str
+    level_img: str
+    level_id: int
+
+
 class WidgetGiftStarProcess(BaseModel):
     gift_id: int
     gift_img: str
@@ -19,7 +26,10 @@ class WidgetGiftStarProcessData(BaseModel):
     reward_gift_img: str
     reward_gift_name: str
 
+    level_info: LevelInfo | None = None
+
     @field_validator('start_date', mode='before')
+    @classmethod
     def start_date_is_yyyymmdd_int(cls, v):
         if isinstance(v, int):
             return date(v // 10000, v // 100 % 100, v % 100)

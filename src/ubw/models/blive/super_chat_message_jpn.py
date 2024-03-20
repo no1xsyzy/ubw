@@ -18,6 +18,12 @@ class MedalInfo(BaseModel):
     target_id: int
 
 
+class GroupMedal(BaseModel):
+    is_lighted: int
+    medal_id: int = 0
+    name: str = ''
+
+
 class UserInfo(BaseModel):
     face: str
     face_frame: str
@@ -30,6 +36,16 @@ class UserInfo(BaseModel):
     title: str
     uname: str
     user_level: int
+
+
+class JpnUinfoBase(BaseModel):
+    uname: str
+    face: str
+    is_mystery: bool
+
+
+class JpnUinfo(BaseModel):
+    base: JpnUinfoBase
 
 
 class Data(BaseModel):
@@ -55,6 +71,12 @@ class Data(BaseModel):
     ts: datetime
     uid: str
     user_info: UserInfo
+
+    group_medal: GroupMedal | None = None
+    is_mystery: bool = False
+    medal_info: MedalInfo | None = None
+
+    uinfo: JpnUinfo | None = None
 
 
 class SuperChatMessageJpnCommand(CommandModel):

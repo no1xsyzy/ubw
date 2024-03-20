@@ -23,7 +23,8 @@ class AnchorLotStartData(BaseModel):
     gift_name: str
     gift_num: int
     gift_price: int
-    goaway_time: str
+    goaway_time: int
+    break_up_time: int
     goods_id: int
     id: int
     is_broadcast: int

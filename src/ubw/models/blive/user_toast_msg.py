@@ -27,6 +27,12 @@ class UserToastMsgData(BaseModel):
     user_show: bool
     username: str
 
+    group_name: str = ''
+    group_op_type: int = 0
+    group_role_name: str = ''
+    is_group: int = 0
+    room_group_effect_id: int = 1337
+
 
 class UserToastMsgCommand(CommandModel):
     cmd: Literal['USER_TOAST_MSG']

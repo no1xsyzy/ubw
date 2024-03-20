@@ -4,7 +4,10 @@ from ._base import *
 class OnlineRankV2Info(BaseModel):
     face: str
     guard_level: int
+    is_mystery: bool = False
+    uinfo: Uinfo
     rank: int
+    score: int = 0
     uid: int
     uname: str
 

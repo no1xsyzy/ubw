@@ -2,9 +2,10 @@ from ._base import *
 
 
 class OnlineRankCountData(BaseModel):
-    online_count: int = Field(validation_alias=AliasChoices('online_count', 'count'))
+    online_count: int | None = None
+    count: int | None = None
 
 
 class OnlineRankCountCommand(CommandModel):
-    cmd: Literal['ONLINE_RANK_COUNT']
+    cmd: Literal['ONLINE_RANK_COUNT'] = 'ONLINE_RANK_COUNT'
     data: OnlineRankCountData

@@ -1,11 +1,6 @@
 from ._base import *
 
 
-class UserInfo(BaseModel):
-    uid: int
-    uname: str
-
-
 class ComboSendData(BaseModel):
     action: str
     """目前遇到的有'喂食'、'赠送'"""
@@ -30,6 +25,11 @@ class ComboSendData(BaseModel):
     total_num: int
     uid: int
     uname: str
+    coin_type: str
+    group_medal: None
+    receiver_uinfo: Uinfo
+    sender_uinfo: Uinfo
+    wealth_level: int
 
 
 class ComboSendCommand(CommandModel):

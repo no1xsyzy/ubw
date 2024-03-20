@@ -2,7 +2,8 @@ import json
 from datetime import datetime, timezone, timedelta, date
 from typing import Annotated, runtime_checkable, Protocol, Union, Literal
 
-from pydantic import BaseModel, Field, model_validator, field_validator, Field, RootModel, AliasChoices, ConfigDict
+from pydantic import BaseModel as _BaseModel, Field, model_validator, field_validator, Field, RootModel, AliasChoices, \
+    ConfigDict
 
 __all__ = (
     # pydantic
@@ -12,10 +13,14 @@ __all__ = (
     # interface
     'Summary', 'Summarizer',
     # common types
-    'Scatter', 'MedalInfo', 'Color',
+    'Scatter', 'MedalInfo', 'Color', 'Uinfo', 'UserInfo',
     # common validator
     'strange_dict', 'convert_ns',
 )
+
+
+class BaseModel(_BaseModel):
+    model_config = ConfigDict(extra='forbid')
 
 
 class Scatter(BaseModel):
@@ -24,8 +29,6 @@ class Scatter(BaseModel):
 
 
 class CommandModel(BaseModel):
-    model_config = ConfigDict(extra='forbid')
-
     cmd: str
     ct: datetime = Field(default_factory=lambda: datetime.now(timezone(timedelta(seconds=8 * 3600))))
 
@@ -130,6 +133,81 @@ class MedalInfo(BaseModel):
     """粉丝牌主播uid"""
 
 
+class RiskCtrlInfo(BaseModel):
+    name: str
+    face: str
+
+
+class OriginInfo(BaseModel):
+    name: str
+    face: str
+
+
+class OfficialInfo(BaseModel):
+    role: int
+    title: str
+    desc: str
+    type: int
+
+
+class UinfoBase(BaseModel):
+    name: str
+    face: str
+    name_color: Color
+    is_mystery: bool
+    risk_ctrl_info: RiskCtrlInfo | None = None
+    origin_info: OriginInfo | None = None
+    official_info: OfficialInfo | None = None
+    name_color_str: str | None = None
+
+
+class GuardInfo(BaseModel):
+    level: int
+    expired_str: str
+
+
+class UinfoMedal(BaseModel):
+    color: Color
+    color_border: Color
+    color_end: Color
+    color_start: Color
+    guard_icon: str = ''
+    guard_level: int = 0
+    honor_icon: str = ''
+    id: int
+    is_light: int
+    level: int
+    name: str
+    ruid: int
+    score: int
+    typ: int
+
+
+class UinfoWealth(BaseModel):
+    level: int
+    dm_icon_key: str
+
+
+class UinfoTitle(BaseModel):
+    old_title_css_id: str
+    title_css_id: str
+
+
+class UinfoGuardLeader(BaseModel):
+    is_guard_leader: bool
+
+
+class Uinfo(BaseModel):
+    uid: int
+    base: UinfoBase
+    medal: UinfoMedal | None = None
+    wealth: UinfoWealth | None = None
+    title: UinfoTitle | None = None
+    guard: GuardInfo | None = None
+    uhead_frame: None = None
+    guard_leader: UinfoGuardLeader | None = None
+
+
 class Summary(BaseModel):
     t: datetime
     msg: str | None = None
@@ -142,3 +220,8 @@ class Summary(BaseModel):
 @runtime_checkable
 class Summarizer(Protocol):
     def summarize(self) -> Summary: ...
+
+
+class UserInfo(BaseModel):
+    uid: int
+    uname: str

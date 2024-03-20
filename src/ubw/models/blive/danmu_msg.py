@@ -22,6 +22,15 @@ class DanmakuInfoModeInfoExtraEmot(BaseModel):
     count: int | None = None
 
 
+class DanmakuInfoModeInfoExtraIconPrefix(BaseModel):
+    type: int
+    resource: str
+
+
+class DanmakuInfoModeInfoExtraIcon(BaseModel):
+    prefix: DanmakuInfoModeInfoExtraIconPrefix
+
+
 class DanmakuInfoModeInfoExtra(BaseModel):
     send_from_me: bool | None = None
     mode: int | None = None
@@ -49,12 +58,21 @@ class DanmakuInfoModeInfoExtra(BaseModel):
     animation: dict | None = None
     emots: dict[str, DanmakuInfoModeInfoExtraEmot] | None = None
     is_audited: bool | None = None
+    id_str: str | None = None
+    icon: DanmakuInfoModeInfoExtraIcon | None = None
+    show_reply: bool = False
+    reply_mid: int = 0
+    reply_uname: str = ''
+    reply_uname_color: str = ''
+    reply_is_mystery: bool = False
+    hit_combo: int = 0
 
 
 class DanmakuInfoModeInfo(BaseModel):
     mode: int | None = None
     show_player_type: int | None = None
     extra: DanmakuInfoModeInfoExtra | None = None
+    user: Uinfo | None = None
 
     validate_extra = field_validator('extra', mode='before')(strange_dict)
 
@@ -259,7 +277,7 @@ class Danmaku371111Command(DanmakuCommand):
                 "runame": '',
                 "medal_room_id": 0,
                 "mcolor": 0,
-                "special_medal": 0,
+                "special_medal": '',
 
                 "user_level": 0,
                 "ulevel_color": 0xffffff,
