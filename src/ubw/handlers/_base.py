@@ -81,12 +81,12 @@ class BaseHandler(BaseModel):
         await aiofiles.os.makedirs("output/unknown_cmd", exist_ok=True)
         async with aiofiles.open(f"output/unknown_cmd/{cmd}.json", mode='a', encoding='utf-8') as afp:
             await afp.write(json.dumps(command, indent=2, ensure_ascii=False))
-        # noinspection PyProtectedMember
+        error_details = err.errors(include_url=False)
         sentry_sdk.capture_event(
-            event={'level': 'warning', 'message': err.errors()[0]['msg']},
+            event={'level': 'warning', 'message': f'error parsing command {cmd}'},
             user={'id': client.user_ident},
-            contexts={'ValidationError': {'command': command, 'error': err.errors()}},
-            tags={'handler': self.cls, 'type': err.errors()[0]['type'],
+            contexts={'ValidationError': {'command': command, 'error': error_details}},
+            tags={'handler': self.cls, 'type': 'command-parsing',
                   'cmd': cmd, 'room_id': client.room_id},
         )
 
