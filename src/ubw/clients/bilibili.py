@@ -89,6 +89,15 @@ class BilibiliClientABC(BaseModel, abc.ABC):
             else:
                 raise BilibiliApiError(data.message)
 
+    async def get_info_by_room_raw(self, room_id: int) -> InfoByRoom:
+        async with self.session.get('https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom',
+                                    params={'room_id': room_id}) as res:
+            json_ = await res.json()
+            if json_['code'] == 0:
+                return json_['data']
+            else:
+                raise BilibiliApiError(json_['message'])
+
     async def get_danmaku_server(self, room_id: int) -> DanmuInfo:
         async with self.session.get(DANMAKU_SERVER_CONF_URL,
                                     params={'id': room_id, 'type': 0}) as res:

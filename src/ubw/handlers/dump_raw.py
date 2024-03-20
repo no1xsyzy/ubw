@@ -15,11 +15,12 @@ class DumpRawHandler(BaseHandler):
     cls: Literal['dump_raw'] = 'dump_raw'
     max_shard_length: timedelta = timedelta(days=1)
     room_id: int
-    _living = False
-    _wait_sharding: asyncio.Task | None = None
+    _living: bool = False
+    _wait_sharding: asyncio.Future | None = None
+    _sharder_task: asyncio.Task | None = None
 
-    async def start(self):
-        await self.m_new_shard()
+    def start(self, client):
+        self._sharder_task = asyncio.create_task(self.t_sharder())
 
     @cached_property
     def shard_start(self):
@@ -36,24 +37,23 @@ class DumpRawHandler(BaseHandler):
         async with self.db as db:
             db.insert(command)
 
+    async def t_sharder(self):
+        self._wait_sharding = asyncio.Future()
+        while True:
+            await self.m_new_shard()
+            try:
+                logger.debug(f"next sharding in {self.max_shard_length}")
+                async with asyncio.timeout(self.max_shard_length.total_seconds()):
+                    await self._wait_sharding
+                    self._wait_sharding = asyncio.Future()
+            except asyncio.TimeoutError:
+                pass
+
     async def m_new_shard(self):
-        self.__dict__.pop('shard_start', None)
-        self.__dict__.pop('db', None)
         async with BilibiliUnauthorizedClient() as client:
             info = await client.get_info_by_room(self.room_id)
         self._living = info.room_info.live_start_time is not None
+        self.__dict__.pop('shard_start', None)
+        self.__dict__.pop('db', None)
         async with self.db as db:
             db.insert(info.model_dump())
-        if self._wait_sharding is not None:
-            self._wait_sharding.cancel("new shard")
-        self._wait_sharding = asyncio.create_task(self.m_new_shard_waiting())
-
-    async def m_new_shard_waiting(self):
-        if 'shard_start' not in self.__dict__:
-            return
-        next_sharding = self.shard_start + self.max_shard_length
-        logger.info(f"[{self.room_id}] scheduled sharding: {next_sharding}")
-        delay = next_sharding - datetime.now(timezone(timedelta(seconds=8 * 3600)))
-        await asyncio.sleep(delay.total_seconds())
-        logger.info(f"[{self.room_id}] sharding")
-        await asyncio.shield(self.m_new_shard())
