@@ -5,7 +5,7 @@ LOWER_SNAKE="$(echo $1 | tr '[:upper:]' '[:lower:]')"
 CAPITAL_CASE="$(echo $1 | awk -F_ '{for (i=1; i<=NF; i++) {printf "%s", toupper(substr($i, 1, 1)) tolower(substr($i, 2))}}')"
 
 IN_FILE="output/unknown_cmd/${UPPER_SNAKE}.json"
-OUT_FILE="src/blivedm/models/${LOWER_SNAKE}.py"
+OUT_FILE="src/ubw/models/blive/${LOWER_SNAKE}.py"
 TMP_NAME="_tmp_create_model"
 
 if [ ! -f "$IN_FILE" ]; then
