@@ -197,6 +197,11 @@ class UinfoGuardLeader(BaseModel):
     is_guard_leader: bool
 
 
+class UheadFrame(BaseModel):
+    id: int
+    frame_img: str
+
+
 class Uinfo(BaseModel):
     uid: int
     base: UinfoBase
@@ -204,7 +209,7 @@ class Uinfo(BaseModel):
     wealth: UinfoWealth | None = None
     title: UinfoTitle | None = None
     guard: GuardInfo | None = None
-    uhead_frame: None = None
+    uhead_frame: UheadFrame | None = None
     guard_leader: UinfoGuardLeader | None = None
 
 
