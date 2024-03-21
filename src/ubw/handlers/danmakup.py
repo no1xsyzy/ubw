@@ -2,6 +2,7 @@ import functools
 import logging
 import math
 import re
+from datetime import timezone, timedelta
 from functools import cached_property
 
 import rich
@@ -254,7 +255,7 @@ class DanmakuPHandler(BaseHandler):
 
     async def on_summary(self, client, summary):
         if self.ui is None:
-            text = rf"\[{summary.t.strftime('%Y-%m-%d %H:%M:%S')}] " \
+            text = rf"\[{summary.t.astimezone(timezone(timedelta(seconds=8 * 3600))).strftime('%Y-%m-%d %H:%M:%S')}] " \
                    rf"\[[bright_cyan]{client.room_id}[/]] " \
                    f"{summary.msg}"
             if summary.price != 0:
