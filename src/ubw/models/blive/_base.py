@@ -13,7 +13,7 @@ __all__ = (
     # interface
     'Summary', 'Summarizer',
     # common types
-    'Scatter', 'MedalInfo', 'Color', 'Uinfo', 'UserInfo',
+    'Scatter', 'MedalInfo', 'Color', 'Uinfo', 'UinfoLow', 'UserInfo',
     # common validator
     'strange_dict', 'convert_ns',
 )
@@ -211,6 +211,16 @@ class Uinfo(BaseModel):
     guard: GuardInfo | None = None
     uhead_frame: UheadFrame | None = None
     guard_leader: UinfoGuardLeader | None = None
+
+
+class UinfoLowBase(BaseModel):
+    uname: str
+    face: str
+    is_mystery: bool
+
+
+class UinfoLow(BaseModel):
+    base: UinfoLowBase
 
 
 class Summary(BaseModel):

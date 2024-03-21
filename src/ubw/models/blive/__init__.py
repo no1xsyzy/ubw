@@ -61,6 +61,11 @@ from .pk import (
     PkBattleSettleNewCommand, PkBattleSettleCommand, PkBattleSettleV2Command, PkBattleSettleUserCommand,
     PkBattleEntranceCommand,
     PkBattleMatchTimeoutCommand,
+    PkBattleMultipleAwardCommand,
+    PkBattleMultipleBeginCommand,
+    PkBattleMultipleDrawResCommand,
+    PkBattleMultipleResCommand,
+    PkBattlePunishBeginCommand,
 )
 from .playtogether_icon_change import PlaytogetherIconChangeCommand
 from .popular_rank_changed import PopularRankChangedCommand
@@ -106,6 +111,7 @@ from .watched_change import WatchedChangeCommand
 from .wealth_notify import WealthNotifyCommand
 from .widget_banner import WidgetBannerCommand
 from .widget_gift_star_process import WidgetGiftStarProcessCommand
+from .widget_wish_list import WidgetWishListCommand
 
 AnnotatedCommandModel = Annotated[Union[
     ActivityBannerChangeCommand, ActivityBannerChangeV2Command,
@@ -166,6 +172,11 @@ AnnotatedCommandModel = Annotated[Union[
     PkBattleSettleNewCommand, PkBattleSettleCommand, PkBattleSettleV2Command, PkBattleSettleUserCommand,
     PkBattleEntranceCommand,
     PkBattleMatchTimeoutCommand,
+    PkBattleMultipleAwardCommand,
+    PkBattleMultipleBeginCommand,
+    PkBattleMultipleDrawResCommand,
+    PkBattleMultipleResCommand,
+    PkBattlePunishBeginCommand,
     PlaytogetherIconChangeCommand,
     PopularRankChangedCommand,
     PopularityRedPocketNewCommand,
@@ -209,7 +220,8 @@ AnnotatedCommandModel = Annotated[Union[
     WatchedChangeCommand,
     WealthNotifyCommand,
     WidgetBannerCommand,
-    WidgetGiftStarProcessCommand
+    WidgetGiftStarProcessCommand,
+    WidgetWishListCommand,
 ], Field(discriminator='cmd')]
 
 __all__ = (
@@ -272,6 +284,11 @@ __all__ = (
     'PkBattleSettleNewCommand', 'PkBattleSettleCommand', 'PkBattleSettleV2Command', 'PkBattleSettleUserCommand',
     'PkBattleEntranceCommand',
     'PkBattleMatchTimeoutCommand',
+    'PkBattleMultipleAwardCommand',
+    'PkBattleMultipleBeginCommand',
+    'PkBattleMultipleDrawResCommand',
+    'PkBattleMultipleResCommand',
+    'PkBattlePunishBeginCommand',
     'PlaytogetherIconChangeCommand',
     'PopularityRedPocketNewCommand',
     'PopularityRedPocketStartCommand',
@@ -314,5 +331,6 @@ __all__ = (
     'WealthNotifyCommand',
     'WidgetBannerCommand',
     'WidgetGiftStarProcessCommand',
+    'WidgetWishListCommand',
     'AnnotatedCommandModel', 'Summary', 'Summarizer', 'CommandModel',
 )

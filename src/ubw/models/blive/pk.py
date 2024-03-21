@@ -6,6 +6,10 @@ class AssistInfo(BaseModel):
     rank: int
     uid: int
     uname: str
+    award_content: str = ''
+    is_mystery: bool = False
+    score: str | None = None
+    uinfo: UinfoLow | Uinfo | None = None
 
 
 class PkInfo(BaseModel):
@@ -17,6 +21,7 @@ class PkInfo(BaseModel):
     assist_info: list[AssistInfo] | None = None
     result_type: int | None = None
     winner_type: int | None = None
+    is_mystery: bool = False
 
 
 class PkBattleRankChangeData(BaseModel):
@@ -42,6 +47,7 @@ class PkBattlePreData(BaseModel):
     season_id: int
     uid: int
     uname: str
+    battle_sub_type: int = 0
 
 
 class PkBattlePreCommand(CommandModel):
@@ -83,6 +89,7 @@ class PkBattleStartData(BaseModel):
     pk_votes_name: str
     pk_votes_type: int
     star_light_msg: str
+    battle_sub_type: int = 0
 
 
 class PkBattleStartCommand(CommandModel):
@@ -120,6 +127,7 @@ class PkBattleProcessData(BaseModel):
     battle_type: int
     init_info: PkInfo
     match_info: PkInfo
+    trace_id: str | None = None
 
 
 class PkBattleProcessCommand(CommandModel):
@@ -192,6 +200,10 @@ class PkBattleEndData(BaseModel):
     battle_type: int
     init_info: PkInfo
     match_info: PkInfo
+    dm_conf: DmConf | None = None
+    show_streak: bool = False
+    timer: int = 10
+    battle_sub_type: int = 0
 
 
 class PkBattleEndCommand(CommandModel):
@@ -205,6 +217,7 @@ class PkBattleEndCommand(CommandModel):
 class PkBattleFinalProcessData(BaseModel):
     battle_type: int
     pk_frozen_time: datetime
+    battle_sub_type: int = 0
 
 
 class PkBattleFinalProcessCommand(CommandModel):
@@ -257,3 +270,107 @@ class PkBattleMatchTimeoutData(BaseModel):
 class PkBattleMatchTimeoutCommand(CommandModel):
     cmd: Literal['PK_BATTLE_MATCH_TIMEOUT']
     data: PkBattleMatchTimeoutData
+
+
+class PkBattleMultipleAwardData(BaseModel):
+    pkid: int
+    pk_status: int
+    award_room: int
+    award_no: int
+    award_name: str
+    award_value: int
+    multiple_time: int
+    start_time: datetime
+    end_time: datetime
+    status: int
+
+
+class PkBattleMultipleAwardCommand(CommandModel):
+    cmd: Literal['PK_BATTLE_MULTIPLE_AWARD']
+    data: PkBattleMultipleAwardData
+
+
+class PkBattleMultipleBeginData(BaseModel):
+    pkid: int
+    pk_status: int
+    target_votes: int
+    rule_url: str
+    start_time: Literal[0]
+    end_time: datetime
+    duration: int
+    award_name: str
+
+
+class PkBattleMultipleBeginCommand(CommandModel):
+    cmd: Literal['PK_BATTLE_MULTIPLE_BEGIN']
+    data: PkBattleMultipleBeginData
+
+
+class PkBattleMultipleDrawResData(BaseModel):
+    pkid: int
+    award_room: int
+    award_no: int
+    award_name: str
+    award_value: int
+    multiple_time: int
+    start_time: datetime
+    end_time: datetime
+    status: int
+
+
+class PkBattleMultipleDrawResCommand(CommandModel):
+    cmd: Literal['PK_BATTLE_MULTIPLE_DRAW_RES']
+    data: PkBattleMultipleDrawResData
+
+
+class PkBattleMultipleResData(BaseModel):
+    pkid: int
+    pk_status: int
+    target_votes: int
+    cur_votes: int
+    award_num: int
+    lottery_wait_time: int
+    start_time: datetime
+    end_time: datetime
+    room_id: int
+    vote_time: int
+
+
+class PkBattleMultipleResCommand(CommandModel):
+    cmd: Literal['PK_BATTLE_MULTIPLE_RES']
+    data: PkBattleMultipleResData
+
+
+class VideoPunish(BaseModel):
+    duration: int
+    punish_name: str
+
+
+class PkBattlePunishBeginData(BaseModel):
+    battle_type: int
+    battle_sub_type: int = 0
+
+    init_info: PkInfo
+    match_info: PkInfo
+
+    video_punish: VideoPunish
+
+
+class PkBattlePunishBeginCommand(CommandModel):
+    cmd: Literal['PK_BATTLE_VIDEO_PUNISH_BEGIN']
+
+    timestamp: datetime
+    pk_id: str
+    pk_status: int
+
+    data: PkBattlePunishBeginData
+
+
+class PkBattlePunishEndCommand(CommandModel):
+    cmd: Literal['PK_BATTLE_VIDEO_PUNISH_END']
+
+    battle_sub_type: int = 0
+
+    timestamp: datetime
+    pk_id: str
+    pk_status: int

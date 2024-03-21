@@ -1,6 +1,41 @@
 from ._base import *
 
 
+class BlindGift(BaseModel):
+    blind_gift_config_id: int
+    from_: int = Field(alias='from')
+    gift_action: str
+    gift_tip_price: int
+    original_gift_id: int
+    original_gift_name: str
+    original_gift_price: int
+
+
+class BatchComboSend(BaseModel):
+    action: str
+    batch_combo_id: str
+    batch_combo_num: int
+    blind_gift: BlindGift | None = None
+    gift_id: int
+    gift_name: str
+    gift_num: int
+    send_master: None = None
+    uid: int
+    uname: str
+
+
+class ComboSend(BaseModel):
+    action: str
+    combo_id: str
+    combo_num: int
+    gift_id: int
+    gift_name: str
+    gift_num: int
+    send_master: None = None
+    uid: int
+    uname: str
+
+
 class GiftData(BaseModel):
     """礼物消息
     :var giftName: 礼物名
@@ -35,13 +70,13 @@ class GiftData(BaseModel):
     tid: str
     bag_gift: None = None
     batch_combo_id: str = ''
-    batch_combo_send: None = None
+    batch_combo_send: BatchComboSend | None = None
     beatId: str = '0'
     biz_source: str
-    blind_gift: None = None
+    blind_gift: BlindGift | None = None
     broadcast_id: int = 0
     combo_resources_id: int = 1
-    combo_send: None = None
+    combo_send: ComboSend | None = None
     combo_stay_time: int = 5
     combo_total_coin: int = 0
     crit_prob: int = 0

@@ -38,16 +38,6 @@ class UserInfo(BaseModel):
     user_level: int
 
 
-class JpnUinfoBase(BaseModel):
-    uname: str
-    face: str
-    is_mystery: bool
-
-
-class JpnUinfo(BaseModel):
-    base: JpnUinfoBase
-
-
 class Data(BaseModel):
     background_bottom_color: Color
     background_color: Color
@@ -76,7 +66,7 @@ class Data(BaseModel):
     is_mystery: bool = False
     medal_info: MedalInfo | None = None
 
-    uinfo: JpnUinfo | None = None
+    uinfo: UinfoLow | None = None
 
 
 class SuperChatMessageJpnCommand(CommandModel):
