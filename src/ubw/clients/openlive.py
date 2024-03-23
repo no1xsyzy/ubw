@@ -48,19 +48,52 @@ class StartData(BaseModel):
 
 
 class AppABC(BaseModel, abc.ABC):
+    """哔哩哔哩直播开放平台鉴权部分的接口类。大部分情况都应当避免直接使用此类，而应该继承 :class:`CommonApp`。
+    最终可用的 App 应当覆盖 app_type 的定义，像这样 ::
+
+        app_type: Literal['direct'] = 'direct'
+
+    这样才能做到方便地同时使用反序列化自动解析App类型和调用类构造两种方式使用。
+
+    :var app_type: 用于区分不同实际类的字段
+    """
     app_type: str
 
     @abc.abstractmethod
-    async def start(self, session, room_owner_auth_code): ...
+    async def start(self, session: aiohttp.ClientSession, room_owner_auth_code: str) -> StartData:
+        """当侦听开始时会被调用的方法，
+        包含 `开放平台开发文档 <https://open-live.bilibili.com/document/849b924b-b421-8586-3e5e-765a72ec3840>`_ 中
+        至“返回长连地址，authbody”为止的部分
+        :param session: 请求时调用的 aiohttp.ClientSession
+        :param room_owner_auth_code: 主播身份码
+        :return: 一个 :class:`StartData` 对象
+        """
 
     @abc.abstractmethod
-    async def end(self, session): ...
+    async def end(self, session):
+        """当侦听结束时会被调用的方法，非正常退出则会导致同id的应用在一段时间内无法使用。
+        :param session: 请求时调用的 aiohttp.ClientSession
+        """
 
     @abc.abstractmethod
-    async def heartbeat(self, session): ...
+    async def heartbeat(self, session):
+        """项目心跳，暂未考虑批量心跳，也在考虑是否将心跳的环境全部迁移到 App 内而非 Client 调用
+        :param session: 请求时调用的 aiohttp.ClientSession
+        """
 
 
 class CommonApp(AppABC, abc.ABC):
+    """哔哩哔哩直播开放平台鉴权部分的脚手架类。
+    最终可用的 App 应当覆盖 app_type 的定义，像这样 ::
+
+        app_type: Literal['direct'] = 'direct'
+
+    这样才能做到方便地同时使用反序列化自动解析App类型和调用类构造两种方式使用。
+
+    :var app_type: 用于区分不同实际类的字段
+    :var api_host: 用于 API 的地址
+    :var app_id: App ID，这个参数之所以放在这边，是因为这个参数对脚手架方法都是必要的。
+    """
     api_host: str = "https://live-open.biliapi.com"
     app_id: int
 
@@ -112,6 +145,19 @@ class CommonApp(AppABC, abc.ABC):
 
 
 class AppDirect(CommonApp):
+    """使用您自己申请的 OpenLive App，
+    申请方式请参考 `成为开发者并获取开发密钥 <https://open-live.bilibili.com/document/849b924b-b421-8586-3e5e-765a72ec3840>`_
+    请尽量不要在代码中直接包含 *access_key_secret*，请不要公开你的 *access_key_secret*，尽量以环境变量的方式提供，例如 ::
+
+        import os
+        access_key_secret = os.environ.get('ACCESS_KEY_SECRET', None)
+        if access_key_secret is None:
+            raise RuntimeError("ACCESS_KEY_SECRET not set")
+        AppDirect(access_key_id='...', access_key_secret=access_key_secret)
+
+    :var access_key_id: 申请时获得的 ``access_key``
+    :var access_key_secret: 申请时获得的 ``access_secret``
+    """
     app_type: Literal['direct'] = 'direct'
     access_key_id: str
     access_key_secret: str
@@ -145,6 +191,8 @@ class AppDirect(CommonApp):
 
 
 class CEVEApp(CommonApp):
+    """使用《彈幕姬》作者的App，他半公开了他的签名服务（感谢他！）。
+    不过，请注意！这会与包括《彈幕姬》在内的其他程序冲突（同一App只能有一个程序）"""
     app_type: Literal['ceve'] = 'ceve'
 
     async def _sign_bytes(self, b):
