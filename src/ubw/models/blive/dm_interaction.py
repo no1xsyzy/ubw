@@ -9,6 +9,7 @@ class ComboData(BaseModel):
     guide: str
     left_duration: int
     fade_duration: int
+    prefix_icon: str = ''
 
 
 class DataData(BaseModel):
@@ -23,6 +24,7 @@ class Data(BaseModel):
     status: int
     type: int
     data: DataData
+    dmscore: int = 0
 
     validate_extra = field_validator('data', mode='before')(strange_dict)
 

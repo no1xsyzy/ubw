@@ -26,7 +26,7 @@ class ComboSendData(BaseModel):
     uid: int
     uname: str
     coin_type: str
-    group_medal: None
+    group_medal: GroupMedal | None = None
     receiver_uinfo: Uinfo
     sender_uinfo: Uinfo
     wealth_level: int

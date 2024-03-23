@@ -42,7 +42,7 @@ class LikeInfoV3ClickData(BaseModel):
     uid: int
     uname: str
     uname_color: str
-    group_medal: None = None
+    group_medal: GroupMedal | None = None
     is_mystery: bool = False
     uinfo: Uinfo | None = None
 

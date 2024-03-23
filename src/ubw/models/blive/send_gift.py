@@ -36,6 +36,11 @@ class ComboSend(BaseModel):
     uname: str
 
 
+class BagGift(BaseModel):
+    price_for_show: int
+    show_price: int  # maybe actually bool
+
+
 class GiftData(BaseModel):
     """礼物消息
     :var giftName: 礼物名
@@ -68,7 +73,7 @@ class GiftData(BaseModel):
     coin_type: str
     total_coin: int
     tid: str
-    bag_gift: None = None
+    bag_gift: BagGift | None = None
     batch_combo_id: str = ''
     batch_combo_send: BatchComboSend | None = None
     beatId: str = '0'
@@ -90,7 +95,7 @@ class GiftData(BaseModel):
     face_effect_type: int = 0
     float_sc_resource_id: float = 0
     gift_tag: list[None] = []
-    group_medal: None = None
+    group_medal: GroupMedal | None = None
     is_first: bool = False
     is_join_receiver: bool = False
     is_naming: bool = False

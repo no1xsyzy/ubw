@@ -48,7 +48,7 @@ class InteractWordData(BaseModel):
     uname: str
     uname_color: str
     roomid: int
-    group_medal: None = None
+    group_medal: GroupMedal | None = None
     is_mystery: bool = False
     tail_text: str = ''
     uinfo: Uinfo

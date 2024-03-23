@@ -32,6 +32,7 @@ class RecommendCardData(BaseModel):
     title_icon: str
     recommend_list: list[dict]  # 太复杂、一直在变、只是为了收米，谁爱写解析谁写
     timestamp: datetime
+    update_list: list[None] = []
 
 
 class RecommendCardCommand(CommandModel):

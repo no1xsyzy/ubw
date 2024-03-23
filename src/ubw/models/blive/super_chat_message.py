@@ -28,12 +28,6 @@ class UserInfo(BaseModel):
     """用户等级"""
 
 
-class GroupMedal(BaseModel):
-    is_lighted: int
-    medal_id: int = 0
-    name: str = ''
-
-
 class SuperChatData(BaseModel):
     """醒目留言消息"""
     price: int

@@ -13,7 +13,7 @@ __all__ = (
     # interface
     'Summary', 'Summarizer',
     # common types
-    'Scatter', 'MedalInfo', 'Color', 'Uinfo', 'UinfoLow', 'UserInfo',
+    'Scatter', 'MedalInfo', 'Color', 'Uinfo', 'UinfoLow', 'UserInfo', 'GroupMedal',
     # common validator
     'strange_dict', 'convert_ns',
 )
@@ -240,3 +240,9 @@ class Summarizer(Protocol):
 class UserInfo(BaseModel):
     uid: int
     uname: str
+
+
+class GroupMedal(BaseModel):
+    is_lighted: int
+    medal_id: int = 0
+    name: str = ''

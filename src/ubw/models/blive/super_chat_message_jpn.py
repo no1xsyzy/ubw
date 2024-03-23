@@ -18,12 +18,6 @@ class MedalInfo(BaseModel):
     target_id: int
 
 
-class GroupMedal(BaseModel):
-    is_lighted: int
-    medal_id: int = 0
-    name: str = ''
-
-
 class UserInfo(BaseModel):
     face: str
     face_frame: str
