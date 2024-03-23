@@ -79,10 +79,12 @@ class SaverHandler(BaseHandler):
             db.insert(message.model_dump(exclude_defaults=True, by_alias=True))
 
     async def on_live(self, client, message):
+        logger.info(f'received LIVE while {self._living=}')
         if not self._living:
             await self.m_shard_now()
 
     async def on_preparing(self, client, message):
+        logger.info(f'received PREPARING while {self._living=}')
         if self._living:
             await self.m_shard_now()
 
@@ -118,6 +120,7 @@ class SaverHandler(BaseHandler):
         async with BilibiliUnauthorizedClient() as client:
             info = await client.get_info_by_room(self.room_id)
         self._living = info.room_info.live_start_time is not None
+        logger.info(f"{self._living=}")
         self.__dict__.pop('shard_start', None)
         self.__dict__.pop('db', None)
         async with self.db as db:
