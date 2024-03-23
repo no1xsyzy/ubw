@@ -31,10 +31,10 @@ class BaseHandler(BaseModel):
     cls: str
     ignored_cmd: list[str] = []
 
-    def start(self, client):
+    def start(self, client: LiveClientABC):
         pass
 
-    async def astart(self, client):
+    async def astart(self, client: LiveClientABC):
         pass
 
     async def handle(self, client: LiveClientABC, command: dict):
