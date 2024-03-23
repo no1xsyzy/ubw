@@ -16,6 +16,11 @@ logger = logging.getLogger('ubw.clients.wsweb')
 
 
 class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
+    """模拟客户端行为
+    :var bilibili_client: 原本的 :class:`ubw.bilibili.BilibiliClient`
+    :var bilibili_client_owner: 是否要让 *bilibili_client* 随自己关闭
+    :var heartbeat_interval: 心跳间隔
+    """
     clientc: Literal['wsweb'] = 'wsweb'
     bilibili_client: BilibiliClient = Field(default_factory=BilibiliCookieClient)
     bilibili_client_owner: bool = True
@@ -206,7 +211,8 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
         if self._buvid3 is not None:
             auth_params['buvid'] = self._buvid3
 
-        logger.debug(f"auth_params=%s", auth_params)
+        logger.debug(f"auth_params=%s", {k: '$$secret$$' if k == 'buvid' else v
+                                         for k, v in auth_params.items()})
 
         await self._websocket.send_bytes(self._make_packet(auth_params, Operation.AUTH))
 
