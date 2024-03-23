@@ -56,4 +56,4 @@ class DumpRawHandler(BaseHandler):
         self.__dict__.pop('shard_start', None)
         self.__dict__.pop('db', None)
         async with self.db as db:
-            db.insert(info.model_dump())
+            db.insert(info.model_dump(exclude_defaults=True, by_alias=True))

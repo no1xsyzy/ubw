@@ -58,25 +58,25 @@ class SaverHandler(BaseHandler):
     async def on_danmu_msg(self, client, message):
         logger.info(f"{message.info.uname} ({message.info.uid}): {message.info.msg}")
         async with self.db as db:
-            db.insert(message.model_dump())
+            db.insert(message.model_dump(exclude_defaults=True, by_alias=True))
 
     async def on_send_gift(self, client, message):
         async with self.db as db:
-            db.insert(message.model_dump())
+            db.insert(message.model_dump(exclude_defaults=True, by_alias=True))
 
     async def on_guard_buy(self, client, message):
         async with self.db as db:
-            db.insert(message.model_dump())
+            db.insert(message.model_dump(exclude_defaults=True, by_alias=True))
 
     async def on_super_chat_message(self, client, message):
         logger.info(f"{message.data.user_info.uname} ({message.data.uid}): "
                     f"{message.data.message} (¥{message.data.price})")
         async with self.db as db:
-            db.insert(message.model_dump())
+            db.insert(message.model_dump(exclude_defaults=True, by_alias=True))
 
     async def on_room_change(self, client, message):
         async with self.db as db:
-            db.insert(message.model_dump())
+            db.insert(message.model_dump(exclude_defaults=True, by_alias=True))
 
     async def on_live(self, client, message):
         if not self._living:
@@ -88,11 +88,11 @@ class SaverHandler(BaseHandler):
 
     async def on_room_block_msg(self, client, message):
         async with self.db as db:
-            db.insert(message.model_dump())
+            db.insert(message.model_dump(exclude_defaults=True, by_alias=True))
 
     async def on_warning(self, client, message):
         async with self.db as db:
-            db.insert(message.model_dump())
+            db.insert(message.model_dump(exclude_defaults=True, by_alias=True))
 
     async def on_unknown_cmd(self, client, command, err):
         async with self.db as db:
@@ -121,4 +121,4 @@ class SaverHandler(BaseHandler):
         self.__dict__.pop('shard_start', None)
         self.__dict__.pop('db', None)
         async with self.db as db:
-            db.insert(info.model_dump())
+            db.insert(info.model_dump(exclude_defaults=True, by_alias=True))

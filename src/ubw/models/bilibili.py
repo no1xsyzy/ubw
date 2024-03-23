@@ -225,12 +225,14 @@ RichTextNode = Annotated[
 
 class ModuleDynamic(BaseModel):
     rich_text_nodes: list[RichTextNode] = Field(
+        alias='rich_text_nodes',
         validation_alias=AliasChoices(
             AliasPath('major', 'opus', 'summary', 'rich_text_nodes'),
             AliasPath('desc', 'rich_text_nodes'),
         ),
     )
     text: str = Field(
+        alias='text',
         validation_alias=AliasChoices(
             AliasPath('major', 'opus', 'summary', 'text'),
             AliasPath('desc', 'text'),
@@ -241,8 +243,10 @@ class ModuleDynamic(BaseModel):
 class DynamicItem(BaseModel):
     basic: DynamicBasic
     id_str: str
-    module_author: ModuleAuthor = Field(validation_alias=AliasPath('modules', 'module_author'))
-    module_dynamic: ModuleDynamic = Field(validation_alias=AliasPath('modules', 'module_dynamic'))
+    module_author: ModuleAuthor = Field(alias='module_author',
+                                        validation_alias=AliasPath('modules', 'module_author'))
+    module_dynamic: ModuleDynamic = Field(alias='module_dynamic',
+                                          validation_alias=AliasPath('modules', 'module_dynamic'))
     type: str
     visible: bool
 
@@ -253,9 +257,12 @@ class Dynamic(BaseModel):
 
 class AccountInfo(BaseModel):
     mid: int
-    live_room_id: int = Field(validation_alias=AliasPath('live_room', 'roomid'))
+    live_room_id: int = Field(alias='live_room_id',
+                              validation_alias=AliasPath('live_room', 'roomid'))
 
 
 class Nav(BaseModel):
-    wbi_img_url: str = Field(validation_alias=AliasPath('wbi_img', 'img_url'))
-    wbi_img_sub_url: str = Field(validation_alias=AliasPath('wbi_img', 'sub_url'))
+    wbi_img_url: str = Field(alias='wbi_img_url',
+                             validation_alias=AliasPath('wbi_img', 'img_url'))
+    wbi_img_sub_url: str = Field(alias='wbi_img_sub_url',
+                                 validation_alias=AliasPath('wbi_img', 'sub_url'))
