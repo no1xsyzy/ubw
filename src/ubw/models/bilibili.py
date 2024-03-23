@@ -29,6 +29,9 @@ class AnchorInfo(BaseModel):
 
 
 class RoomInfo(BaseModel):
+    """
+    :var live_start_time: API result ``0`` is validated as ``None``, meaning not living
+    """
     room_id: int
     short_id: int
     uid: int
