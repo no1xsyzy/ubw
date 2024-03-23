@@ -17,6 +17,8 @@ __all__ = (
 
 logger = logging.getLogger('ubw.handlers._base')
 
+ANNOTATED_COMMAND_ADAPTER = TypeAdapter(models.AnnotatedCommandModel)
+
 
 def func_info(func: Callable):
     try:
@@ -53,7 +55,7 @@ class BaseHandler(BaseModel):
                 return
 
             try:
-                model: models.CommandModel = TypeAdapter(models.AnnotatedCommandModel).validate_python(command)
+                model: models.CommandModel = ANNOTATED_COMMAND_ADAPTER.validate_python(command)
             except ValidationError as e:
                 logger.debug(f"got a {cmd}, processed with {func_info(self.on_unknown_cmd)}")
                 return await self.on_unknown_cmd(client, command, e)
