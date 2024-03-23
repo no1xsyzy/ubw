@@ -3,6 +3,7 @@ import functools
 import http.cookies
 import logging
 import os
+import re
 from pathlib import Path
 from typing import *
 
@@ -12,7 +13,7 @@ from multidict import CIMultiDict
 from pydantic import BaseModel, Field
 from yarl import URL
 
-from ubw.models.bilibili import Response, InfoByRoom, DanmuInfo, RoomEmoticons, FingerSPI, RoomPlayInfo
+from ubw.models.bilibili import *
 
 ROOM_INIT_URL = 'https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom'
 DANMAKU_SERVER_CONF_URL = 'https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo'
@@ -24,6 +25,19 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 F = TypeVar('F')
 
 logger = logging.getLogger('ubw.bilibili')
+
+# magics for wbi sign
+RE_FN = re.compile(r'.+/(\w+)\..+')
+MAGIC = [
+    46, 47, 18, 2, 53, 8, 23, 32,
+    15, 50, 10, 31, 58, 3, 45, 35,
+    27, 43, 5, 49, 33, 9, 42, 19,
+    29, 28, 14, 39, 12, 38, 41, 13,
+    37, 48, 7, 16, 24, 55, 40, 61,
+    26, 17, 0, 1, 60, 51, 30, 4,
+    22, 25, 54, 21, 56, 59, 6, 63,
+    57, 62, 11, 36, 20, 34, 44, 52,
+]
 
 
 class BilibiliApiError(Exception):
@@ -54,6 +68,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
     headers: dict[str, str] = {}
     user_agent: str = USER_AGENT
     _session: aiohttp.ClientSession | None = None
+    _mixin_key: str | None = None
 
     @abc.abstractmethod
     def make_session(self):
@@ -141,6 +156,56 @@ class BilibiliClientABC(BaseModel, abc.ABC):
             else:
                 raise BilibiliApiError(data.message)
 
+    async def get_dynamic(self, dynamic_id: int, features: list[str] = ()) -> Dynamic:
+        async with self.session.get('https://api.bilibili.com/x/polymer/web-dynamic/v1/detail',
+                                    params={'id': dynamic_id, 'features': ','.join(features)}, ) as res:
+            data = Response[Dynamic].model_validate(await res.json())
+            if data.code == 0:
+                return data.data
+            else:
+                request_info = res.request_info
+                raise BilibiliApiError(data.message)
+
+    async def get_account_info(self, uid: int) -> AccountInfo:
+        async with self.session.get('https://api.bilibili.com/x/space/wbi/acc/info',
+                                    params=await self.enclose_wbi({'mid': uid})) as res:
+            data = Response[AccountInfo].model_validate(await res.json())
+            if data.code == 0:
+                return data.data
+            else:
+                raise BilibiliApiError(data.message)
+
+    async def enclose_wbi(self, params):
+        import time
+        from urllib.parse import urlencode
+        import hashlib
+
+        if self._mixin_key is None:
+            data = await self.get_nav()
+            j = RE_FN.match(data.wbi_img_url).group(1) + RE_FN.match(data.wbi_img_sub_url).group(1)
+            s = ""
+            for i in MAGIC:
+                if i < len(j):
+                    s += j[i]
+            mixin_key = self._mixin_key = s[:32]
+        else:
+            mixin_key = self._mixin_key
+
+        params.pop("w_rid", None)
+        params["wts"] = int(time.time())
+        params["web_location"] = 1550101
+        ek = urlencode(sorted(params.items())) + mixin_key
+        params["w_rid"] = hashlib.md5(ek.encode(encoding="utf-8")).hexdigest()
+        return params
+
+    async def get_nav(self) -> Nav:
+        async with self.session.get("https://api.bilibili.com/x/web-interface/nav") as res:
+            data = Response[Nav].model_validate(await res.json())
+            if data.code == 0:
+                return data.data
+            else:
+                raise BilibiliApiError(data.message)
+
 
 class BilibiliUnauthorizedClient(BilibiliClientABC):
     auth_type: Literal['no'] = 'no'
@@ -198,6 +263,10 @@ class BilibiliCookieClient(BilibiliClientABC):
                 self._cookies[name]['expires'] = expires
                 self._cookies[name]['path'] = path
                 self._cookies[name]['httponly'] = httponly
+
+    async def __aenter__(self):
+        await self.read_cookie()
+        return await super().__aenter__()
 
     def make_session(self, default_cookies=True, timeout=None, **kwargs):
         headers = CIMultiDict(self.headers)

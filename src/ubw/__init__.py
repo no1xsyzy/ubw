@@ -126,6 +126,38 @@ async def saver(rooms: list[int]):
     await listen_to_all(rooms, handler_factory=lambda r: SaverHandler(room_id=r))
 
 
+@app.command('living_status')
+@app.command('w')
+@sync
+async def living_status(
+        rooms: list[int] = (),
+        from_user: Annotated[list[int], typer.Option("--from-user", "-u")] = (),
+        from_dynamic: Annotated[list[int], typer.Option("--from-dynamic", "-d")] = (),
+):
+    from pydantic import TypeAdapter
+    from .clients.bilibili import BilibiliClient
+    from .handlers import LivingStatusHandler
+    from . import models
+
+    from_user = set(from_user)
+    from_dynamic = set(from_dynamic)
+    rooms = set(rooms)
+
+    async with TypeAdapter(BilibiliClient).validate_python(main.config['accounts']['default']) as c:
+        c: BilibiliClient
+        for d in from_dynamic:
+            f: models.Dynamic = await c.get_dynamic(d, features=('itemOpusStyle',))
+            for t in f.item.module_dynamic.rich_text_nodes:
+                if isinstance(t, models.bilibili.RichTextNodeTypeAt):
+                    from_user.add(t.rid)
+
+        for m in from_user:
+            acc = await c.get_account_info(m)
+            rooms.add(acc.live_room_id)
+
+        await listen_to_all(list(rooms), LivingStatusHandler(), b_client=c)
+
+
 @app.command('run')
 @app.command('r')
 @sync
@@ -216,7 +248,6 @@ async def get_play_url(room_id: int,
 
     console = get_console()
     async with BilibiliCookieClient(**main.config['accounts']['default']) as client:
-        await client.read_cookie()
         play_info = await client.get_room_play_info(room_id, qn)
 
     each: Callable[[str, str], Any] | None = None

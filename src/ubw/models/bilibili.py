@@ -1,9 +1,12 @@
 from datetime import datetime, timezone, timedelta
 from typing import *
 
-from pydantic import BaseModel, field_validator, Field
+from pydantic import BaseModel, field_validator, Field, AliasPath, AliasChoices
 
-__all__ = ('Response', 'InfoByRoom', 'DanmuInfo', 'RoomEmoticons', 'FingerSPI', 'RoomPlayInfo')
+__all__ = (
+    'Response', 'InfoByRoom', 'DanmuInfo', 'RoomEmoticons', 'FingerSPI', 'RoomPlayInfo', 'Dynamic', 'AccountInfo',
+    'Nav',
+)
 
 DataV = TypeVar('DataV')
 
@@ -12,7 +15,7 @@ class Response(BaseModel, Generic[DataV]):
     code: int
     message: str
     ttl: int = -1
-    data: DataV | None
+    data: DataV | None = None
 
 
 class BaseInfo(BaseModel):
@@ -178,3 +181,81 @@ class RoomPlayInfo(BaseModel):
     short_id: int
     uid: int
     playurl_info: PlayUrlInfo | None
+
+
+class LikeIcon(BaseModel):
+    action_url: str
+    end_url: str
+    id: int
+    start_url: str
+
+
+class DynamicBasic(BaseModel):
+    comment_id_str: str
+    comment_type: int
+    like_icon: LikeIcon
+    rid_str: str
+
+
+class ModuleAuthor(BaseModel):
+    mid: int
+    name: str
+
+
+class RichTextNodeBase(BaseModel):
+    type: str
+    orig_text: str
+    text: str
+
+
+class RichTextNodeTypeText(RichTextNodeBase):
+    type: Literal['RICH_TEXT_NODE_TYPE_TEXT']
+
+
+class RichTextNodeTypeAt(RichTextNodeBase):
+    type: Literal['RICH_TEXT_NODE_TYPE_AT']
+    rid: int
+
+
+RichTextNode = Annotated[
+    Union[RichTextNodeTypeText, RichTextNodeTypeAt],
+    Field(discriminator='type')
+]
+
+
+class ModuleDynamic(BaseModel):
+    rich_text_nodes: list[RichTextNode] = Field(
+        validation_alias=AliasChoices(
+            AliasPath('major', 'opus', 'summary', 'rich_text_nodes'),
+            AliasPath('desc', 'rich_text_nodes'),
+        ),
+    )
+    text: str = Field(
+        validation_alias=AliasChoices(
+            AliasPath('major', 'opus', 'summary', 'text'),
+            AliasPath('desc', 'text'),
+        ),
+    )
+
+
+class DynamicItem(BaseModel):
+    basic: DynamicBasic
+    id_str: str
+    module_author: ModuleAuthor = Field(validation_alias=AliasPath('modules', 'module_author'))
+    module_dynamic: ModuleDynamic = Field(validation_alias=AliasPath('modules', 'module_dynamic'))
+    type: str
+    visible: bool
+
+
+class Dynamic(BaseModel):
+    item: DynamicItem
+
+
+class AccountInfo(BaseModel):
+    mid: int
+    live_room_id: int = Field(validation_alias=AliasPath('live_room', 'roomid'))
+
+
+class Nav(BaseModel):
+    wbi_img_url: str = Field(validation_alias=AliasPath('wbi_img', 'img_url'))
+    wbi_img_sub_url: str = Field(validation_alias=AliasPath('wbi_img', 'sub_url'))

@@ -116,7 +116,7 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
 
     async def main(self):
         if self.bilibili_client_owner:
-            await self.bilibili_client.read_cookie()
+            await self.bilibili_client.__aenter__()
 
         self._session = self.bilibili_client.make_session()
 

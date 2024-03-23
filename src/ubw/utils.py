@@ -1,37 +1,50 @@
 import asyncio
 import sys
+import warnings
 from functools import wraps
 from typing import Callable
 
 from pydantic import BaseModel
 
-from .clients import LiveClient, BilibiliCookieClient, WSWebCookieLiveClient, HandlerInterface
+from .clients import LiveClient, BilibiliCookieClient, WSWebCookieLiveClient, HandlerInterface, BilibiliClientABC
 from .handlers import Handler, BaseHandler
 
 __all__ = ('listen_to_all', 'sync', 'Application')
 
 
-async def listen_to_all(room_ids: list[int],
-                        handler: BaseHandler = None,
-                        handler_factory: Callable[[int], HandlerInterface] = None):
+async def listen_to_all(
+        room_ids: list[int],
+        handler: BaseHandler = None,
+        handler_factory: Callable[[int], HandlerInterface] = None,
+        b_client: BilibiliClientABC = None,
+):
     if handler is None and handler_factory is None:
         raise ValueError("neither handler nor handler_factory is specified, useless")
-    clients: dict[int, WSWebCookieLiveClient] = {}
-    async with BilibiliCookieClient(cookie_file='cookies.txt') as bclient:
-        await bclient.read_cookie()
+
+    async def g(b):
+        clients: dict[int, WSWebCookieLiveClient] = {}
         for room_id in room_ids:
             if room_id in clients:
                 client = clients[room_id]
             else:
                 clients[room_id] = client = \
-                    WSWebCookieLiveClient(bilibili_client=bclient, bilibili_client_owner=False, room_id=room_id)
+                    WSWebCookieLiveClient(bilibili_client=b, bilibili_client_owner=False, room_id=room_id)
             client.add_handler(handler if handler is not None else handler_factory(room_id))
+            handler.start(client)
+            await handler.astart(client)
             client.start()
 
         try:
             await asyncio.gather(*(client.join() for client in clients.values()))
         finally:
             await asyncio.gather(*(client.stop_and_close() for client in clients.values()))
+
+    if b_client is None:
+        warnings.warn('b_client should be passed')
+        async with BilibiliCookieClient(cookie_file='cookies.txt') as b_client:
+            await g(b_client)
+    else:
+        await g(b_client)
 
 
 def sync(f):
@@ -53,6 +66,7 @@ class Application(BaseModel):
         self.client.add_handler(self.handler)
         self.client.start()
         self.handler.start(self.client)
+        self.handler.astart(self.client)
         await self.client.join()
 
     async def close(self):

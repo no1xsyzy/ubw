@@ -32,6 +32,9 @@ class BaseHandler(BaseModel):
     def start(self, client):
         pass
 
+    async def astart(self, client):
+        pass
+
     async def handle(self, client: LiveClientABC, command: dict):
         await self.process_one(client, command)
 
