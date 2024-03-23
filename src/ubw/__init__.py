@@ -130,7 +130,7 @@ async def saver(rooms: list[int]):
 @app.command('w')
 @sync
 async def living_status(
-        rooms: list[int] = (),
+        rooms: Annotated[list[int], typer.Option("--rooms", "-r")] = (),
         from_user: Annotated[list[int], typer.Option("--from-user", "-u")] = (),
         from_dynamic: Annotated[list[int], typer.Option("--from-dynamic", "-d")] = (),
 ):
