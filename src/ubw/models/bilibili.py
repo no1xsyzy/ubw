@@ -1,10 +1,14 @@
+import json
 from datetime import datetime, timezone, timedelta
+from functools import cached_property
 from typing import *
 
-from pydantic import BaseModel, field_validator, Field, AliasPath, AliasChoices
+from pydantic import BaseModel, field_validator, Field, AliasPath, TypeAdapter
 
 __all__ = (
-    'Response', 'InfoByRoom', 'DanmuInfo', 'RoomEmoticons', 'FingerSPI', 'RoomPlayInfo', 'Dynamic', 'AccountInfo',
+    'Response', 'OffsetList',
+    'RoomInfo', 'InfoByRoom', 'DanmuInfo', 'RoomEmoticons', 'FingerSPI', 'RoomPlayInfo',
+    'Dynamic', 'DynamicItem', 'AccountInfo',
     'Nav',
 )
 
@@ -16,6 +20,12 @@ class Response(BaseModel, Generic[DataV]):
     message: str
     ttl: int = -1
     data: DataV | None = None
+
+
+class OffsetList(BaseModel, Generic[DataV]):
+    has_more: bool
+    items: list[DataV]
+    offset: str
 
 
 class BaseInfo(BaseModel):
@@ -198,11 +208,13 @@ class DynamicBasic(BaseModel):
     comment_type: int
     like_icon: LikeIcon
     rid_str: str
+    jump_url: str = ""
 
 
 class ModuleAuthor(BaseModel):
     mid: int
     name: str
+    pub_ts: datetime
 
 
 class RichTextNodeBase(BaseModel):
@@ -220,38 +232,72 @@ class RichTextNodeTypeAt(RichTextNodeBase):
     rid: int
 
 
+class RichTextNodeTypeEmoji(RichTextNodeBase):
+    type: Literal['RICH_TEXT_NODE_TYPE_EMOJI']
+
+
 RichTextNode = Annotated[
-    Union[RichTextNodeTypeText, RichTextNodeTypeAt],
+    Union[RichTextNodeTypeText, RichTextNodeTypeAt, RichTextNodeTypeEmoji],
     Field(discriminator='type')
 ]
 
-
-class ModuleDynamic(BaseModel):
-    rich_text_nodes: list[RichTextNode] = Field(
-        alias='rich_text_nodes',
-        validation_alias=AliasChoices(
-            AliasPath('major', 'opus', 'summary', 'rich_text_nodes'),
-            AliasPath('desc', 'rich_text_nodes'),
-        ),
-    )
-    text: str = Field(
-        alias='text',
-        validation_alias=AliasChoices(
-            AliasPath('major', 'opus', 'summary', 'text'),
-            AliasPath('desc', 'text'),
-        ),
-    )
+TA_L_RTN = TypeAdapter(list[RichTextNode])
 
 
 class DynamicItem(BaseModel):
     basic: DynamicBasic
     id_str: str
-    module_author: ModuleAuthor = Field(alias='module_author',
-                                        validation_alias=AliasPath('modules', 'module_author'))
-    module_dynamic: ModuleDynamic = Field(alias='module_dynamic',
-                                          validation_alias=AliasPath('modules', 'module_dynamic'))
+    modules: dict
     type: str
     visible: bool
+
+    @cached_property
+    def major_type(self):
+        major = self.modules['module_dynamic']['major']
+        if major is None:
+            return None
+        return major['type']
+
+    @cached_property
+    def live_rcmd(self):
+        try:
+            return json.loads(self.modules['module_dynamic']['major']['live_rcmd']['content'])
+        except KeyError:
+            return {}
+
+    @cached_property
+    def rich_text_nodes(self) -> list[RichTextNode]:
+        major_type = self.major_type
+        if major_type is None or major_type == 'MAJOR_TYPE_DRAW':
+            return TA_L_RTN.validate_python(self.modules['module_dynamic']['desc']['rich_text_nodes'])
+        elif major_type == 'MAJOR_TYPE_OPUS':
+            return TA_L_RTN.validate_python(self.modules['module_dynamic']['major']['summary']['rich_text_nodes'])
+        return []
+
+    @cached_property
+    def text(self) -> str:
+        major_type = self.major_type
+        if major_type is None or major_type == 'MAJOR_TYPE_DRAW':
+            return self.modules['module_dynamic']['desc']['text']
+        elif major_type == 'MAJOR_TYPE_OPUS':
+            return self.modules['module_dynamic']['major']['summary']['text']
+        elif major_type == 'MAJOR_TYPE_LIVE_RCMD':
+            return json.loads(self.modules['module_dynamic']['major']['live_rcmd']['content'])['live_play_info'][
+                'title']
+        elif major_type == 'MAJOR_TYPE_ARCHIVE':
+            return self.modules['module_dynamic']['major']['archive']['title']
+        return ""
+
+    @cached_property
+    def jump_url(self) -> str:
+        major_type = self.major_type
+        if major_type == 'MAJOR_TYPE_OPUS':
+            return "https:" + self.modules['module_dynamic']['major']['jump_url']
+        elif major_type == 'MAJOR_TYPE_LIVE_RCMD':
+            return f"https://live.bilibili.com/blanc/{self.live_rcmd['live_play_info']['room_id']}"
+        elif major_type == 'MAJOR_TYPE_ARCHIVE':
+            return "https:" + self.modules['module_dynamic']['major']['archive']['jump_url']
+        return f"https://t.bilibili.com/{self.id_str}"
 
 
 class Dynamic(BaseModel):

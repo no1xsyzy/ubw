@@ -206,6 +206,28 @@ class BilibiliClientABC(BaseModel, abc.ABC):
             else:
                 raise BilibiliApiError(data.message)
 
+    async def get_user_dynamic(self, uid, offset=0) -> OffsetList[DynamicItem]:
+        params = {'host_mid': uid, 'features': 'itemOpusStyle'}
+        if offset != 0:
+            params['offset'] = offset
+        async with self.session.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space",
+                                    params=params) as res:
+            data = Response[OffsetList[DynamicItem]].model_validate(await res.json())
+            if data.code == 0:
+                return data.data
+            else:
+                raise BilibiliApiError(data.message)
+
+    async def iter_user_dynamic(self, uid):
+        has_more = True
+        offset = 0
+        while has_more:
+            d = await self.get_user_dynamic(uid, offset)
+            has_more = d.has_more
+            offset = d.offset
+            for item in d.items:
+                yield item
+
 
 class BilibiliUnauthorizedClient(BilibiliClientABC):
     auth_type: Literal['no'] = 'no'
