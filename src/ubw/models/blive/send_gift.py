@@ -99,8 +99,8 @@ class GiftData(BaseModel):
     is_first: bool = False
     is_join_receiver: bool = False
     is_naming: bool = False
-    is_special_batch: int = 0
-    magnification: int = 1
+    is_special_batch: int = 0  # maybe bool
+    magnification: float = 1
     medal_info: MedalInfo
     name_color: str = ''
     original_gift_name: str = ''

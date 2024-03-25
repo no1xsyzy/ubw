@@ -120,7 +120,7 @@ class MedalInfo(BaseModel):
     icon_id: int
     is_lighted: int
     """点亮？"""
-    medal_color: Color
+    medal_color: Color | Literal['']
     medal_color_border: Color
     medal_color_end: Color
     medal_color_start: Color
