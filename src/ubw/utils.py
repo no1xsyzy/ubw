@@ -4,12 +4,10 @@ import warnings
 from functools import wraps
 from typing import Callable
 
-from pydantic import BaseModel
+from .clients import BilibiliCookieClient, WSWebCookieLiveClient, HandlerInterface, BilibiliClientABC
+from .handlers import BaseHandler
 
-from .clients import LiveClient, BilibiliCookieClient, WSWebCookieLiveClient, HandlerInterface, BilibiliClientABC
-from .handlers import Handler, BaseHandler
-
-__all__ = ('listen_to_all', 'sync', 'Application')
+__all__ = ('listen_to_all', 'sync')
 
 
 async def listen_to_all(
@@ -56,18 +54,3 @@ def sync(f):
             print("...user abort...", file=sys.stderr)
 
     return wrapper
-
-
-class Application(BaseModel):
-    client: LiveClient
-    handler: Handler
-
-    async def run(self):
-        self.client.add_handler(self.handler)
-        self.client.start()
-        self.handler.start(self.client)
-        self.handler.astart(self.client)
-        await self.client.join()
-
-    async def close(self):
-        await self.client.stop_and_close()

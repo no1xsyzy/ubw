@@ -8,7 +8,8 @@ from typing import Annotated, Callable, Any
 
 import typer
 
-from .utils import sync, listen_to_all, Application
+from .app import AppTypeAdapter
+from .utils import sync, listen_to_all
 
 app = typer.Typer()
 
@@ -147,7 +148,7 @@ async def living_status(
         c: BilibiliClient
         for d in from_dynamic:
             f: models.Dynamic = await c.get_dynamic(d, features=('itemOpusStyle',))
-            for t in f.item.module_dynamic.rich_text_nodes:
+            for t in f.item.rich_text_nodes:
                 if isinstance(t, models.bilibili.RichTextNodeTypeAt):
                     from_user.add(t.rid)
 
@@ -185,7 +186,7 @@ async def run(cc: list[str]):
 @app.command('app_show')
 @sync
 async def app_show(app_name: str):
-    application = Application.model_validate(main.config['apps'].get(app_name))
+    application = AppTypeAdapter.validate_python(main.config['apps'].get(app_name))
     from rich.pretty import pprint
     pprint(application)
     return application
@@ -194,9 +195,10 @@ async def app_show(app_name: str):
 @app.command('app_run')
 @sync
 async def app_run(app_name: str):
-    application = Application.model_validate(main.config['apps'].get(app_name))
+    application = AppTypeAdapter.validate_python(main.config['apps'].get(app_name))
     try:
-        return await application.run()
+        application.start()
+        await application.join()
     finally:
         await application.close()
 

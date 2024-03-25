@@ -1,4 +1,5 @@
 import json
+import warnings
 from datetime import datetime, timezone, timedelta
 from functools import cached_property
 from typing import *
@@ -253,51 +254,81 @@ class DynamicItem(BaseModel):
 
     @cached_property
     def major_type(self):
-        major = self.modules['module_dynamic']['major']
-        if major is None:
+        try:
+            major = self.modules['module_dynamic']['major']
+            if major is None:
+                return None
+            return major['type']
+        except KeyError as e:
+            warnings.warn(f"err in major_type {e=} {self.id_str=}")
             return None
-        return major['type']
 
     @cached_property
     def live_rcmd(self):
         try:
             return json.loads(self.modules['module_dynamic']['major']['live_rcmd']['content'])
-        except KeyError:
+        except KeyError as e:
+            warnings.warn(f"err in live_rcmd {e=} {self.id_str=}")
             return {}
 
     @cached_property
     def rich_text_nodes(self) -> list[RichTextNode]:
-        major_type = self.major_type
-        if major_type is None or major_type == 'MAJOR_TYPE_DRAW':
-            return TA_L_RTN.validate_python(self.modules['module_dynamic']['desc']['rich_text_nodes'])
-        elif major_type == 'MAJOR_TYPE_OPUS':
-            return TA_L_RTN.validate_python(self.modules['module_dynamic']['major']['summary']['rich_text_nodes'])
+        try:
+            major_type = self.major_type
+            if major_type is None or major_type == 'MAJOR_TYPE_DRAW':
+                return TA_L_RTN.validate_python(self.modules['module_dynamic']['desc']['rich_text_nodes'])
+            elif major_type == 'MAJOR_TYPE_OPUS':
+                return TA_L_RTN.validate_python(
+                    self.modules['module_dynamic']['major']['opus']['summary']['rich_text_nodes'])
+        except KeyError as e:
+            warnings.warn(f"err in rich_text_nodes {e=} {self.id_str=}")
         return []
 
     @cached_property
     def text(self) -> str:
-        major_type = self.major_type
-        if major_type is None or major_type == 'MAJOR_TYPE_DRAW':
-            return self.modules['module_dynamic']['desc']['text']
-        elif major_type == 'MAJOR_TYPE_OPUS':
-            return self.modules['module_dynamic']['major']['summary']['text']
-        elif major_type == 'MAJOR_TYPE_LIVE_RCMD':
-            return json.loads(self.modules['module_dynamic']['major']['live_rcmd']['content'])['live_play_info'][
-                'title']
-        elif major_type == 'MAJOR_TYPE_ARCHIVE':
-            return self.modules['module_dynamic']['major']['archive']['title']
+        try:
+            major_type = self.major_type
+            if major_type is None or major_type == 'MAJOR_TYPE_DRAW':
+                return self.modules['module_dynamic']['desc']['text']
+            elif major_type == 'MAJOR_TYPE_OPUS':
+                return self.modules['module_dynamic']['major']['opus']['summary']['text']
+            elif major_type == 'MAJOR_TYPE_LIVE_RCMD':
+                return self.live_rcmd['live_play_info']['title']
+            elif major_type == 'MAJOR_TYPE_ARCHIVE':
+                return self.modules['module_dynamic']['major']['archive']['title']
+        except KeyError as e:
+            warnings.warn(f"err in text {e=} {self.id_str=}")
         return ""
 
     @cached_property
     def jump_url(self) -> str:
-        major_type = self.major_type
-        if major_type == 'MAJOR_TYPE_OPUS':
-            return "https:" + self.modules['module_dynamic']['major']['jump_url']
-        elif major_type == 'MAJOR_TYPE_LIVE_RCMD':
-            return f"https://live.bilibili.com/blanc/{self.live_rcmd['live_play_info']['room_id']}"
-        elif major_type == 'MAJOR_TYPE_ARCHIVE':
-            return "https:" + self.modules['module_dynamic']['major']['archive']['jump_url']
+        try:
+            major_type = self.major_type
+            if major_type == 'MAJOR_TYPE_OPUS':
+                return "https:" + self.modules['module_dynamic']['major']['opus']['jump_url']
+            elif major_type == 'MAJOR_TYPE_LIVE_RCMD':
+                return f"https://live.bilibili.com/blanc/{self.live_rcmd['live_play_info']['room_id']}"
+            elif major_type == 'MAJOR_TYPE_ARCHIVE':
+                return "https:" + self.modules['module_dynamic']['major']['archive']['jump_url']
+        except KeyError as e:
+            warnings.warn(f"err in jump_url {e=} {self.id_str=}")
         return f"https://t.bilibili.com/{self.id_str}"
+
+    @cached_property
+    def pub_date(self):
+        try:
+            return datetime.fromtimestamp(self.modules['module_author']['pub_ts'])
+        except KeyError as e:
+            warnings.warn(f"err in pub_date {e=} {self.id_str=}")
+            return datetime.now()
+
+    @cached_property
+    def is_topped(self):
+        try:
+            return 'module_tag' in self.modules and self.modules['module_tag']['text'] == '置顶'
+        except KeyError as e:
+            warnings.warn(f"err in is_topped {e=} {self.id_str=}")
+            return False
 
 
 class Dynamic(BaseModel):
