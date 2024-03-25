@@ -7,5 +7,5 @@ class OnlineRankCountData(BaseModel):
 
 
 class OnlineRankCountCommand(CommandModel):
-    cmd: Literal['ONLINE_RANK_COUNT'] = 'ONLINE_RANK_COUNT'
+    cmd: Literal['ONLINE_RANK_COUNT']
     data: OnlineRankCountData

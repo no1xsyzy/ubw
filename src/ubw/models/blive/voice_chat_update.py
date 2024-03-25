@@ -6,5 +6,5 @@ class VoiceChatUpdateData(BaseModel):
 
 
 class VoiceChatUpdateCommand(CommandModel):
-    cmd: Literal['VOICE_CHAT_UPDATE'] = 'VOICE_CHAT_UPDATE'
+    cmd: Literal['VOICE_CHAT_UPDATE']
     data: VoiceChatUpdateData
