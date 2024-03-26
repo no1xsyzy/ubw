@@ -72,11 +72,9 @@ class BLiveUI(BaseModel, abc.ABC):
     @abc.abstractmethod
     def unstick_before(self, key, before): ...
 
-    def start(self):
-        pass
+    def start(self): ...
 
-    def stop(self):
-        pass
+    def stop(self): ...
 
     def __enter__(self):
         self.start()
@@ -86,7 +84,7 @@ class BLiveUI(BaseModel, abc.ABC):
         self.stop()
 
 
-def demo(ui: BLiveUI, interval=0.5):
+def demo(ui: BLiveUI, interval=0.5):  # pragma: no cover
     import time
     import random
     import string
