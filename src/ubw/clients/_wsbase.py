@@ -40,14 +40,14 @@ class WSMessageParserMixin(LiveClientABC, abc.ABC):
 
         :param message: websocket消息
         """
-        if message.type != aiohttp.WSMsgType.BINARY:
+        if message.type != aiohttp.WSMsgType.BINARY:  # pragma: no cover
             logger.warning('room=%d unknown websocket message type=%s, data=%s', self.room_id,
                            message.type, message.data)
             return
 
         try:
             await self._parse_ws_message(message.data)
-        except (asyncio.CancelledError, AuthError):
+        except (asyncio.CancelledError, AuthError):  # pragma: no cover
             # 正常停止、认证失败，让外层处理
             raise
         except Exception:  # noqa
