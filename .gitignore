@@ -10,3 +10,4 @@ dist/
 cookies.txt
 libmpv*.dll
 build/
+.coverage
