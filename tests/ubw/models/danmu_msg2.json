@@ -1,0 +1,107 @@
+{
+  "cmd": "DANMU_MSG",
+  "ct": "{TinyDate}:2024-03-25T22:35:45.781328+08:00",
+  "info": {
+    "mode": 1,
+    "font_size": 25,
+    "color": 5816798,
+    "timestamp": "{TinyDate}:2024-03-25T14:15:27.685000+00:00",
+    "rnd": -2126799550,
+    "uid_crc32": "8a164cd7",
+    "msg_type": 0,
+    "bubble": 0,
+    "dm_type": 0,
+    "emoticon_options": {},
+    "voice_config": {},
+    "mode_info": {
+      "mode": 0,
+      "show_player_type": 0,
+      "extra": {
+        "send_from_me": false,
+        "mode": 0,
+        "color": [
+          88,
+          193,
+          222
+        ],
+        "dm_type": 0,
+        "font_size": 25,
+        "player_mode": 1,
+        "show_player_type": 0,
+        "content": "\u5443\u5443",
+        "user_hash": "2316717271",
+        "emoticon_unique": "",
+        "bulge_display": 0,
+        "recommend_score": 4,
+        "main_state_dm_color": "",
+        "objective_state_dm_color": "",
+        "direction": 0,
+        "pk_direction": 0,
+        "quartet_direction": 0,
+        "anniversary_crowd": 0,
+        "yeah_space_type": "",
+        "yeah_space_url": "",
+        "jump_to_url": "",
+        "space_type": "",
+        "space_url": "",
+        "animation": {},
+        "is_audited": false,
+        "id_str": "0bf4d44973a2402e2169ea26e266018649",
+        "show_reply": true
+      },
+      "user": {
+        "uid": 1708908573,
+        "base": {
+          "name": "\u72fc\u84ec",
+          "face": "https://i0.hdslb.com/bfs/face/97187e9129dcfe19a13676217940d2b5f6e8f12a.jpg",
+          "name_color": [
+            0,
+            0,
+            0
+          ],
+          "is_mystery": false,
+          "origin_info": {
+            "name": "\u72fc\u84ec",
+            "face": "https://i0.hdslb.com/bfs/face/97187e9129dcfe19a13676217940d2b5f6e8f12a.jpg"
+          },
+          "official_info": {
+            "role": 0,
+            "title": "",
+            "desc": "",
+            "type": -1
+          },
+          "name_color_str": ""
+        },
+        "title": {
+          "old_title_css_id": "",
+          "title_css_id": ""
+        },
+        "guard_leader": {
+          "is_guard_leader": false
+        }
+      }
+    },
+    "msg": "\u5443\u5443",
+    "uid": 1708908573,
+    "uname": "\u72fc\u84ec",
+    "admin": 0,
+    "vip": 0,
+    "svip": 0,
+    "urank": 10000,
+    "mobile_verify": 1,
+    "uname_color": "",
+    "medal_level": 0,
+    "medal_name": "",
+    "runame": "",
+    "medal_room_id": 0,
+    "mcolor": 0,
+    "special_medal": "",
+    "user_level": 6,
+    "ulevel_color": 9868950,
+    "ulevel_rank": ">50000",
+    "old_title": "",
+    "title": "",
+    "privilege_type": 0
+  },
+  "dm_v2": ""
+}
