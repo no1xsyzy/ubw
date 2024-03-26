@@ -173,68 +173,69 @@ class DanmakuCommand(CommandModel):
 
     @field_validator('info', mode='before')
     def parse_dankamu_info(cls, v):
-        if isinstance(v, list):
-            if len(v[3]) != 0:
-                medal_level = v[3][0]
-                medal_name = v[3][1]
-                runame = v[3][2]
-                room_id = v[3][3]
-                mcolor = v[3][4]
-                special_medal = v[3][5]
-            else:
-                medal_level = 0
-                medal_name = ''
-                runame = ''
-                room_id = 0
-                mcolor = 0
-                special_medal = ""
+        if not isinstance(v, list):
+            return v
 
-            return {
-                # .0.0
-                "mode": v[0][1],
-                "font_size": v[0][2],
-                "color": v[0][3],
-                "timestamp": v[0][4],
-                "rnd": v[0][5],
-                # .0.6
-                "uid_crc32": v[0][7],
-                # .0.8
-                "msg_type": v[0][9],
-                "bubble": v[0][10],
-                # .0.11
-                "dm_type": v[0][12],
-                "emoticon_options": v[0][13],
-                "voice_config": v[0][14],
-                "mode_info": v[0][15],
+        if len(v[3]) != 0:
+            medal_level = v[3][0]
+            medal_name = v[3][1]
+            runame = v[3][2]
+            room_id = v[3][3]
+            mcolor = v[3][4]
+            special_medal = v[3][5]
+        else:
+            medal_level = 0
+            medal_name = ''
+            runame = ''
+            room_id = 0
+            mcolor = 0
+            special_medal = ""
 
-                "msg": v[1],
+        return {
+            # .0.0
+            "mode": v[0][1],
+            "font_size": v[0][2],
+            "color": v[0][3],
+            "timestamp": v[0][4],
+            "rnd": v[0][5],
+            # .0.6
+            "uid_crc32": v[0][7],
+            # .0.8
+            "msg_type": v[0][9],
+            "bubble": v[0][10],
+            # .0.11
+            "dm_type": v[0][12],
+            "emoticon_options": v[0][13],
+            "voice_config": v[0][14],
+            "mode_info": v[0][15],
 
-                "uid": v[2][0],
-                "uname": v[2][1],
-                "admin": v[2][2],
-                "vip": v[2][3],
-                "svip": v[2][4],
-                "urank": v[2][5],
-                "mobile_verify": v[2][6],
-                "uname_color": v[2][7],
+            "msg": v[1],
 
-                "medal_level": medal_level,
-                "medal_name": medal_name,
-                "runame": runame,
-                "medal_room_id": room_id,
-                "mcolor": mcolor,
-                "special_medal": special_medal,
+            "uid": v[2][0],
+            "uname": v[2][1],
+            "admin": v[2][2],
+            "vip": v[2][3],
+            "svip": v[2][4],
+            "urank": v[2][5],
+            "mobile_verify": v[2][6],
+            "uname_color": v[2][7],
 
-                "user_level": v[4][0],
-                "ulevel_color": v[4][2],
-                "ulevel_rank": v[4][3],
+            "medal_level": medal_level,
+            "medal_name": medal_name,
+            "runame": runame,
+            "medal_room_id": room_id,
+            "mcolor": mcolor,
+            "special_medal": special_medal,
 
-                "old_title": v[5][0],
-                "title": v[5][1],
+            "user_level": v[4][0],
+            "ulevel_color": v[4][2],
+            "ulevel_rank": v[4][3],
 
-                "privilege_type": v[7],
-            }
-        return v
+            "old_title": v[5][0],
+            "title": v[5][1],
+
+            "privilege_type": v[7],
+        }
 
 
 class Danmaku371111Command(DanmakuCommand):
