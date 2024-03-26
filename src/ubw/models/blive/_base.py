@@ -86,10 +86,7 @@ class Color(RootModel):
 
     @property
     def alpha(self) -> int | None:
-        return int(self.__root__[6:]) if len(self.__root__) > 6 else None
-
-    def __str__(self):
-        return "#" + self.__root__
+        return int(self.root[3]) if len(self.root) > 3 else None
 
 
 def strange_dict(cls, v):
