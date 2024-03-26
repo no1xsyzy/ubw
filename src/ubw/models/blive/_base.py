@@ -103,7 +103,7 @@ def strange_dict(cls, v):
 def convert_ns(cls, v):
     if isinstance(v, int):
         if v > 2e13 or v < -2e13:
-            v = v / 1e6
+            v = v / 1e9
     return v
 
 
