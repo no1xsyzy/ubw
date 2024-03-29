@@ -17,8 +17,7 @@ class BaseApp(BaseModel, abc.ABC):
 
     def start(self):
         if self._task is not None:
-            warnings.warn("This app is already running")
-            return
+            return warnings.warn("This app is already running")
         self._task = asyncio.create_task(self._run())
 
     @abc.abstractmethod
@@ -27,20 +26,14 @@ class BaseApp(BaseModel, abc.ABC):
 
     async def join(self):
         if self._task is None:
-            warnings.warn('This app is stopped, cannot join()')
-            return
-
+            return warnings.warn('This app is stopped, cannot join()')
         logger.debug('app=%s joining', self)
         await asyncio.shield(self._task)
 
     def stop(self):
-        if self._task is None:
-            warnings.warn('This app is stopped, cannot stop() again')
-            return
-
         task = self._task
         if task is None:
-            return
+            return warnings.warn('This app is stopped, cannot stop() again')
         if task.cancel('stop'):
             self._task = None
             return task
