@@ -16,7 +16,7 @@ def generate_random_string(mark=None):
 
 
 def test_call_by_module():
-    with Popen([sys.executable, '-m', 'ubw', '--help'], stdout=PIPE, text=True) as proc:
+    with Popen([sys.executable, '-m', 'ubw', '--help'], stdout=PIPE, text=True, encoding='utf-8') as proc:
         out = proc.stdout.read()
     assert out.strip().startswith('Usage: python -m ubw [OPTIONS] COMMAND [ARGS]...')
 
