@@ -8,7 +8,7 @@ class DanmuAggregationData(BaseModel):
     aggregation_icon: str
     aggregation_num: int
     broadcast_msg_type: int
-    dmscore: int
+    dmscore: int = 0
     msg: str
     show_rows: int
     show_time: int

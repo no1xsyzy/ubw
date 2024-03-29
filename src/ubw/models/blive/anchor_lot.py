@@ -57,6 +57,8 @@ class AwardUser(BaseModel):
     level: int
     color: Color
     num: int
+    is_mystery: bool = False
+    uinfo: Uinfo | None = None
 
 
 class AnchorLotAwardData(BaseModel):
@@ -89,10 +91,14 @@ class AnchorLotEndCommand(CommandModel):
 
 
 class AnchorLotCheckStatusData(BaseModel):
+    """
+    :var uid: 主播uid
+    """
     id: int
     status: int
     uid: int
-    """主播uid"""
+    reject_danmu: None = None
+    reject_reason: str = ''
 
 
 class AnchorLotCheckStatusCommand(CommandModel):
