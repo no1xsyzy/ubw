@@ -381,23 +381,23 @@ def main(
     main.config = config = load_config(cd)
     if log:
         if verbose > 0:
-            config['logging']['root']['level'] = 'DEBUG'
-            config['logging']['root']['handlers'] = ['richconsole']
-        init_logging(config)
-    if config_override is not None:
-        for c in config_override:
-            ks, v = c.split("=", 1)
-            from ast import literal_eval
-            v = literal_eval(v)
-            p = config
-            *kk, lk = ks.split('.')
-            for k in kk:
-                if k in p:
-                    p = p[k]
-                else:
-                    break
+            config_override.append('logging.root.level="DEBUG"')
+            config_override.append('logging.root.handlers="richconsole"')
+    for c in config_override:
+        ks, v = c.split("=", 1)
+        from ast import literal_eval
+        v = literal_eval(v)
+        p = config
+        *kk, lk = ks.split('.')
+        for k in kk:
+            if k in p:
+                p = p[k]
             else:
-                p[lk] = v
+                p = p.setdefault(k, {})
+        else:
+            p[lk] = v
+    if log:
+        init_logging(config)
     if sentry:
         init_sentry(config)
     if 0 < remote_debug_with_port < 65536:
