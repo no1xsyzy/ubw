@@ -9,6 +9,7 @@ from .dump_raw import DumpRawHandler
 from .living_status import LivingStatusHandler
 from .saver import SaverHandler
 from .strange_stalker import StrangeStalkerHandler
+from .testing import MockHandler
 from .wocpian import PianHandler
 
 Handler = Annotated[
@@ -20,5 +21,6 @@ Handler = Annotated[
         StrangeStalkerHandler,
         PianHandler,
         LivingStatusHandler,
+        MockHandler
     ],
     Field(discriminator='cls')]
