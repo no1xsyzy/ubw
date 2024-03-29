@@ -5,7 +5,11 @@ from pathlib import Path
 from subprocess import Popen, PIPE
 from unittest.mock import patch
 
+from typer.testing import CliRunner
+
 import ubw
+
+runner = CliRunner()
 
 
 def generate_random_string(mark=None):
@@ -45,3 +49,44 @@ def test_config(tmp_path):
         ])
     ret = ubw.load_config(config_path)
     assert ret == {'config': {'magic': s}}
+
+
+def test_print_config():
+    config_path = generate_random_string()
+    config = {}
+    with patch('ubw.load_config') as p_load:
+        p_load.return_value = config
+        with patch('ubw.init_logging') as p_log:
+            with patch('ubw.init_sentry') as p_sentry:
+                result = runner.invoke(ubw.app, ['--config', config_path, 'print-config'])
+                p_load.assert_called_once_with(Path(config_path))
+                p_log.assert_called_once_with(config)
+                p_sentry.assert_called_once_with(config)
+    assert result.exit_code == 0
+    assert result.stdout.strip() == '{}'
+
+    # manipulation
+    config_path = generate_random_string()
+    s = generate_random_string()
+    config = {}
+    config_manipulated = {
+        'logging': {'root': {'level': 'DEBUG', 'handlers': "richconsole"}},
+        'path': {'to': {'key': s}},
+    }
+    with patch('ubw.load_config') as p_load:
+        p_load.return_value = config
+        with patch('ubw.init_logging') as p_log:
+            with patch('ubw.init_sentry') as p_sentry:
+                with patch('pdb_attach.listen') as p_listen:
+                    result = runner.invoke(
+                        ubw.app,
+                        ['--config', config_path,
+                         '--verbose',
+                         '--config-override', f'path.to.key="{s}"',
+                         '--remote-debug-with-port', '10203',
+                         'print-config'])
+                    p_load.assert_called_once_with(Path(config_path))
+                    p_log.assert_called_once_with(config_manipulated)
+                    p_sentry.assert_called_once_with(config_manipulated)
+                    p_listen.assert_called_once_with(10203)
+    assert result.exit_code == 0
