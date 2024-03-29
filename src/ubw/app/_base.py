@@ -34,7 +34,7 @@ class BaseApp(BaseModel, abc.ABC):
         await asyncio.shield(self._task)
 
     def stop(self):
-        if not self.is_running:
+        if self._task is None:
             warnings.warn('This app is stopped, cannot stop() again')
             return
 
