@@ -63,9 +63,9 @@ class Color(RootModel):
         elif isinstance(data, int):
             if 0 <= data < 2 ** 24:
                 return data // 65536, data // 256 % 256, data % 256
-        elif isinstance(data, tuple):
+        elif isinstance(data, (tuple, list)):
             if len(data) in [3, 4]:
-                return data
+                return tuple(data)
         raise ValueError(f"`{data!r}` is not a color")
 
     @property
