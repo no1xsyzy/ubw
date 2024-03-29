@@ -2,7 +2,6 @@ import asyncio
 import json
 import logging
 import ssl as ssl_
-from typing import Literal
 
 import aiohttp
 import yarl

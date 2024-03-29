@@ -4,14 +4,13 @@ import json as json_
 import logging
 import uuid
 from datetime import datetime
-from typing import Optional, Literal, Annotated
+from typing import Optional, Annotated
 
 import aiohttp
 from pydantic import BaseModel
 from pydantic import Field
 
-from ._livebase import *
-from ._wsbase import HEADER_STRUCT, WSMessageParserMixin
+from ._wsbase import *
 from .bilibili import BilibiliApiError, USER_AGENT
 from ..models import Response
 

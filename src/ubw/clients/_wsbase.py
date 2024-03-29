@@ -15,6 +15,7 @@ __all__ = (
     'LiveClientABC',
     'HeaderTuple',
     'WSMessageParserMixin',
+    'Literal',
 
     # exceptions
     'InitError',

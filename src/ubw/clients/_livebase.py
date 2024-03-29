@@ -6,7 +6,7 @@ import logging
 import struct
 from asyncio import Task
 from functools import cached_property
-from typing import Protocol, NamedTuple
+from typing import Protocol, NamedTuple, Literal
 
 from pydantic import BaseModel
 
@@ -15,6 +15,7 @@ __all__ = (
     'HandlerInterface',
     'LiveClientABC',
     'HeaderTuple',
+    'Literal',
 
     # exceptions
     'InitError',
