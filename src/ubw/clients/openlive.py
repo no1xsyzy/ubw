@@ -10,8 +10,8 @@ import aiohttp
 from pydantic import BaseModel
 from pydantic import Field
 
+from ._b_base import BilibiliApiError, USER_AGENT
 from ._wsbase import *
-from .bilibili import BilibiliApiError, USER_AGENT
 from ..models import Response
 
 logger = logging.getLogger('open_live_client')

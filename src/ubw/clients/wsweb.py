@@ -7,8 +7,9 @@ import aiohttp
 import yarl
 from pydantic import Field
 
+from . import BilibiliCookieClient
 from ._wsbase import *
-from .bilibili import BilibiliCookieClient, BilibiliApiError, USER_AGENT, BilibiliClient
+from .bilibili import BilibiliApiError, USER_AGENT, BilibiliClient
 from ..models.bilibili import Host
 
 logger = logging.getLogger('ubw.clients.wsweb')
