@@ -19,4 +19,7 @@ class MockClient(LiveClientABC):
 class MockBilibiliClient(BilibiliClientABC):
     auth_type: Literal['mock_bilibili_client'] = 'mock_bilibili_client'
 
-    make_session = cached_property(lambda self: Mock(name='session'))
+    read_cookie = cached_property(lambda self: AsyncMock(name='read_cookie'))
+    make_session = cached_property(lambda self: Mock(name='make_session'))
+    get_account_info = cached_property(lambda self: AsyncMock(name='get_account_info'))
+    get_user_dynamic = cached_property(lambda self: AsyncMock(name='get_user_dynamic'))
