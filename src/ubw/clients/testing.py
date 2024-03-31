@@ -5,17 +5,6 @@ from ._b_base import BilibiliClientABC
 from ._livebase import *
 
 
-class MockClient(LiveClientABC):
-    clientc: Literal['mock'] = 'mock'
-
-    close = cached_property(lambda self: AsyncMock(name='close'))
-    join = cached_property(lambda self: AsyncMock(name='join'))
-    start = cached_property(lambda self: Mock(name='start'))
-    stop = cached_property(lambda self: Mock(name='stop'))
-    user_ident = cached_property(lambda self: Mock(name='user_ident'))
-    add_handler = cached_property(lambda self: Mock(name='add_handler'))
-
-
 class MockBilibiliClient(BilibiliClientABC):
     auth_type: Literal['mock_bilibili_client'] = 'mock_bilibili_client'
 
@@ -23,3 +12,17 @@ class MockBilibiliClient(BilibiliClientABC):
     make_session = cached_property(lambda self: Mock(name='make_session'))
     get_account_info = cached_property(lambda self: AsyncMock(name='get_account_info'))
     get_user_dynamic = cached_property(lambda self: AsyncMock(name='get_user_dynamic'))
+    get_info_by_room = cached_property(lambda self: AsyncMock(name='get_info_by_room'))
+
+
+class MockClient(LiveClientABC):
+    clientc: Literal['mock'] = 'mock'
+
+    bilibili_client: MockBilibiliClient | None = None
+
+    close = cached_property(lambda self: AsyncMock(name='close'))
+    join = cached_property(lambda self: AsyncMock(name='join'))
+    start = cached_property(lambda self: Mock(name='start'))
+    stop = cached_property(lambda self: Mock(name='stop'))
+    user_ident = cached_property(lambda self: Mock(name='user_ident'))
+    add_handler = cached_property(lambda self: Mock(name='add_handler'))

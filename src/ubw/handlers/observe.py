@@ -11,13 +11,13 @@ class Observer(BaseHandler):
     cls: Literal['observer'] = 'observer'
     room_id: int
 
-    async def get_room_info(self, bclient) -> models.RoomInfo:
+    async def _get_room_info(self, bclient) -> models.RoomInfo:
         return (await bclient.get_info_by_room(self.room_id)).room_info
 
     async def astart(self, client):
         now = datetime.now()
         room_id = client.room_id
-        room_info = await self.get_room_info(client.bilibili_client)
+        room_info = await self._get_room_info(client.bilibili_client)
         title = room_info.title
         parent_area_name = room_info.parent_area_name
         area_name = room_info.area_name
@@ -31,6 +31,9 @@ class Observer(BaseHandler):
         )
 
     async def on_room_change(self, client, message):
+        title = message.data.title
+        parent_area_name = message.data.parent_area_name
+        area_name = message.data.area_name
         rich.print(
             rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
             f"直播间信息变更《[rgb(255,212,50)]{escape(title)}[/]》，分区：{parent_area_name}/{area_name}")
