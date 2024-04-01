@@ -291,7 +291,7 @@ class DanmakuPHandler(BaseHandler):
         else:
             rich.print(
                 rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
-                rf"\[[bright_cyan]{room_id}[/]] {css(f'{message.data.uname} (uid={uid})', uid)} "
+                rf"\[[bright_cyan]{room_id}[/]] {css(f'{uname} (uid={uid})', uid)} "
                 rf"\[[bright_cyan]¥{price}[/]]: [{color}]{escape(msg)}[/]")
 
     async def on_room_block_msg(self, client, message):
