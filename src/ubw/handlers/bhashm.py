@@ -5,7 +5,6 @@ from datetime import datetime, timezone, timedelta
 import aiocsv
 import aiofiles
 import aiofiles.os
-from rich.markup import escape
 
 from ._base import *
 from ..clients import BilibiliUnauthorizedClient

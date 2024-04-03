@@ -1,8 +1,6 @@
 import logging
 import re
 
-from rich.markup import escape
-
 from ._base import *
 
 

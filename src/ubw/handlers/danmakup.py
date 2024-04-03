@@ -5,13 +5,10 @@ import re
 from datetime import timezone, timedelta
 from functools import cached_property
 
-import rich
 from pydantic import field_validator, model_validator
-from rich.markup import escape
 
 from ubw.ui import Record, PlainText, User, RoomTitle, UI, ColorSeeSee
 from ._base import *
-from ..models import blive as models
 
 KAOMOJIS = [
     "(⌒▽⌒)",
@@ -155,7 +152,7 @@ class DanmakuPHandler(BaseHandler):
             tok.suggest_freq(kmj, True)
         return tok
 
-    def trivial_rate(self, info: models.danmu_msg.DanmakuInfo) -> float:
+    def trivial_rate(self, info: models.blive.danmu_msg.DanmakuInfo) -> float:
         if self.ignore_danmaku is not None and self.ignore_danmaku.match(info.msg):
             return -1
         if info.mode_info.extra.emoticon_unique:  # 单一表情

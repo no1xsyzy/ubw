@@ -1,10 +1,6 @@
 from datetime import datetime
 
-import rich
-from rich.markup import escape
-
 from ._base import *
-from .. import models
 
 
 class Observer(BaseHandler):

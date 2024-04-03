@@ -1,11 +1,7 @@
 from datetime import datetime
 from functools import cached_property
 
-import rich
-from rich.markup import escape
-
 from ._base import *
-from .. import models
 
 
 class LivingStatusHandler(BaseHandler):

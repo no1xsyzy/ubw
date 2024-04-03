@@ -4,15 +4,19 @@ import logging
 from functools import cached_property
 from typing import *
 
+import rich
 import sentry_sdk
 from pydantic import ValidationError, BaseModel, TypeAdapter
+from rich.markup import escape
 
+from .. import models
 from ..clients import LiveClientABC
-from ..models import blive as models
 
 __all__ = (
     'BaseHandler',
     'Literal',
+    'models',
+    'rich', 'escape',
 )
 
 logger = logging.getLogger('ubw.handlers._base')
