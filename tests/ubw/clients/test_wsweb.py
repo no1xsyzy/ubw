@@ -12,7 +12,7 @@ import yarl
 
 from ubw.clients import MockBilibiliClient, WSWebCookieLiveClient
 from ubw.clients._b_base import USER_AGENT
-from ubw.clients._livebase import HEADER_STRUCT, Operation
+from ubw.clients._livebase import HEADER_STRUCT, Operation, AuthError
 from ubw.clients.testing import MockWebsocket
 from ubw.handlers import MockHandler
 from ubw.models import DanmuInfo
@@ -43,8 +43,9 @@ class Checkpoint:
         mock.side_effect = self.side_effect
         return decorator
 
-    def reach(self):
-        self._future.set_result(None)
+    def reach(self, val=None):
+        if not self._future.done():
+            self._future.set_result(val)
 
     def side_effect(self, *args, **kwargs):
         self.reach()
@@ -249,6 +250,118 @@ async def test_wsweb():
                 await client.close()
 
                 session.close.assert_awaited_once_with()
+    except asyncio.TimeoutError as e:
+        expected = []
+        actual = []
+        for k, v in locals().items():
+            if isinstance(v, Checkpoint):
+                expected.append(k)
+                if v.is_reached():
+                    actual.append(k)
+        raise AssertionError(f"""expected checkpoint not reached.\n"""
+                             f"""Expected: {" ".join(expected)}\n"""
+                             f"""Actual:   {" ".join(actual)}\n""") from None
+
+
+@pytest.mark.asyncio
+async def test_auth_error_reconnect():
+    room_id = 123
+    heartbeat_interval = 0.7
+    self_uid = 343
+
+    buvid3 = generate_random_string('buvid3')
+    token = generate_random_string('token')
+
+    bilibili_client = MockBilibiliClient()
+    client = WSWebCookieLiveClient(room_id=room_id,
+                                   bilibili_client=bilibili_client,
+                                   heartbeat_interval=heartbeat_interval)
+
+    session: Mock = bilibili_client.make_session.return_value
+    session.close = AsyncMock()
+
+    checkpoint1 = Checkpoint()
+    checkpoint2 = Checkpoint()
+    checkpoint3 = Checkpoint()
+    checkpoint4 = Checkpoint()
+    checkpoint5 = Checkpoint()
+    checkpoint6 = Checkpoint()
+
+    @checkpoint1.back_conn(bilibili_client.__aenter__)
+    def effect1():
+        return bilibili_client
+
+    session.cookie_jar.filter_cookies.return_value = {'DedeUserID': Value(str(self_uid)),
+                                                      'buvid3': Value(buvid3)}
+
+    @checkpoint2.back_conn(bilibili_client.get_danmaku_server)
+    def effect2(r):
+        return DanmuInfo.model_validate({
+            'group': 'group',
+            'business_id': 1,
+            'refresh_row_factor': 1.0,
+            'refresh_rate': 1,
+            'max_delay': 1,
+            'token': token,
+            'host_list': [{
+                'host': 'host_list.host',
+                'port': 444,
+                'wss_port': 445,
+                'ws_port': 446,
+            }],
+        })
+
+    websocket = MockWebsocket()
+
+    @checkpoint3.back_conn(session.ws_connect)
+    def effect3(*args, **kwargs):
+        return websocket
+
+    t = 0
+
+    async def ws():
+        nonlocal t
+        t += 1
+        if t == 1:
+            checkpoint4.reach()
+            raise AuthError
+        elif t == 2:
+            checkpoint5.reach()
+            raise ConnectionError
+        else:
+            checkpoint6.reach()
+            await asyncio.Future()
+
+    websocket.side_effect = ws
+
+    try:
+        async with asyncio.timeout(5):
+            with patch('asyncio.sleep') as patch_sleep:
+                async def sleep(secs):
+                    if secs % 1 > 0:
+                        await asyncio.Future()
+                    else:
+                        return
+
+                patch_sleep.side_effect = sleep
+
+                client.start()
+
+                await checkpoint1
+                await checkpoint2
+                await checkpoint3
+                await checkpoint4
+                await checkpoint5
+                await checkpoint6
+
+                assert client.user_ident == f'u={self_uid}|r={room_id}'
+                assert bilibili_client.get_danmaku_server.await_count == 2
+
+                task = client.stop()
+
+                with pytest.raises(asyncio.CancelledError):
+                    await task
+
     except asyncio.TimeoutError as e:
         expected = []
         actual = []
