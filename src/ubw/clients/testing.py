@@ -1,4 +1,5 @@
 from functools import cached_property
+from typing import TYPE_CHECKING
 from unittest.mock import Mock, AsyncMock
 
 from ._b_base import BilibiliClientABC
@@ -18,6 +19,16 @@ class MockBilibiliClient(BilibiliClientABC):
     get_info_by_room = cached_property(lambda self: AsyncMock(name='get_info_by_room'))
     get_danmaku_server = cached_property(lambda self: AsyncMock(name='get_danmaku_server'))
 
+    if TYPE_CHECKING:
+        read_cookie: AsyncMock
+        make_session: Mock
+        close: AsyncMock
+        __aenter__: AsyncMock
+        get_account_info: AsyncMock
+        get_user_dynamic: AsyncMock
+        get_info_by_room: AsyncMock
+        get_danmaku_server: AsyncMock
+
 
 class MockClient(LiveClientABC):
     clientc: Literal['mock'] = 'mock'
@@ -30,6 +41,14 @@ class MockClient(LiveClientABC):
     stop = cached_property(lambda self: Mock(name='stop'))
     user_ident = cached_property(lambda self: Mock(name='user_ident'))
     add_handler = cached_property(lambda self: Mock(name='add_handler'))
+
+    if TYPE_CHECKING:
+        close: AsyncMock
+        join: AsyncMock
+        start: Mock
+        stop: Mock
+        user_ident: Mock
+        add_handler: Mock
 
 
 class MockWebsocket:
@@ -74,3 +93,7 @@ class MockWebsocket:
 
     async def __anext__(self):
         return await self.side_effect()
+
+    if TYPE_CHECKING:
+        close: AsyncMock
+        send_bytes: AsyncMock
