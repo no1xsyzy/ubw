@@ -1,28 +1,8 @@
+"""
+(archived) 检测片哥并作出提示，因片哥消失而收容。
+"""
+
 from ._base import *
-
-ROOM_IDS = [
-    5252,  # 天堂
-    # 17961,  # 赫萝老师
-    42062,  # 瓶子君152
-    # 81004,  # 艾尔莎_Channel
-    913137,  # 噩梦
-    1141542,  # 仙乐阅
-    # 3428783,  # 绫濑光Official
-    7688602,  # 花花Haya
-    # 22898905,  # 珞璃Official
-    27299825,  # 布莲雾
-    # 27337779,  # 月见林林
-]
-
-
-class RichClientAdapter(logging.LoggerAdapter):
-    def process(self, msg, kwargs):
-        kwargs.setdefault('extra', {})
-        kwargs['extra']['markup'] = True
-        return msg, kwargs
-
-
-logger = RichClientAdapter(logging.getLogger('wocpian'), {})
 
 
 class PianHandler(BaseHandler):
@@ -41,7 +21,9 @@ class PianHandler(BaseHandler):
         room_id = client.room_id
 
         if self.maybe_pian(uid, uname) and model.data.msg_type == 1:
-            logger.info(rf"\[[bright_cyan]{room_id}[/]] [bright_red]{uname}[/]（uid={uid}）进入直播间")
+            rich.print(
+                rf"\[{model.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
+                rf"\[[bright_cyan]{room_id}[/]] [bright_red]{uname}[/]（uid={uid}）进入直播间")
 
     async def on_danmu_msg(self, client, message):
         uid = message.info.uid
@@ -50,7 +32,8 @@ class PianHandler(BaseHandler):
         room_id = client.room_id
 
         if self.maybe_pian(uid, uname):
-            logger.info(
+            rich.print(
+                rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
                 rf"\[[bright_cyan]{room_id}[/]] [bright_red]{uname}[/] ({uid=}): [bright_white]{escape(msg)}[/]")
 
     async def on_room_block_msg(self, client, message):
@@ -58,7 +41,8 @@ class PianHandler(BaseHandler):
         uid = message.data.uid
         room_id = client.room_id
 
-        if self.maybe_pian(uid, uname):
-            logger.info(rf"\[[bright_cyan]{room_id}[/]] 用户 [bright_red]{uname}[/]（uid={uid}）被封禁")
-        else:
-            logger.warning(rf"\[[bright_cyan]{room_id}[/]] 用户 [cyan]{uname}[/]（uid={uid}）被封禁")
+        color = 'bright_red' if self.maybe_pian(uid, uname) else 'cyan'
+
+        rich.print(
+            rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
+            rf"\[[bright_cyan]{room_id}[/]] 用户 [{color}]{uname}[/] (uid={uid}) 被封禁")
