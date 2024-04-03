@@ -9,3 +9,4 @@ exclude_also =
     @(abc\.)?abstractmethod
     .+#\s+noqa
     warnings.warn
+    if DEBUGGING_

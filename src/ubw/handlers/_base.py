@@ -2,6 +2,9 @@
 import asyncio
 import inspect
 import logging
+import os
+import time
+import warnings
 from functools import cached_property
 from typing import *
 
@@ -24,6 +27,8 @@ logger = logging.getLogger('ubw.handlers._base')
 
 ANNOTATED_COMMAND_ADAPTER = TypeAdapter(models.AnnotatedCommandModel)
 
+DEBUGGING_TOO_LONG = os.environ.get('DEBUGGING_TOO_LONG', '') == '1'
+
 
 def _func_info(func: Callable):
     if inspect.iscode(func):
@@ -33,7 +38,7 @@ def _func_info(func: Callable):
     elif inspect.ismethod(func):
         return f"{func!r} ({func.__func__.__code__.co_filename}:{func.__func__.__code__.co_firstlineno})"
     elif inspect.isbuiltin(func):
-        return f"{func!r}"
+        return f"{func!r} (builtin)"
     return f"{func!r} (???:???)"
 
 
@@ -47,8 +52,15 @@ class BaseHandler(BaseModel):
     async def astart(self, client: LiveClientABC):
         pass
 
-    async def handle(self, client: LiveClientABC, command: dict):
-        await self.process_one(client, command)
+    if DEBUGGING_TOO_LONG:
+        async def handle(self, client: LiveClientABC, command: dict):
+            start = time.time()
+            await self.process_one(client, command)
+            if time.time() - start > 1:
+                warnings.warn(f"command `{command['cmd']}` process too long (>1s)")
+    else:
+        async def handle(self, client: LiveClientABC, command: dict):
+            await self.process_one(client, command)
 
     async def process_one(self, client: LiveClientABC, command: dict):
         try:
@@ -59,7 +71,7 @@ class BaseHandler(BaseModel):
             if pos != -1:
                 cmd = cmd[:pos]
 
-            # 手工指定回调
+            # 强硬忽略
             if cmd in self.ignored_cmd:
                 logger.debug(f"got a {cmd}, processed with ignore")
                 return
