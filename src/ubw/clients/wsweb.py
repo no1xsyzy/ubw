@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 import ssl as ssl_
+import warnings
 
 import aiohttp
 import yarl
@@ -26,7 +27,7 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
     bilibili_client_owner: bool = True
 
     # defaults
-    heartbeat_interval: int = 30
+    heartbeat_interval: float = 30
 
     # dynamic
     _host_server_list: list[Host] | None = None
@@ -41,18 +42,16 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
 
     def start(self):
         if self.is_running:
-            logger.warning('room=%s client is running, cannot start() again', self.room_id)
-            return
+            return warnings.warn(f'room={self.room_id} client is running, cannot start() again')
 
         self._task = asyncio.create_task(self.main())
 
     def stop(self):
         if not self.is_running:
-            logger.warning('room=%s client is stopped, cannot stop() again', self.room_id)
-            return
+            return warnings.warn(f'room={self.room_id} client is stopped, cannot stop() again')
 
         task = self._task
-        if task is None:
+        if task is None:  # noqa
             return
         if task.cancel('stop'):
             self._task = None
@@ -60,15 +59,14 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
 
     async def join(self):
         if not self.is_running:
-            logger.warning('room=%s client is stopped, cannot join()', self.room_id)
-            return
+            return warnings.warn(f'room={self.room_id} client is stopped, cannot join()')
 
         logger.debug('room=%s joining', self.room_id)
         await asyncio.shield(self._task)
 
     async def close(self):
         if self.is_running:
-            logger.warning('room=%s is calling close(), but client is running', self.room_id)
+            return warnings.warn(f'room={self.room_id} is calling close(), but client is running')
         await self._session.close()
         if self.bilibili_client_owner:
             await self.bilibili_client.close()
@@ -81,7 +79,7 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
         self._uid = int(cookies['DedeUserID'].value)
         self._buvid3 = cookies['buvid3'].value
         if not await self._init_host_server():
-            res = False
+            res = False  # pragma: no cover
         return res
 
     async def _init_host_server(self):
@@ -91,7 +89,7 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
             # server: bilibili.DanmuInfo = await bilibili.get_danmaku_server(self.room_id, session=self._session)
             self._host_server_list = server.host_list
             self._host_server_token = server.token
-        except (aiohttp.ClientConnectionError, asyncio.TimeoutError, BilibiliApiError):
+        except (aiohttp.ClientConnectionError, asyncio.TimeoutError, BilibiliApiError):  # pragma: no cover
             logger.exception('room=%d _init_host_server() failed:', self.room_id)
             self._host_server_list = [Host(
                 host='broadcastlv.chat.bilibili.com', port=2243, wss_port=443, ws_port=2244
@@ -137,8 +135,7 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
         # 如果之前未初始化则初始化
         if self._host_server_token is None:
             if not await self._init_room():
-                raise InitError('init_room() failed')
-
+                raise InitError('init_room() failed')  # pragma: no cover
         retry_count = 0
         while True:
             try:
@@ -168,7 +165,7 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
                 logger.exception('room=%d auth failed, trying init_room() again', self.room_id)
                 if not await self._init_room():
                     raise InitError('init_room() failed')
-            except ssl_.SSLError:
+            except ssl_.SSLError:  # noqa
                 logger.error('room=%d a SSLError happened, cannot reconnect', self.room_id)
                 raise
             finally:
