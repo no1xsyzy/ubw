@@ -1,5 +1,4 @@
 import functools
-import logging
 import math
 import re
 from datetime import timezone, timedelta
@@ -79,16 +78,6 @@ class TokenEntropy:
 
     def cleanup(self):
         pass
-
-
-class RichClientAdapter(logging.LoggerAdapter):
-    def process(self, msg, kwargs):
-        kwargs.setdefault('extra', {})
-        kwargs['extra']['markup'] = True
-        return msg, kwargs
-
-
-logger = RichClientAdapter(logging.getLogger('danmakup'), {})
 
 
 def colorseesee(palette):
