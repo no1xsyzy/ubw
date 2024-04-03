@@ -164,7 +164,7 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
                 # 认证失败了，应该重新获取token再重连
                 logger.exception('room=%d auth failed, trying init_room() again', self.room_id)
                 if not await self._init_room():
-                    raise InitError('init_room() failed')
+                    raise InitError('init_room() failed')  # pragma: no cover
             except ssl_.SSLError:  # noqa
                 logger.error('room=%d a SSLError happened, cannot reconnect', self.room_id)
                 raise
@@ -216,7 +216,7 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
     async def _heartbeat_timer(self):
         while True:
             await asyncio.sleep(self.heartbeat_interval)
-            if self._websocket is None or self._websocket.closed:
+            if self._websocket is None or self._websocket.closed:  # pragma: no cover
                 self._heartbeat_timer_task = None
                 return
             await self._send_heartbeat()
@@ -225,12 +225,12 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
         """
         发送心跳包
         """
-        if self._websocket is None or self._websocket.closed:
+        if self._websocket is None or self._websocket.closed:  # pragma: no cover
             return
 
         try:
             await self._websocket.send_bytes(self._make_packet({}, Operation.HEARTBEAT))
-        except (ConnectionResetError, aiohttp.ClientConnectionError) as e:
+        except (ConnectionResetError, aiohttp.ClientConnectionError) as e:  # pragma: no cover
             logger.warning('room=%d _send_heartbeat() failed: %r', self.room_id, e)
         except Exception:  # noqa
             logger.exception('room=%d _send_heartbeat() failed:', self.room_id)
