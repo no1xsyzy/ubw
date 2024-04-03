@@ -74,6 +74,7 @@ from .popularity_red_pocket_start import PopularityRedPocketStartCommand
 from .popularity_red_pocket_winner_list import PopularityRedPocketWinnerListCommand
 from .preparing import PreparingCommand
 from .recommend_card import RecommendCardCommand
+from .reenter_live_room import ReenterLiveRoomCommand
 from .ring_status_change import RingStatusChangeCommand, RingStatusChangeCommandV2
 from .room_admin import RoomAdminsCommand, RoomAdminEntranceCommand, RoomAdminRevokeCommand
 from .room_block_msg import RoomBlockCommand
@@ -184,6 +185,7 @@ AnnotatedCommandModel = Annotated[Union[
     PopularityRedPocketWinnerListCommand,
     PreparingCommand,
     RecommendCardCommand,
+    ReenterLiveRoomCommand,
     RingStatusChangeCommand, RingStatusChangeCommandV2,
     RoomAdminsCommand, RoomAdminEntranceCommand, RoomAdminRevokeCommand,
     RoomBlockCommand,
@@ -294,6 +296,7 @@ __all__ = (
     'PopularityRedPocketStartCommand',
     'PopularityRedPocketWinnerListCommand',
     'RecommendCardCommand',
+    'ReenterLiveRoomCommand',
     'RingStatusChangeCommand', 'RingStatusChangeCommandV2',
     'RoomAdminsCommand', 'RoomAdminEntranceCommand', 'RoomAdminRevokeCommand',
     'RoomBlockCommand',
