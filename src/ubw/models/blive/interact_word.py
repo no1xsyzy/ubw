@@ -61,19 +61,18 @@ class InteractWordCommand(CommandModel):
     data: InteractWordData
 
     def summarize(self):
-        match self.data.msg_type:
-            case 1:
-                msg = f"{self.data.uname} 进入了 {self.data.roomid}"
-            case 2:
-                msg = f"{self.data.uname} 关注了 {self.data.roomid}"
-            case 3:
-                msg = f"{self.data.uname} 分享了 {self.data.roomid}"
-            case 4:
-                msg = f"{self.data.uname} 特别关注了 {self.data.roomid}"
-            case 5:
-                msg = f"{self.data.uname} 互相关注了 {self.data.roomid}"
-            case msg_type:
-                msg = f"{self.data.uname}/{self.data.roomid} (msg_type={msg_type})"
+        msg_name = {
+            1: '进入',
+            2: '关注',
+            3: '分享',
+            4: '特别关注',
+            5: '互相关注',
+        }
+
+        if self.data.msg_type in msg_name:
+            msg = f"{self.data.uname} {msg_name[self.data.msg_type]}了 {self.data.roomid}"
+        else:
+            msg = f"{self.data.uname}/{self.data.roomid} (msg_type={self.data.msg_type})"
 
         return Summary(
             t=self.data.timestamp,
