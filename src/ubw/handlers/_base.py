@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import asyncio
+import inspect
 import logging
 from functools import cached_property
 from typing import *
@@ -24,11 +25,16 @@ logger = logging.getLogger('ubw.handlers._base')
 ANNOTATED_COMMAND_ADAPTER = TypeAdapter(models.AnnotatedCommandModel)
 
 
-def func_info(func: Callable):
-    try:
-        return f"{func.__qualname__} ({func.__code__.co_filename}:{func.__code__.co_firstlineno})"
-    except Exception:
-        return f"{func.__qualname__} (???:???)"
+def _func_info(func: Callable):
+    if inspect.iscode(func):
+        return f"{func!r} ({func.co_filename}:{func.co_firstlineno})"
+    elif inspect.isfunction(func):
+        return f"{func!r} ({func.__code__.co_filename}:{func.__code__.co_firstlineno})"
+    elif inspect.ismethod(func):
+        return f"{func!r} ({func.__func__.__code__.co_filename}:{func.__func__.__code__.co_firstlineno})"
+    elif inspect.isbuiltin(func):
+        return f"{func!r}"
+    return f"{func!r} (???:???)"
 
 
 class BaseHandler(BaseModel):
@@ -61,7 +67,7 @@ class BaseHandler(BaseModel):
             try:
                 model: models.CommandModel = ANNOTATED_COMMAND_ADAPTER.validate_python(command)
             except ValidationError as e:
-                logger.debug(f"got a {cmd}, processed with {func_info(self.on_unknown_cmd)}")
+                logger.debug(f"got a {cmd}, processed with {_func_info(self.on_unknown_cmd)}")
                 return await self.on_unknown_cmd(client, command, e)
             else:
                 return await self.on_known_cmd(client, model)
@@ -74,13 +80,13 @@ class BaseHandler(BaseModel):
         cmd = model.cmd.lower().strip("_")
         if hasattr(self, f'on_{cmd}'):
             callback = getattr(self, f'on_{cmd}')
-            logger.debug(f"got a {cmd}, processing with {func_info(callback)})")
+            logger.debug(f"got a {cmd}, processing with {_func_info(callback)})")
             return await callback(client, model)
         elif isinstance(model, models.Summarizer):
-            logger.debug(f"got a {cmd}, summarized and processing with {func_info(self.on_summary)})")
+            logger.debug(f"got a {cmd}, summarized and processing with {_func_info(self.on_summary)})")
             return await self.on_summary(client, model.summarize())
         else:
-            logger.debug(f"got a {cmd}, processing with {func_info(self.on_else)})")
+            logger.debug(f"got a {cmd}, processing with {_func_info(self.on_else)})")
             return await self.on_else(client, model)
 
     async def on_unknown_cmd(self, client: LiveClientABC, command: dict, err: ValidationError):
