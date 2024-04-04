@@ -357,10 +357,8 @@ async def test_auth_error_reconnect():
                 assert client.user_ident == f'u={self_uid}|r={room_id}'
                 assert bilibili_client.get_danmaku_server.await_count == 2
 
-                task = client.stop()
-
                 with pytest.raises(asyncio.CancelledError):
-                    await task
+                    await client.stop_and_close()
 
     except asyncio.TimeoutError as e:
         expected = []
