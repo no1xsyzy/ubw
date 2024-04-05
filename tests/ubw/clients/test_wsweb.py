@@ -1,8 +1,6 @@
 import asyncio
 import base64
 import json
-import random
-import string
 from typing import TYPE_CHECKING
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -16,46 +14,13 @@ from ubw.clients._livebase import HEADER_STRUCT, Operation, AuthError
 from ubw.clients.testing import MockWebsocket
 from ubw.handlers import MockHandler
 from ubw.models import DanmuInfo
-
-
-def generate_random_string(mark=None):
-    tok = ''.join(random.choices(string.ascii_letters, k=16))
-    if mark is None:
-        return tok
-    return f"<{mark}.{tok}>"
+from ubw.testing.checkpoint import Checkpoint
+from ubw.testing.generate import generate_random_string
 
 
 class Value:
     def __init__(self, value):
         self.value = value
-
-
-class Checkpoint:
-    def __init__(self):
-        self._future = asyncio.Future()
-        self._more_side_effect = None
-
-    def back_conn(self, mock):
-        def decorator(f):
-            self._more_side_effect = f
-            return f
-
-        mock.side_effect = self.side_effect
-        return decorator
-
-    def reach(self, val=None):
-        if not self._future.done():
-            self._future.set_result(val)
-
-    def side_effect(self, *args, **kwargs):
-        self.reach()
-        return self._more_side_effect(*args, **kwargs)
-
-    def is_reached(self):
-        return self._future.done()
-
-    def __await__(self):
-        yield from self._future.__await__()
 
 
 @pytest.mark.asyncio

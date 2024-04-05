@@ -1,5 +1,3 @@
-import random
-import string
 import sys
 from pathlib import Path
 from subprocess import Popen, PIPE
@@ -8,15 +6,9 @@ from unittest.mock import patch
 from typer.testing import CliRunner
 
 import ubw
+from ubw.testing.generate import generate_random_string
 
 runner = CliRunner()
-
-
-def generate_random_string(mark=None):
-    tok = ''.join(random.choices(string.ascii_letters, k=16))
-    if mark is None:
-        return tok
-    return f"<{mark}.{tok}>"
 
 
 def test_call_by_module():

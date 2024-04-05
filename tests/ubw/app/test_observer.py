@@ -8,6 +8,7 @@ import pytest
 from ubw.app import ObserverApp
 from ubw.clients import MockBilibiliClient, WSWebCookieLiveClient
 from ubw.handlers.observe import Observer
+from ubw.testing.checkpoint import Checkpoint
 
 
 @dataclasses.dataclass
@@ -33,9 +34,9 @@ async def test_observer():
 
     app = ObserverApp(uid=uid, bilibili_client=bilibili_client, dynamic_poll_interval=1)
 
-    checkpoint1 = asyncio.Future()
-    checkpoint2 = asyncio.Future()
-    checkpoint3 = asyncio.Future()
+    checkpoint1 = Checkpoint()
+    checkpoint2 = Checkpoint()
+    checkpoint3 = Checkpoint()
 
     async def p():
         app.start()
@@ -48,7 +49,7 @@ async def test_observer():
         nonlocal t
         t += 1
         if t == 1:
-            checkpoint3.set_result(None)
+            checkpoint3.reach()
             return OffsetList(items=[
                 DynamicItem(id_str='1', pub_date=datetime(1999, 12, 31, 23, 59, 59),
                             text='sample text', jump_url='url://fake')
@@ -59,14 +60,14 @@ async def test_observer():
     bilibili_client.get_user_dynamic.side_effect = get_user_dynamic
 
     def read_cookie():
-        checkpoint1.set_result(None)
+        checkpoint1.reach()
 
     bilibili_client.read_cookie.side_effect = read_cookie
 
     with patch('ubw.app.observer.Observer', spec=Observer) as patch_observer_handler_class:
 
         async def astart(c):
-            checkpoint2.set_result(None)
+            checkpoint2.reach()
             assert c is app._live_client
 
         patch_observer_handler_class.return_value.astart.side_effect = astart
