@@ -25,6 +25,9 @@ class Data(BaseModel):
     countdown: int
     scatter_time: int
     sub_title: str
+    desc: str = ''
+    official_base_info: OfficialBaseInfo
+    current_room_status: int | None = None
 
 
 class OfficialRoomEventCommand(CommandModel):
