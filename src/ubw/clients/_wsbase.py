@@ -63,7 +63,7 @@ class WSMessageParserMixin(LiveClientABC, abc.ABC):
         offset = 0
         try:
             header = HeaderTuple(*HEADER_STRUCT.unpack_from(data, offset))
-        except struct.error:
+        except struct.error:  # pragma: no cover, should not happen
             logger.exception('room=%d parsing header failed, offset=%d, data=%s', self.room_id, offset, data)
             return
 
@@ -97,7 +97,7 @@ class WSMessageParserMixin(LiveClientABC, abc.ABC):
             }
             await self._handle_command(body)
 
-        else:
+        else:  # pragma: no cover, should not happen
             # 未知消息
             body = data[offset + header.raw_header_size: offset + header.pack_len]
             logger.warning('room=%d unknown message operation=%d, header=%s, body=%s', self.room_id,
