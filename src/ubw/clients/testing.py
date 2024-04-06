@@ -53,28 +53,36 @@ class MockClient(LiveClientABC):
 
 class MockWebsocket:
     def __init__(self, side_effect=None):
-        try:
-            side_effect = iter(side_effect)
+        self.side_effect = side_effect
 
-            async def sd():
-                next_side_effect = next(side_effect)
-                if isinstance(next_side_effect, Exception):
-                    raise next_side_effect
-                else:
-                    return next_side_effect
+    @property
+    def side_effect(self):
+        return self._side_effect
 
-            self.side_effect = sd
-        except TypeError:
-            if callable(side_effect):
-                self.side_effect = side_effect
-            else:
+    @side_effect.setter
+    def side_effect(self, value):
+        if callable(value):
+            self._side_effect = value
+        else:
+            try:
+                value = iter(value)
+
                 async def sd():
-                    if isinstance(side_effect, Exception):
-                        raise side_effect
+                    next_side_effect = next(value)
+                    if isinstance(next_side_effect, BaseException):
+                        raise next_side_effect
                     else:
-                        return side_effect
+                        return next_side_effect
 
-                self.side_effect = sd
+                self._side_effect = sd
+            except TypeError:
+                async def sd():
+                    if isinstance(value, BaseException):
+                        raise value
+                    else:
+                        return value
+
+                self._side_effect = sd
 
     async def __aenter__(self):
         return self
