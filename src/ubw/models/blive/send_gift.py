@@ -131,7 +131,7 @@ class GiftCommand(CommandModel):
     def summarize(self) -> Summary:
         return Summary(
             t=self.data.timestamp,
-            msg=f"{self.data.action} {self.data.giftName}x{self.data.num}",
+            msg=f"{self.data.uname} {self.data.action}了 {self.data.giftName}x{self.data.num}",
             user=(self.data.uid, self.data.uname),
             price=self.data.price * self.data.num / 1000 if self.data.coin_type == 'gold' else 0,
             raw=self,
