@@ -341,3 +341,13 @@ class DanmakuPHandler(BaseHandler):
 
     async def on_x_ubw_heartbeat(self, client, message):
         pass
+
+    async def on_send_gift(self, client, model: models.GiftCommand):
+        room_id = client.room_id
+        uid = model.data.uid
+        msg = rf"\[{model.ct.strftime('%Y-%m-%d %H:%M:%S')}] " \
+              rf"\[[bright_cyan]{room_id}[/]] {css(f'{model.data.uname} (uid={uid})', uid)}" \
+              rf"{self.data.action}了 {self.data.giftName}x{self.data.num}"
+        if model.data.coin_type == 'gold':
+            msg += f" [￥{model.data.price * model.data.num / 1000}]"
+        rich.print(msg)
