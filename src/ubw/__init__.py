@@ -382,7 +382,7 @@ def main(
     if log:
         if verbose > 0:
             config_override.append('logging.root.level="DEBUG"')
-            config_override.append('logging.root.handlers="richconsole"')
+            config_override.append('logging.root.handlers=["richconsole"]')
     for c in config_override:
         ks, v = c.split("=", 1)
         from ast import literal_eval

@@ -62,7 +62,7 @@ def test_print_config():
     s = generate_random_string()
     config = {}
     config_manipulated = {
-        'logging': {'root': {'level': 'DEBUG', 'handlers': "richconsole"}},
+        'logging': {'root': {'level': 'DEBUG', 'handlers': ["richconsole"]}},
         'path': {'to': {'key': s}},
     }
     with patch('ubw.load_config') as p_load:
