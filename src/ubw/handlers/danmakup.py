@@ -338,3 +338,6 @@ class DanmakuPHandler(BaseHandler):
                 rf"\[{model.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
                 rf"\[[bright_cyan]{room_id}[/]] 用户 {css(f'{model.data.uname} (uid={uid})', uid)}"
                 rf"{c[model.data.msg_type]}了直播间")
+
+    async def on_x_ubw_heartbeat(self, client, message):
+        pass
