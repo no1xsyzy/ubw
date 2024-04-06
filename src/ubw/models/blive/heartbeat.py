@@ -1,13 +1,18 @@
 from ._base import *
 
 
-class HeartbeatMessage(BaseModel):
-    """心跳消息"""
-
+class XHeartbeatCommand(CommandModel):
+    """构造心跳消息
+    :var popularity: 人气值
+    """
+    cmd: Literal['X_UBW_HEARTBEAT']
     popularity: int
-    """人气值"""
+    client_heartbeat_content: str
 
-
-class HeartbeatCommand(CommandModel):
-    cmd: Literal['_HEARTBEAT']
-    data: HeartbeatMessage
+    def summarize(self) -> Summary:
+        return Summary(
+            t=self.ct,
+            msg=f"人气值：{self.popularity}",
+            room_id=None,
+            raw=self,
+        )

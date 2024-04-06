@@ -3,6 +3,8 @@ import asyncio
 import json
 import logging
 import struct
+from functools import partial
+from typing import AsyncGenerator, Any
 
 import aiohttp
 import brotli
@@ -34,6 +36,10 @@ __all__ = (
 logger = logging.getLogger('wsclient')
 
 
+class YieldRestBytes(BaseException):
+    pass
+
+
 class WSMessageParserMixin(LiveClientABC, abc.ABC):
     async def _on_ws_message(self, message: aiohttp.WSMessage):
         """
@@ -54,90 +60,73 @@ class WSMessageParserMixin(LiveClientABC, abc.ABC):
         except Exception:  # noqa
             logger.exception('room=%d _parse_ws_message() error:', self.room_id)
 
+    async def _iter_pack(self, pack: bytes) -> AsyncGenerator[tuple[HeaderTuple | None,
+                                                                    Any | bytes | tuple[bytes, bytes]], Any]:
+        offset = 0
+        try:
+            while offset < len(pack):
+                try:
+                    header = HeaderTuple(*HEADER_STRUCT.unpack_from(pack, offset))
+                except struct.error:  # pragma: no cover, should not happen
+                    logger.exception(f'room={self.room_id} parsing header failed\n{offset = }\n{pack[offset:] = }')
+                    return
+                body: bytes = pack[offset + header.raw_header_size:offset + header.pack_len]
+                offset += header.pack_len
+                if header.ver == ProtoVer.BROTLI:
+                    body_decoded = await asyncio.to_thread(partial(brotli.decompress, body))
+                    async for header, body in self._iter_pack(body_decoded):
+                        yield header, body
+                elif header.ver == ProtoVer.NORMAL:
+                    if body:
+                        try:
+                            yield header, json.loads(body.decode('utf-8'))
+                        except Exception as e:  # pragma: no cover, not reachable
+                            logger.error(f'room={self.room_id} ProtoVer.NORMAL json error\n{body = }\n{e = }')
+                            yield header, body
+                    else:
+                        yield header, body
+                elif header.ver == ProtoVer.HEARTBEAT:
+                    popularity = int.from_bytes(body, 'big')
+                    extra = body[offset:]
+                    offset = len(pack)
+                    if extra not in [b'{}', b'']:
+                        logger.warning('unexpected extra=%s header=%s popularity=%s body=%s',
+                                       repr(extra), repr(header), repr(popularity), repr(body))
+                    yield header, (body, extra)
+                else:
+                    logger.warning('room=%d unknown protocol version=%d, header=%s, body=%s', self.room_id,
+                                   header.ver, header, body)
+        except YieldRestBytes:
+            yield None, pack[offset:]
+
     async def _parse_ws_message(self, data: bytes):
         """
         解析websocket消息
 
         :param data: websocket消息数据
         """
-        offset = 0
-        try:
-            header = HeaderTuple(*HEADER_STRUCT.unpack_from(data, offset))
-        except struct.error:  # pragma: no cover, should not happen
-            logger.exception('room=%d parsing header failed, offset=%d, data=%s', self.room_id, offset, data)
-            return
-
-        if header.operation in (Operation.SEND_MSG_REPLY, Operation.AUTH_REPLY):
-            # 业务消息，可能有多个包一起发，需要分包
-            while True:
-                body = data[offset + header.raw_header_size: offset + header.pack_len]
-                await self._parse_business_message(header, body)
-
-                offset += header.pack_len
-                if offset >= len(data):
-                    break
-
-                try:
-                    header = HeaderTuple(*HEADER_STRUCT.unpack_from(data, offset))
-                except struct.error:
-                    logger.exception('room=%d parsing header failed, offset=%d, data=%s', self.room_id, offset, data)
-                    break
-
-        elif header.operation == Operation.HEARTBEAT_REPLY:
-            # 服务器心跳包，前4字节是人气值，后面是客户端发的心跳包内容
-            # pack_len不包括客户端发的心跳包内容，不知道是不是服务器BUG
-            body = data[offset + header.raw_header_size: offset + header.raw_header_size + 4]
-            popularity = int.from_bytes(body, 'big')
-            # 自己造个消息当成业务消息处理
-            body = {
-                'cmd': '_HEARTBEAT',
-                'data': {
-                    'popularity': popularity
-                }
-            }
-            await self._handle_command(body)
-
-        else:  # pragma: no cover, should not happen
-            # 未知消息
-            body = data[offset + header.raw_header_size: offset + header.pack_len]
-            logger.warning('room=%d unknown message operation=%d, header=%s, body=%s', self.room_id,
-                           header.operation, header, body)
-
-    async def _parse_business_message(self, header: HeaderTuple, body: bytes):
-        """
-        解析业务消息
-        """
-        if header.operation == Operation.SEND_MSG_REPLY:
-            # 业务消息
-            if header.ver == ProtoVer.BROTLI:
-                # 压缩过的先解压，为了避免阻塞网络线程，放在其他线程执行
-                body = await asyncio.get_running_loop().run_in_executor(None, brotli.decompress, body)
-                await self._parse_ws_message(body)
-            elif header.ver == ProtoVer.NORMAL:
-                # 没压缩过的直接反序列化，因为有万恶的GIL，这里不能并行避免阻塞
-                if len(body) != 0:
-                    try:
-                        body = json.loads(body.decode('utf-8'))
-                        await self._handle_command(body)
-                    except asyncio.CancelledError:
-                        raise
-                    except Exception:
-                        logger.error('room=%d, body=%s', self.room_id, body)
-                        raise
-            else:
-                # 未知格式
-                logger.warning('room=%d unknown protocol version=%d, header=%s, body=%s', self.room_id,
-                               header.ver, header, body)
-
-        elif header.operation == Operation.AUTH_REPLY:
-            # 认证响应
-            body = json.loads(body.decode('utf-8'))
-            if body['code'] != AuthReplyCode.OK:
-                raise AuthError(f"auth reply error, code={body['code']}, body={body}")
-        else:
-            # 未知消息
-            logger.warning('room=%d unknown message operation=%d, header=%s, body=%s', self.room_id,
-                           header.operation, header, body)
+        it = self._iter_pack(data)
+        async for header, body in it:
+            if header.operation == Operation.SEND_MSG_REPLY:
+                await self._handle_command(body)
+            elif header.operation == Operation.AUTH_REPLY:
+                assert body[1] == b''
+                body = body[0]
+                body = json.loads(body.decode('utf-8'))
+                if body['code'] != AuthReplyCode.OK:
+                    raise AuthError(f"auth reply error, {body=}")
+            elif header.operation == Operation.HEARTBEAT_REPLY:
+                popularity = int.from_bytes(body[0], 'big')
+                extra = body[1].decode()
+                await self._handle_command({
+                    'cmd': 'X_UBW_HEARTBEAT',
+                    'popularity': popularity,
+                    'client_heartbeat_content': extra,
+                })
+            else:  # pragma: no cover, should not happen
+                # 未知消息
+                logger.warning('room=%d unknown message operation=%d, header=%s, body=%s', self.room_id,
+                               header.operation, header, body)
 
     async def _handle_command(self, command: dict):
         """

@@ -130,7 +130,7 @@ class BaseHandler(BaseModel):
     async def on_else(self, client: LiveClientABC, model: models.CommandModel):
         """未处理、不可摘要消息"""
 
-    async def on_heartbeat(self, client: LiveClientABC, message: models.HeartbeatCommand):
+    async def on_x_ubw_heartbeat(self, client: LiveClientABC, message: models.XHeartbeatCommand):
         """收到心跳包（人气值）"""
         await self.on_maybe_summarizer(client, message)
 
