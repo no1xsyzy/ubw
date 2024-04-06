@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from datetime import datetime, timezone, timedelta
+from enum import Enum
 from functools import cached_property
 
 from aiotinydb import AIOTinyDB, AIOJSONStorage
@@ -28,11 +29,17 @@ class TimeDeltaSerializer(Serializer):
         return timedelta(seconds=float(s))
 
 
+class _State(Enum):
+    init = 'init'
+    living = 'living'
+    preparing = 'preparing'
+
+
 class SaverHandler(BaseHandler):
     cls: Literal['saver'] = 'saver'
     max_shard_length: timedelta = timedelta(days=1)
     room_id: int
-    _living: bool = False
+    _living: _State = _State.init
     _wait_sharding: asyncio.Future | None = None
     _sharder_task: asyncio.Task | None = None
 
@@ -56,7 +63,7 @@ class SaverHandler(BaseHandler):
         return db
 
     async def on_danmu_msg(self, client, message):
-        logger.info(f"{message.info.uname} ({message.info.uid}): {message.info.msg}")
+        logger.debug(f"{message.info.uname} ({message.info.uid}): {message.info.msg}")
         async with self.db as db:
             db.insert(message.model_dump(exclude_defaults=True, by_alias=True))
 
@@ -69,8 +76,8 @@ class SaverHandler(BaseHandler):
             db.insert(message.model_dump(exclude_defaults=True, by_alias=True))
 
     async def on_super_chat_message(self, client, message):
-        logger.info(f"{message.data.user_info.uname} ({message.data.uid}): "
-                    f"{message.data.message} (¥{message.data.price})")
+        logger.debug(f"{message.data.user_info.uname} ({message.data.uid}): "
+                     f"{message.data.message} (¥{message.data.price})")
         async with self.db as db:
             db.insert(message.model_dump(exclude_defaults=True, by_alias=True))
 
@@ -79,14 +86,18 @@ class SaverHandler(BaseHandler):
             db.insert(message.model_dump(exclude_defaults=True, by_alias=True))
 
     async def on_live(self, client, message):
-        logger.info(f'received LIVE while {self._living=}')
-        if not self._living:
+        logger.debug(f'received LIVE while {self._living=}')
+        if self._living != _State.living:
             await self.m_shard_now()
+        else:
+            logger.warning(f'!!STRANGE!! received LIVE while {self._living=}')
 
     async def on_preparing(self, client, message):
-        logger.info(f'received PREPARING while {self._living=}')
-        if self._living:
+        logger.debug(f'received PREPARING while {self._living=}')
+        if self._living != _State.preparing:
             await self.m_shard_now()
+        else:
+            logger.warning(f'!!STRANGE!! received PREPARING while {self._living=}')
 
     async def on_room_block_msg(self, client, message):
         async with self.db as db:
@@ -117,10 +128,20 @@ class SaverHandler(BaseHandler):
         self._wait_sharding.set_result(None)
 
     async def m_new_shard(self):
-        async with BilibiliUnauthorizedClient() as client:
-            info = await client.get_info_by_room(self.room_id)
-        self._living = info.room_info.live_start_time is not None
-        logger.info(f"{self._living=}")
+        logger.info("check if shard")
+        while True:
+            async with BilibiliUnauthorizedClient() as client:
+                info = await client.get_info_by_room(self.room_id)
+            if info.room_info.live_start_time is not None:
+                living = _State.living
+            else:
+                living = _State.preparing
+            logger.info(f"{self._living=}, get_info_by_room({self.room_id}) returns {living=}")
+            if self._living != living:
+                break
+            await asyncio.sleep(60)
+        logger.info("really making shard")
+        self._living = living
         self.__dict__.pop('shard_start', None)
         self.__dict__.pop('db', None)
         async with self.db as db:
