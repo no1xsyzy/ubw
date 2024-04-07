@@ -129,7 +129,7 @@ class SaverHandler(BaseHandler):
 
     async def m_new_shard(self):
         logger.info("check if shard")
-        while True:
+        for _ in range(10):
             async with BilibiliUnauthorizedClient() as client:
                 info = await client.get_info_by_room(self.room_id)
             if info.room_info.live_start_time is not None:
@@ -140,6 +140,8 @@ class SaverHandler(BaseHandler):
             if self._living != living:
                 break
             await asyncio.sleep(60)
+        else:
+            return
         logger.info("really making shard")
         self._living = living
         self.__dict__.pop('shard_start', None)
