@@ -347,7 +347,7 @@ class DanmakuPHandler(BaseHandler):
         uid = model.data.uid
         msg = rf"\[{model.ct.strftime('%Y-%m-%d %H:%M:%S')}] " \
               rf"\[[bright_cyan]{room_id}[/]] {css(f'{model.data.uname} (uid={uid})', uid)}" \
-              rf"{self.data.action}了 {self.data.giftName}x{self.data.num}"
+              rf"{model.data.action}了 {model.data.giftName}x{model.data.num}"
         if model.data.coin_type == 'gold':
             msg += f" [￥{model.data.price * model.data.num / 1000}]"
         rich.print(msg)
