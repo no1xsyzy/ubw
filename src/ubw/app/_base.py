@@ -6,7 +6,10 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-__all__ = ('BaseApp', 'Literal',)
+__all__ = (
+    'BaseApp', 'InitLoopFinalizeApp',
+    'Literal',
+)
 
 logger = logging.getLogger('app._base')
 
@@ -49,3 +52,25 @@ class BaseApp(BaseModel, abc.ABC):
                 await task
         finally:
             await self.close()
+
+
+class InitLoopFinalizeApp(BaseApp, abc.ABC):
+    @abc.abstractmethod
+    async def _init(self):
+        pass
+
+    @abc.abstractmethod
+    async def _loop(self):
+        pass
+
+    @abc.abstractmethod
+    async def _finalize(self):
+        pass
+
+    async def _run(self):
+        try:
+            await self._init()
+            while True:
+                await self._loop()
+        finally:
+            await self._finalize()
