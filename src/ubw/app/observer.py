@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timedelta
 
 import rich
 from pydantic import Field
@@ -7,6 +8,11 @@ from rich.markup import escape
 from ubw.clients import BilibiliCookieClient, BilibiliClient, WSWebCookieLiveClient
 from ubw.handlers.observe import Observer
 from ._base import *
+from .. import models
+
+
+def key(dyn: models.DynamicItem):
+    return 0 if dyn.is_topped else 1, dyn.pub_date
 
 
 class ObserverApp(InitLoopFinalizeApp):
@@ -44,16 +50,24 @@ class ObserverApp(InitLoopFinalizeApp):
         if self._last_got is None:
             self._last_got = set()
         s = await self.bilibili_client.get_user_dynamic(self.uid)  # checkpoint3
-        for item in reversed(s.items):
+
+        for item in sorted(s.items, key=key):
             if item.id_str not in self._last_got:
-                rich.print(rf"\[{item.pub_date.strftime('%Y-%m-%d %H:%M:%S')}] "
-                           f"发布动态：{escape(item.text)}"
-                           f" [link {item.jump_url}]链接[/]")
+                if item.is_topped:
+                    rich.print(rf"\[{item.pub_date.strftime('%Y-%m-%d %H:%M:%S')}] "
+                               f"[bright_blue]置顶动态[/]：{escape(item.text)}"
+                               f" [link {item.jump_url}]链接[/]")
+                elif (datetime.now() - item.pub_date) > timedelta(days=2):
+                    pass
+                else:
+                    rich.print(rf"\[{item.pub_date.strftime('%Y-%m-%d %H:%M:%S')}] "
+                               f"发布动态：{escape(item.text)}"
+                               f" [link {item.jump_url}]链接[/]")
         self._last_got = {item.id_str for item in s.items}
 
     async def _loop(self):
-        await self._fetch_print_update()
         await asyncio.sleep(self.dynamic_poll_interval)
+        await self._fetch_print_update()
 
     async def _finalize(self):
         try:

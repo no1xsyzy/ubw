@@ -17,6 +17,7 @@ class DynamicItem:
     pub_date: datetime
     text: str
     jump_url: str
+    is_topped: bool
 
 
 @dataclasses.dataclass
@@ -52,7 +53,7 @@ async def test_observer():
             checkpoint3.reach()
             return OffsetList(items=[
                 DynamicItem(id_str='1', pub_date=datetime(1999, 12, 31, 23, 59, 59),
-                            text='sample text', jump_url='url://fake')
+                            text='sample text', jump_url='url://fake', is_topped=True)
             ])
         elif t == 2:
             raise asyncio.CancelledError
@@ -104,7 +105,7 @@ async def test_observer():
             await task
         live_client.stop.assert_called_once_with()
         patch_rich_print.assert_called_once_with(
-            r"\[1999-12-31 23:59:59] 发布动态：sample text [link url://fake]链接[/]")
+            r"\[1999-12-31 23:59:59] [bright_blue]置顶动态[/]：sample text [link url://fake]链接[/]")
 
         await app.close()
         live_client.close.assert_awaited_once_with()
