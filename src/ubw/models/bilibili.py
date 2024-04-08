@@ -4,7 +4,7 @@ from datetime import datetime, timezone, timedelta
 from functools import cached_property
 from typing import *
 
-from pydantic import BaseModel, field_validator, Field, AliasPath, TypeAdapter
+from pydantic import BaseModel, field_validator, Field, AliasPath, TypeAdapter, AliasChoices
 
 __all__ = (
     'Response', 'OffsetList',
@@ -337,12 +337,18 @@ class Dynamic(BaseModel):
 
 class AccountInfo(BaseModel):
     mid: int
-    live_room_id: int = Field(alias='live_room_id',
-                              validation_alias=AliasPath('live_room', 'roomid'))
+    live_room_id: int = Field(
+        alias='live_room_id',
+        validation_alias=AliasChoices('live_room_id',
+                                      AliasPath('live_room', 'roomid')))
 
 
 class Nav(BaseModel):
-    wbi_img_url: str = Field(alias='wbi_img_url',
-                             validation_alias=AliasPath('wbi_img', 'img_url'))
-    wbi_img_sub_url: str = Field(alias='wbi_img_sub_url',
-                                 validation_alias=AliasPath('wbi_img', 'sub_url'))
+    wbi_img_url: str = Field(
+        alias='wbi_img_url',
+        validation_alias=AliasChoices('wbi_img_url',
+                                      AliasPath('wbi_img', 'img_url')))
+    wbi_img_sub_url: str = Field(
+        alias='wbi_img_sub_url',
+        validation_alias=AliasChoices('wbi_img_sub_url',
+                                      AliasPath('wbi_img', 'sub_url')))
