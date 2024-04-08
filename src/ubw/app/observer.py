@@ -43,14 +43,13 @@ class ObserverApp(InitLoopFinalizeApp):
         self._live_handler.start(self._live_client)
         await self._live_handler.astart(self._live_client)  # checkpoint2
         self._live_client.start()
-        await self._fetch_print_update()
-        print(" ===== 以上为历史消息 ===== ")
-
-    async def _fetch_print_update(self):
         if self._last_got is None:
             self._last_got = set()
-        s = await self.bilibili_client.get_user_dynamic(self.uid)  # checkpoint3
+        await self._fetch_print_update()
+        rich.print(" ===== 以上为历史消息 ===== ")
 
+    async def _fetch_print_update(self):
+        s = await self.bilibili_client.get_user_dynamic(self.uid)  # checkpoint3
         for item in sorted(s.items, key=key):
             if item.id_str not in self._last_got:
                 if item.is_topped:
@@ -70,13 +69,13 @@ class ObserverApp(InitLoopFinalizeApp):
         await self._fetch_print_update()
 
     async def _finalize(self):
-        try:
-            if self._live_client is not None:
-                stop = self._live_client.stop()
-                if stop is not None:
+        if self._live_client is not None:
+            stop = self._live_client.stop()
+            if stop is not None:
+                try:
                     await stop
-        except asyncio.CancelledError:
-            pass
+                except asyncio.CancelledError:
+                    pass
 
     async def close(self):
         await self._live_client.close()
