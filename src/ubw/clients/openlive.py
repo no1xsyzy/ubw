@@ -190,9 +190,10 @@ class AppDirect(CommonApp):
 
 
 class CEVEApp(CommonApp):
-    """使用《彈幕姬》作者的App，他半公开了他的签名服务（感谢他！）。
-    不过，请注意！这会与包括《彈幕姬》在内的其他程序冲突（同一App只能有一个程序）"""
+    """使用《彈幕姬》作者 CopyLiu 的 App ID，他的开源中包含了他的签名服务地址（感谢他！）。
+    不过，请注意！这会与包括《彈幕姬》在内的其他程序冲突（同一 App ID 同时只能有一个程序运行）"""
     app_type: Literal['ceve'] = 'ceve'
+    app_id: int = 1651388990835
 
     async def _sign_bytes(self, b):
         async with aiohttp.ClientSession() as session:
