@@ -325,19 +325,18 @@ class DanmakuPHandler(BaseHandler):
             return
         uid = model.data.uid
         room_id = client.room_id
-        c = {1: "进入", 2: "关注", 3: "分享", 4: "特别关注", 5: "互相关注"}
         if self.ui is not None:
             self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 User(name=model.data.uname, uid=uid),
-                PlainText(text=c[model.data.msg_type]),
+                PlainText(text=model.MSG_NAME[model.data.msg_type]),
                 PlainText(text="了直播间"),
             ]))
         else:
             rich.print(
                 rf"\[{model.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
                 rf"\[[bright_cyan]{room_id}[/]] 用户 {css(f'{model.data.uname} (uid={uid})', uid)}"
-                rf"{c[model.data.msg_type]}了直播间")
+                rf"{model.MSG_NAME[model.data.msg_type]}了直播间")
 
     async def on_x_ubw_heartbeat(self, client, message):
         pass

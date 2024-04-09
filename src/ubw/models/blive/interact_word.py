@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from ._base import *
 
 
@@ -60,17 +62,17 @@ class InteractWordCommand(CommandModel):
     cmd: Literal['INTERACT_WORD']
     data: InteractWordData
 
-    def summarize(self):
-        msg_name = {
-            1: '进入',
-            2: '关注',
-            3: '分享',
-            4: '特别关注',
-            5: '互相关注',
-        }
+    MSG_NAME: ClassVar = {
+        1: '进入',
+        2: '关注',
+        3: '分享',
+        4: '特别关注',
+        5: '互相关注',
+    }
 
-        if self.data.msg_type in msg_name:
-            msg = f"{self.data.uname} {msg_name[self.data.msg_type]}了 {self.data.roomid}"
+    def summarize(self):
+        if self.data.msg_type in self.MSG_NAME:
+            msg = f"{self.data.uname} {self.MSG_NAME[self.data.msg_type]}了 {self.data.roomid}"
         else:
             msg = f"{self.data.uname}/{self.data.roomid} (msg_type={self.data.msg_type})"
 
