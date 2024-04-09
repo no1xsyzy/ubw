@@ -258,6 +258,8 @@ class AsyncStoryline:
 
     def add_sync_patch(self, target, patch_class=SyncPatcher):
         def deco(returner):
+            if not callable(returner):
+                raise TypeError("add_sync_patch must be used as function decorator")
             patch = patch_class(self, target, returner)
             self._patches.append(patch)
             entered = patch.__enter__()
@@ -268,6 +270,8 @@ class AsyncStoryline:
 
     def add_sync_mock(self, mock_class=SyncMock):
         def deco(returner):
+            if not callable(returner):
+                raise TypeError("add_sync_mock must be used as function decorator")
             mock = mock_class(self, returner)
             self._patches.append(mock)
             entered = mock.__enter__()
