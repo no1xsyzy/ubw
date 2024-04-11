@@ -37,7 +37,7 @@ class BilibiliCookieClient(BilibiliClientABC):
     def _cookies(self):
         return http.cookies.SimpleCookie()
 
-    async def read_cookie(self, use='default'):
+    async def read_cookie(self, use: Literal['env', 'config', 'default'] = 'default'):
         match use:
             case 'env':
                 s = os.environ.get('UBW_COOKIE_FILE')
@@ -48,7 +48,7 @@ class BilibiliCookieClient(BilibiliClientABC):
                 if s is None:
                     s = self.cookie_file
             case _:
-                raise ValueError('`use` must be one of `env`, `config`, `default`')
+                raise NotImplementedError(f"{use=}, expected 'env', 'config' or 'default'")
 
         if s is None:
             raise ValueError('no cookie file provided, use UBW_COOKIE_FILE or config.toml to specify')
