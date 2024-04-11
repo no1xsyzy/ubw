@@ -389,7 +389,7 @@ def main(
         log: bool = True,
         verbose: Annotated[int, typer.Option('--verbose', '-v', count=True)] = 0,
         remote_debug_with_port: int = 0,
-        config_override: list[str] = (),
+        config_override: Annotated[list[str], typer.Option('--config-override', '-D')] = (),
 ):
     cd = Path(cd)
     main.config = config = load_config(cd)
