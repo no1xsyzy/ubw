@@ -41,16 +41,11 @@ class ConsoleUI(StreamUI):
     async def add_record(self, record: Record, sticky=False):
         print(self.format_record(record))
 
-    async def edit_record(self, key, record: Record):
-        print(self.format_record(record))
+    async def edit_record(self, key, *, record=None, sticky=None):
+        if record is not None:
+            print(self.format_record(record))
 
     async def remove(self, key):
-        pass
-
-    async def unstick(self, key):
-        pass
-
-    async def unstick_before(self, key, before):
         pass
 
 
