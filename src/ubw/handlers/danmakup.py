@@ -105,7 +105,9 @@ class DanmakuPHandler(BaseHandler):
 
     show_interact_word: bool = False
     test_flags: list[str] = []
+
     ui: UI | None = None
+    owned_ui: bool = True
 
     @model_validator(mode='after')
     def ignore_less_than_dim(self):
@@ -155,6 +157,10 @@ class DanmakuPHandler(BaseHandler):
                 msg = msg.replace(emot, "\ue000")
         return len(msg.replace("\ue000", "")) / len(msg)
 
+    async def astart(self, client):
+        if self.owned_ui and self.ui is not None:
+            await self.ui.start()
+
     async def on_danmu_msg(self, client, message: models.DanmakuCommand):
         uname = message.info.uname
         msg = message.info.msg
@@ -176,7 +182,7 @@ class DanmakuPHandler(BaseHandler):
                     tokens.extend(self.tokenizer.lcut(s))
             entropy = self.entropy.calculate_and_add_tokens(tokens)
             if self.ui is not None:
-                self.ui.add_record(Record(segments=[
+                await self.ui.add_record(Record(segments=[
                     ColorSeeSee(text=f"[{room_id}] "),
                     User(name=uname, uid=uid),
                     PlainText(text=f": "),
@@ -196,7 +202,7 @@ class DanmakuPHandler(BaseHandler):
             pass
         elif trivial_rate < self.dim_rate:
             if self.ui is not None:
-                self.ui.add_record(Record(segments=[
+                await self.ui.add_record(Record(segments=[
                     ColorSeeSee(text=f"[{room_id}] "),
                     User(name=uname, uid=uid),
                     PlainText(text=f": "),
@@ -209,7 +215,7 @@ class DanmakuPHandler(BaseHandler):
                     rf"\[[bright_cyan]{room_id}[/]] {css(f'{uname} (uid={uid})', uid)}: [grey]{escape(msg)}[/]")
         else:
             if self.ui is not None:
-                self.ui.add_record(Record(segments=[
+                await self.ui.add_record(Record(segments=[
                     ColorSeeSee(text=f"[{room_id}] "),
                     User(name=uname, uid=uid),
                     PlainText(text=f"说: "),
@@ -227,7 +233,7 @@ class DanmakuPHandler(BaseHandler):
         room_id = client.room_id
 
         if self.ui is not None:
-            self.ui.add_record(Record(segments=[
+            await self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 PlainText(text=f"直播间信息变更"),
                 RoomTitle(title=title, room_id=room_id),
@@ -252,7 +258,7 @@ class DanmakuPHandler(BaseHandler):
     async def on_warning(self, client, message: models.WarningCommand):
         room_id = client.room_id
         if self.ui is not None:
-            self.ui.add_record(Record(segments=[
+            await self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 PlainText(text=f"受到警告 {message.msg}"),
             ]))
@@ -269,7 +275,7 @@ class DanmakuPHandler(BaseHandler):
         color = message.data.message_font_color
         room_id = client.room_id
         if self.ui is not None:
-            self.ui.add_record(Record(segments=[
+            await self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 User(name=uname, uid=uid),
                 PlainText(text=f"[¥{price}]: {msg}")
@@ -284,7 +290,7 @@ class DanmakuPHandler(BaseHandler):
         room_id = client.room_id
         uid = message.data.uid
         if self.ui is not None:
-            self.ui.add_record(Record(segments=[
+            await self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 PlainText(text="用户被封禁"),
                 User(name=message.data.uname, uid=uid),
@@ -298,7 +304,7 @@ class DanmakuPHandler(BaseHandler):
     async def on_live(self, client, message):
         room_id = client.room_id
         if self.ui is not None:
-            self.ui.add_record(Record(segments=[
+            await self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 PlainText(text="\N{Black Right-Pointing Triangle With Double Vertical Bar}\N{VS16}直播开始"),
             ]))
@@ -311,7 +317,7 @@ class DanmakuPHandler(BaseHandler):
     async def on_preparing(self, client, message):
         room_id = client.room_id
         if self.ui is not None:
-            self.ui.add_record(Record(segments=[
+            await self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 PlainText(text="\N{Black Square For Stop}\N{VS16}直播结束"),
             ]))
@@ -326,7 +332,7 @@ class DanmakuPHandler(BaseHandler):
         uid = model.data.uid
         room_id = client.room_id
         if self.ui is not None:
-            self.ui.add_record(Record(segments=[
+            await self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 User(name=model.data.uname, uid=uid),
                 PlainText(text=model.MSG_NAME[model.data.msg_type]),

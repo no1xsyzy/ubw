@@ -157,26 +157,26 @@ class LiveUI(StreamUI):
             if key not in self._records:
                 return key
 
-    def add_record(self, record: Record, sticky=False):
+    async def add_record(self, record: Record, sticky=False):
         with self._lock:
             key = self._generate_key()
             self._records[key] = Info(is_sticky=sticky, renderable=self.format_record(record), unstick_before=set())
             return key
 
-    def edit_record(self, key, record: Record):
+    async def edit_record(self, key, record: Record):
         with self._lock:
             if key in self._records:
                 self._records[key]['renderable'] = self.format_record(record)
 
-    def remove(self, key: Key):
+    async def remove(self, key: Key):
         with self._lock:
             self._records.pop(key, None)
 
-    def unstick(self, key):
+    async def unstick(self, key):
         with self._lock:
             self._records[key]['is_sticky'] = False
 
-    def unstick_before(self, key, before):
+    async def unstick_before(self, key, before):
         with self._lock:
             if before in self._records:
                 self._records[key]['unstick_before'].add(before)

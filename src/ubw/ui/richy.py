@@ -56,19 +56,19 @@ class Richy(StreamUI):
     def _console(self):
         return Console()
 
-    def add_record(self, record: Record, sticky=False):
+    async def add_record(self, record: Record, sticky=False):
         self._console.print(self.format_record(record))
 
-    def edit_record(self, key, record: Record):
+    async def edit_record(self, key, record: Record):
         self._console.print(self.format_record(record))
 
-    def remove(self, key):
+    async def remove(self, key):
         pass
 
-    def unstick(self, key):
+    async def unstick(self, key):
         pass
 
-    def unstick_before(self, key, before):
+    async def unstick_before(self, key, before):
         pass
 
 
