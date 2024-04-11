@@ -156,16 +156,18 @@ socket.addEventListener("message", (event) => {
     const data = JSON.parse(event.data);
     const main = document.getElementById('main');
     const sticky = document.getElementById('sticky');
-    
+
     const op = data[0]
     if (op === 'add') {
         let el = document.createElement('DIV');
         el.id = data[1];
         el.classList = data[2];
         el.innerHTML = data[3];
+        main.appendChild(el);
     } else if (op === 'edit') {
         let el = document.getElementById(data[1]);
         if (el === null) return;
+        if (el.parentElement === sticky && data[2] !== 'sticky') { el.remove(); return; } 
         el.classList = data[2];
         el.innerHTML = data[3];
     } else if (op === 'del') {
@@ -176,15 +178,15 @@ socket.addEventListener("message", (event) => {
         sticky.innerHTML = ""
         main.innerHTML = data[1];
     }
-    
+
     for (let el of document.querySelectorAll("#sticky :not(.sticky)")){
         el.remove();
     }
-    
+
     while (main.children.length > 20) {
         let el = main.children[0];
         if (el.classList.contains('sticky')){
-            document.getElementById('sticky').appendChild(el)
+            sticky.appendChild(el)
         } else {
             el.remove();
         }
