@@ -208,8 +208,12 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
         if self._buvid3 is not None:
             auth_params['buvid'] = self._buvid3
 
-        logger.debug(f"auth_params=%s", {k: '$$secret$$' if k == 'buvid' else v
-                                         for k, v in auth_params.items()})
+        p = auth_params.copy()
+        if 'buvid' in p:
+            p['buvid'] = '$$secret$$'
+        if 'key' in p:
+            p['key'] = '$$toolong$$'
+        logger.debug(f"auth_params=%s", p)
 
         await self._websocket.send_bytes(self._make_packet(auth_params, Operation.AUTH))
 
