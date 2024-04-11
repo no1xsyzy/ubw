@@ -80,8 +80,14 @@ class StreamUI(BaseModel, abc.ABC):
 
 
 async def ademo(ui: StreamUI, interval=0.5):  # pragma: no cover
+    import logging
     import random
     import string
+    from rich.logging import RichHandler
+
+    logging.basicConfig(
+        level=logging.INFO, format="%(message)s", datefmt="[%X]", handlers=[RichHandler()]
+    )
     async with ui:
         keys = []
         while True:

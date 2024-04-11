@@ -87,15 +87,29 @@ async def danmakup(
         'test_flags': test_flags,
     }
 
-    if 'use_ui' in test_flags:
-        from .ui import LiveUI
-        ui = LiveUI(alternate_screen=True)
-        handler = DanmakuPHandler(**settings, ui=ui)
-        with ui:
-            await listen_to_all(rooms, handler)
-    else:
+    ui = None
+
+    for s in test_flags.split(','):
+        if s.startswith('use_ui='):
+            ui = s[len('use_ui='):]
+
+    if ui is None:
         handler = DanmakuPHandler(**settings)
         await listen_to_all(rooms, handler)
+    elif ui == 'live':
+        from .ui import LiveUI
+        ui = LiveUI(alternate_screen=True)
+        handler = DanmakuPHandler(**settings, ui=ui, owned_ui=False)
+        async with ui:
+            await listen_to_all(rooms, handler)
+    elif ui == 'web':
+        from .ui import Web
+        ui = Web()
+        handler = DanmakuPHandler(**settings, ui=ui, owned_ui=False)
+        async with ui:
+            await listen_to_all(rooms, handler)
+    else:
+        raise NotImplementedError(f'{ui=} not supported yet')
 
 
 @app.command('pian')
