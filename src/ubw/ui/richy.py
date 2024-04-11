@@ -13,7 +13,7 @@ from ._base import *
 StickyKey = str
 
 
-class Richy(BLiveUI):
+class Richy(StreamUI):
     uic: Literal['richy'] = 'richy'
     verbose: int = 0
     datetime_format: str = '[%Y-%m-%d %H:%M:%S]'

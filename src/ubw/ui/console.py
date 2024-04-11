@@ -3,7 +3,7 @@ from ._base import *
 StickyKey = str
 
 
-class ConsoleUI(BLiveUI):
+class ConsoleUI(StreamUI):
     uic: Literal['console'] = 'console'
     verbose: int = 0
     datetime_format: str = '[%Y-%m-%d %H:%M:%S]'

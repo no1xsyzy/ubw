@@ -28,7 +28,7 @@ class Info(TypedDict):
     renderable: RichRenderable
 
 
-class LiveUI(BLiveUI):
+class LiveUI(StreamUI):
     uic: Literal['live'] = 'live'
     verbose: int = 0
     alternate_screen: bool = False

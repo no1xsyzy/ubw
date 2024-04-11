@@ -54,7 +54,7 @@ class Record(BaseModel):
     time: datetime = Field(default_factory=datetime.now)
 
 
-class BLiveUI(BaseModel, abc.ABC):
+class StreamUI(BaseModel, abc.ABC):
     uic: str
 
     @abc.abstractmethod
@@ -84,7 +84,7 @@ class BLiveUI(BaseModel, abc.ABC):
         self.stop()
 
 
-def demo(ui: BLiveUI, interval=0.5):  # pragma: no cover
+def demo(ui: StreamUI, interval=0.5):  # pragma: no cover
     import time
     import random
     import string
@@ -107,7 +107,7 @@ def demo(ui: BLiveUI, interval=0.5):  # pragma: no cover
                         DebugInfo(info={'LOVE': '❤️'})
                     ]))
                 case 1:
-                    name = ''.join(random.choice(string.digits) for _ in range(8))
+                    name: str = ''.join(random.choice(string.digits) for _ in range(8))
                     key = ui.add_record(Record(time=datetime.now(), segments=[
                         PlainText(text=f"This is sticky - {name}"),
                     ]), sticky=True)
