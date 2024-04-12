@@ -80,6 +80,9 @@ class LiveUI(StreamUI):
                                 break
                     else:
                         s += f"(info...)"
+                case Currency(price=price, mark=mark):
+                    if price > 0:
+                        s += f" [{mark}{price}]"
         res = [Text.from_markup(s)]
         for k, v in d.items():
             res.append(Panel.fit(JSON.from_data(v), title=f'[{k}]'))

@@ -36,6 +36,9 @@ class ConsoleUI(StreamUI):
                             s.append(json.dumps(info, ensure_ascii=False, indent=2))
                     else:
                         s[0] += f"(info...)"
+                case Currency(price=price, mark=mark):
+                    if price > 0:
+                        s[0] += f" [{mark}{price}]"
         return '\n'.join(s)
 
     async def add_record(self, record: Record, sticky=False):

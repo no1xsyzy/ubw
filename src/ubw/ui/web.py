@@ -1,3 +1,4 @@
+import asyncio
 import itertools
 import json
 import logging
@@ -92,6 +93,9 @@ class Web(StreamUI):
                 case DebugInfo(text=text, info=info):
                     s = f'{s}<span class="debug-info" ' \
                         f'data-debug-info="{escape(json.dumps(info))}">({escape(text)})</span>'
+                case Currency(price=price, mark=mark):
+                    if price > 0:
+                        s = f'{s}<span class="currency"> [{escape(mark)}{price}]</span>'
 
         return s
 

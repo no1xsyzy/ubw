@@ -5,6 +5,14 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+__all__ = (
+    'Segment',
+    'PlainText', 'Anchor', 'User', 'Room', 'RoomTitle', 'ColorSeeSee', 'DebugInfo', 'Currency',
+    'Record',
+    'StreamUI', 'Literal', 'Field',
+    'demo',
+)
+
 
 class Segment(BaseModel):
     type: str
@@ -48,6 +56,12 @@ class DebugInfo(Segment):
     type: Literal['debug'] = 'debug'
     text: str = 'DEBUG'
     info: dict
+
+
+class Currency(Segment):
+    type: Literal['currency'] = 'currency'
+    price: float
+    mark: str = '￥'
 
 
 class Record(BaseModel):
