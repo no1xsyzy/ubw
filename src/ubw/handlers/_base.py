@@ -89,7 +89,7 @@ class BaseHandler(BaseModel):
 
     async def on_known_cmd(self, client: LiveClientABC, model: models.CommandModel):
         """默认的 dispatcher，自省寻找 on_{model.cmd}"""
-        cmd = model.cmd.lower().strip("_")
+        cmd = model.cmd.lower().split(":", 1)[0]
         if hasattr(self, f'on_{cmd}'):
             callback = getattr(self, f'on_{cmd}')
             logger.debug(f"got a {cmd}, processing with {_func_info(callback)})")
