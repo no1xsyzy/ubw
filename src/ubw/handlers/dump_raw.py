@@ -33,8 +33,13 @@ class DumpRawHandler(BaseHandler):
         db = AIOTinyDB(fname)
         return db
 
-    async def handle(self, client, command):
+    async def process_one(self, client, command):
+        cmd = command.get('cmd', '')
+        if cmd in self.ignored_cmd:
+            logger.debug(f"got a {cmd}, processed with ignore")
+            return
         async with self.db as db:
+            logger.debug(f"got a {cmd}, logged")
             db.insert(command)
 
     async def t_sharder(self):
