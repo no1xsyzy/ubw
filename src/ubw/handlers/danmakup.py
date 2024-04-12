@@ -6,7 +6,7 @@ from functools import cached_property
 
 from pydantic import field_validator, model_validator
 
-from ubw.ui import Record, PlainText, User, RoomTitle, UI, ColorSeeSee
+from ubw.ui import Record, PlainText, User, RoomTitle, UI, ColorSeeSee, Currency
 from ._base import *
 
 KAOMOJIS = [
@@ -189,7 +189,7 @@ class DanmakuPHandler(BaseHandler):
                     PlainText(text=f"{tokens}"),
                     PlainText(
                         text=f" ({entropy=:.3f}, {entropy/len(tokens)=:.3f}, {trivial_rate=:.3f})"),
-                ]))
+                ], time=message.ct))
             else:
                 rich.print(
                     rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
@@ -207,8 +207,7 @@ class DanmakuPHandler(BaseHandler):
                     User(name=uname, uid=uid),
                     PlainText(text=f": "),
                     PlainText(text=msg),
-                    PlainText(text=f" (trivial {trivial_rate})"),
-                ]))
+                ], time=message.ct))
             else:
                 rich.print(
                     rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
@@ -220,7 +219,7 @@ class DanmakuPHandler(BaseHandler):
                     User(name=uname, uid=uid),
                     PlainText(text=f"说: "),
                     PlainText(text=msg),
-                ]))
+                ], time=message.ct))
             else:
                 rich.print(
                     rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
@@ -238,7 +237,7 @@ class DanmakuPHandler(BaseHandler):
                 PlainText(text=f"直播间信息变更"),
                 RoomTitle(title=title, room_id=room_id),
                 PlainText(text=f"，分区：{parent_area_name}/{area_name}"),
-            ]))
+            ], time=message.ct))
         else:
             rich.print(
                 rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
@@ -246,9 +245,17 @@ class DanmakuPHandler(BaseHandler):
                 f"直播间信息变更《[rgb(255,212,50)]{escape(title)}[/]》，分区：{parent_area_name}/{area_name}")
 
     async def on_summary(self, client, summary):
-        if self.ui is None:
+        room_id = client.room_id
+        if self.ui is not None:
+            await self.ui.add_record(Record(segments=[
+                ColorSeeSee(text=f"[{room_id}] "),
+                PlainText(text=summary.msg),
+                Currency(price=summary.price),
+                PlainText(text=f" ({summary.raw.cmd})"),
+            ], time=summary.t.astimezone(timezone(timedelta(seconds=8 * 3600)))))
+        else:
             text = rf"\[{summary.t.astimezone(timezone(timedelta(seconds=8 * 3600))).strftime('%Y-%m-%d %H:%M:%S')}] " \
-                   rf"\[[bright_cyan]{client.room_id}[/]] " \
+                   rf"\[[bright_cyan]{room_id}[/]] " \
                    f"{summary.msg}"
             if summary.price != 0:
                 text += f" [￥{summary.price}]"
@@ -261,7 +268,7 @@ class DanmakuPHandler(BaseHandler):
             await self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 PlainText(text=f"受到警告 {message.msg}"),
-            ]))
+            ], time=message.ct))
         else:
             rich.print(
                 rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
@@ -279,7 +286,7 @@ class DanmakuPHandler(BaseHandler):
                 ColorSeeSee(text=f"[{room_id}] "),
                 User(name=uname, uid=uid),
                 PlainText(text=f"[¥{price}]: {msg}")
-            ]))
+            ], time=message.ct))
         else:
             rich.print(
                 rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
@@ -294,7 +301,7 @@ class DanmakuPHandler(BaseHandler):
                 ColorSeeSee(text=f"[{room_id}] "),
                 PlainText(text="用户被封禁"),
                 User(name=message.data.uname, uid=uid),
-            ]))
+            ], time=message.ct))
         else:
             rich.print(
                 rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
@@ -307,7 +314,7 @@ class DanmakuPHandler(BaseHandler):
             await self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 PlainText(text="\N{Black Right-Pointing Triangle With Double Vertical Bar}\N{VS16}直播开始"),
-            ]))
+            ], time=message.ct))
         else:
             rich.print(
                 rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
@@ -320,7 +327,7 @@ class DanmakuPHandler(BaseHandler):
             await self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 PlainText(text="\N{Black Square For Stop}\N{VS16}直播结束"),
-            ]))
+            ], time=message.ct))
         else:
             rich.print(
                 rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
@@ -337,7 +344,7 @@ class DanmakuPHandler(BaseHandler):
                 User(name=model.data.uname, uid=uid),
                 PlainText(text=model.MSG_NAME[model.data.msg_type]),
                 PlainText(text="了直播间"),
-            ]))
+            ], time=model.ct))
         else:
             rich.print(
                 rf"\[{model.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
@@ -350,9 +357,21 @@ class DanmakuPHandler(BaseHandler):
     async def on_send_gift(self, client, model: models.GiftCommand):
         room_id = client.room_id
         uid = model.data.uid
-        msg = rf"\[{model.ct.strftime('%Y-%m-%d %H:%M:%S')}] " \
-              rf"\[[bright_cyan]{room_id}[/]] {css(f'{model.data.uname} (uid={uid})', uid)}" \
-              rf"{model.data.action}了 {model.data.giftName}x{model.data.num}"
-        if model.data.coin_type == 'gold':
-            msg += f" [￥{model.data.price * model.data.num / 1000}]"
-        rich.print(msg)
+        money = model.data.price * model.data.num / 1000
+
+        if self.ui is not None:
+            segments = [
+                ColorSeeSee(text=f"[{room_id}] "),
+                User(name=model.data.uname, uid=uid),
+                PlainText(text=f"{model.data.action}了 {model.data.giftName}x{model.data.num}"),
+            ]
+            if model.data.coin_type == 'gold':
+                segments.append(Currency(price=money))
+            await self.ui.add_record(Record(segments=segments, time=model.ct))
+        else:
+            msg = rf"\[{model.ct.strftime('%Y-%m-%d %H:%M:%S')}] " \
+                  rf"\[[bright_cyan]{room_id}[/]] {css(f'{model.data.uname} (uid={uid})', uid)}" \
+                  rf"{model.data.action}了 {model.data.giftName}x{model.data.num}"
+            if model.data.coin_type == 'gold':
+                msg += f" [￥{money}]"
+            rich.print(msg)
