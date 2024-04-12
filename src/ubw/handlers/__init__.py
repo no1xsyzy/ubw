@@ -6,6 +6,7 @@ from ._base import BaseHandler
 from .bhashm import HashMarkHandler
 from .danmakup import DanmakuPHandler
 from .dump_raw import DumpRawHandler
+from .edge_collect import EdgeCollector
 from .living_status import LivingStatusHandler
 from .saver import SaverHandler
 from .strange_stalker import StrangeStalkerHandler
@@ -17,6 +18,7 @@ Handler = Annotated[
         HashMarkHandler,
         DanmakuPHandler,
         DumpRawHandler,
+        EdgeCollector,
         SaverHandler,
         StrangeStalkerHandler,
         PianHandler,
