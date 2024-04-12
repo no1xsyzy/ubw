@@ -108,26 +108,34 @@ def convert_ns(cls, v):
 
 
 class MedalInfo(BaseModel):
-    anchor_roomid: int
-    """粉丝牌主播房间号"""
-    anchor_uname: str
-    """粉丝牌主播用户名"""
-    guard_level: int
-    """大航海等级"""
-    icon_id: int
-    is_lighted: int
-    """点亮？"""
-    medal_color: Color | Literal['']
-    medal_color_border: Color
-    medal_color_end: Color
-    medal_color_start: Color
+    """粉丝牌信息
+    :var medal_level: 粉丝牌等级
+    :var medal_name: 粉丝牌名称
+    :var anchor_uname: 粉丝牌主播用户名
+    :var anchor_roomid: 粉丝牌主播房间号
+    :var medal_color: 粉丝牌颜色
+    :var special:
+    :var icon_id:
+    :var medal_color_border: 更多关于粉丝牌颜色的信息
+    :var medal_color_start: 更多关于粉丝牌颜色的信息
+    :var medal_color_end: 更多关于粉丝牌颜色的信息
+    :var guard_level: 大航海等级
+    :var is_lighted: 点亮？
+    :var target_id: 粉丝牌主播uid
+    """
     medal_level: int
-    """粉丝牌等级"""
     medal_name: str
-    """粉丝牌名称"""
+    anchor_uname: str
+    anchor_roomid: int
+    medal_color: Color | Literal['']
     special: str
+    icon_id: int
+    medal_color_border: Color
+    medal_color_start: Color
+    medal_color_end: Color
+    guard_level: int
+    is_lighted: int
     target_id: int
-    """粉丝牌主播uid"""
 
 
 class RiskCtrlInfo(BaseModel):
@@ -149,9 +157,9 @@ class OfficialInfo(BaseModel):
 
 class UinfoBase(BaseModel):
     name: str
-    face: str
     name_color: Color
-    is_mystery: bool
+    face: str = ''
+    is_mystery: bool = False
     risk_ctrl_info: RiskCtrlInfo | None = None
     origin_info: OriginInfo | None = None
     official_info: OfficialInfo | None = None
@@ -191,7 +199,7 @@ class UinfoTitle(BaseModel):
 
 
 class UinfoGuardLeader(BaseModel):
-    is_guard_leader: bool
+    is_guard_leader: bool = False
 
 
 class UheadFrame(BaseModel):

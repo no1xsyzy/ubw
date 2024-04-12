@@ -1,22 +1,6 @@
 from ._base import *
 
 
-class MedalInfo(BaseModel):
-    anchor_roomid: int
-    anchor_uname: str
-    guard_level: int
-    icon_id: int
-    is_lighted: int
-    medal_color: int
-    medal_color_border: int
-    medal_color_end: int
-    medal_color_start: int
-    medal_level: int
-    medal_name: str
-    special: str
-    target_id: int
-
-
 class PopularityRedPocketNewData(BaseModel):
     action: str
     current_time: datetime

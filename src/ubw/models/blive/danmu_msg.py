@@ -77,25 +77,35 @@ class DanmakuInfoModeInfo(BaseModel):
     validate_extra = field_validator('extra', mode='before')(strange_dict)
 
 
+class DanmakuAggre(BaseModel):
+    activity_identity: str = ""
+    activity_source: int = 0
+    not_show: int = 0
+
+
 class DanmakuInfo(BaseModel):
-    """弹幕消息"""
+    """弹幕消息
+    :var rnd: 这是每一个终端单独拥有的一个随机数，用以保证自己发送的弹幕在同终端上不会重复。 TODO：这是发送弹幕时即包含的吗？
+    :var bubble_type: 右侧评论栏气泡类型
+    :var bubble_color: 右侧评论栏气泡颜色
+    :var bubble_id: 右侧评论栏气泡相关信息，似乎 43=舰 42=提
+    """
 
     mode: int
     """弹幕显示模式（滚动、顶部、底部）"""
     font_size: int
     """字体尺寸"""
-    color: int
+    color: Color
     """颜色"""
     timestamp: datetime
     """时间戳（毫秒）"""
     rnd: int
-    """随机数，前端叫作弹幕ID，可能是去重用的"""
     uid_crc32: str
     """用户ID文本的CRC32"""
     msg_type: int
     """是否礼物弹幕（节奏风暴）"""
-    bubble: int
-    """右侧评论栏气泡"""
+    bubble_type: int
+    bubble_color: Color
     dm_type: int
     """弹幕类型，0文本，1表情，2语音"""
     emoticon_options: DanmakuInfoEmoticonOptions
@@ -104,6 +114,8 @@ class DanmakuInfo(BaseModel):
     """语音参数"""
     mode_info: DanmakuInfoModeInfo
     """一些附加参数"""
+    aggre: DanmakuAggre
+    bubble_id: int
 
     msg: str
     """弹幕内容"""
@@ -112,11 +124,11 @@ class DanmakuInfo(BaseModel):
     """用户ID"""
     uname: str
     """用户名"""
-    admin: int
+    admin: bool
     """是否房管"""
-    vip: int
+    vip: bool
     """是否月费老爷"""
-    svip: int
+    svip: bool
     """是否年费老爷"""
     urank: int
     """用户身份，用来判断是否正式会员，猜测非正式会员为5000，正式会员为10000"""
@@ -125,22 +137,11 @@ class DanmakuInfo(BaseModel):
     uname_color: str
     """用户名颜色"""
 
-    medal_level: int
-    """勋章等级"""
-    medal_name: str
-    """勋章名"""
-    runame: str
-    """勋章房间主播名"""
-    medal_room_id: int
-    """勋章房间ID"""
-    mcolor: int
-    """勋章颜色"""
-    special_medal: str
-    """特殊勋章"""
+    medal_info: MedalInfo | None = None
 
     user_level: int
     """用户等级"""
-    ulevel_color: int
+    ulevel_color: Color
     """用户等级颜色"""
     ulevel_rank: int | Literal['>50000']
     """用户等级排名，>50000时为'>50000'"""
@@ -153,9 +154,46 @@ class DanmakuInfo(BaseModel):
     privilege_type: int
     """舰队类型，0非舰队，1总督，2提督，3舰长"""
 
+    wealth_level: int | None = None
+    """荣耀等级"""
+
+    group_medal: GroupMedal | None = None
+
     validate_emoticon_options = field_validator('emoticon_options', mode='before')(strange_dict)
 
     validate_voice_config = field_validator('voice_config', mode='before')(strange_dict)
+
+
+def parse_medal_info(v3):
+    if v3:
+        return MedalInfo(
+            medal_level=v3[0],
+            medal_name=v3[1],
+            anchor_uname=v3[2],
+            anchor_roomid=v3[3],
+            medal_color=v3[4],
+            special=v3[5],
+            icon_id=v3[6],
+            medal_color_border=v3[7],
+            medal_color_start=v3[8],
+            medal_color_end=v3[9],
+            guard_level=v3[10],
+            is_lighted=v3[11],
+            target_id=v3[12],
+        )
+    else:
+        return None
+
+
+def parse_group_medal(v17):
+    if v17 is None:
+        return None
+    else:
+        return GroupMedal(
+            medal_id=v17[0],
+            name=v17[1],
+            is_lighted=v17[2],
+        )
 
 
 class DanmakuCommand(CommandModel):
@@ -176,21 +214,6 @@ class DanmakuCommand(CommandModel):
         if not isinstance(v, list):
             return v
 
-        if len(v[3]) != 0:
-            medal_level = v[3][0]
-            medal_name = v[3][1]
-            runame = v[3][2]
-            room_id = v[3][3]
-            mcolor = v[3][4]
-            special_medal = v[3][5]
-        else:
-            medal_level = 0
-            medal_name = ''
-            runame = ''
-            room_id = 0
-            mcolor = 0
-            special_medal = ""
-
         return {
             # .0.0
             "mode": v[0][1],
@@ -202,12 +225,14 @@ class DanmakuCommand(CommandModel):
             "uid_crc32": v[0][7],
             # .0.8
             "msg_type": v[0][9],
-            "bubble": v[0][10],
-            # .0.11
+            "bubble_type": v[0][10],
+            'bubble_color': v[0][11],
             "dm_type": v[0][12],
             "emoticon_options": v[0][13],
             "voice_config": v[0][14],
             "mode_info": v[0][15],
+            'aggre': v[0][16],
+            'bubble_id': v[0][17],
 
             "msg": v[1],
 
@@ -218,14 +243,9 @@ class DanmakuCommand(CommandModel):
             "svip": v[2][4],
             "urank": v[2][5],
             "mobile_verify": v[2][6],
-            "uname_color": v[2][7],
+            "uname_color": v[2][7],  # 似乎与舰有关
 
-            "medal_level": medal_level,
-            "medal_name": medal_name,
-            "runame": runame,
-            "medal_room_id": room_id,
-            "mcolor": mcolor,
-            "special_medal": special_medal,
+            'medal_info': parse_medal_info(v[3]),
 
             "user_level": v[4][0],
             "ulevel_color": v[4][2],
@@ -234,7 +254,18 @@ class DanmakuCommand(CommandModel):
             "old_title": v[5][0],
             "title": v[5][1],
 
+            # .6
             "privilege_type": v[7],
+            # .8
+            # .9 validation { "ts": int maybe datetime, "ct": hex str upper, not CRC32. Or is? }
+            # .10
+            # .11
+            # .12
+            # .13
+            # .14 lpl 这与 LPL 联赛有关吗？
+            # .15 score 一个 int，对相同用户更经常是相同的，对不同用户通常是不同的，但都不绝对
+            'wealth_level': v[16][0],
+            'group_medal': parse_group_medal(v[17]),
         }
 
 
@@ -255,12 +286,14 @@ class Danmaku371111Command(DanmakuCommand):
                 "uid_crc32": v[0][7],
                 # .0.8
                 "msg_type": 0,
-                "bubble": 0,
-                # .0.11
+                "bubble_type": 0,
+                'bubble_color': v[0][11],
                 "dm_type": v[0][12],
                 "emoticon_options": v[0][13],
                 "voice_config": v[0][14],
                 "mode_info": v[0][15],
+                'aggre': v[0][16],
+                'bubble_id': v[0][17],
 
                 "msg": v[1],
 
@@ -273,12 +306,7 @@ class Danmaku371111Command(DanmakuCommand):
                 "mobile_verify": v[2][6],
                 "uname_color": v[2][7],
 
-                "medal_level": 0,
-                "medal_name": '',
-                "runame": '',
-                "medal_room_id": 0,
-                "mcolor": 0,
-                "special_medal": '',
+                'medal_info': parse_medal_info(v[3]),
 
                 "user_level": 0,
                 "ulevel_color": 0xffffff,
@@ -288,5 +316,8 @@ class Danmaku371111Command(DanmakuCommand):
                 "title": "",
 
                 "privilege_type": v[7],
+
+                'wealth_level': v[16][0],
+                'group_medal': parse_group_medal(v[17]),
             }
         return v
