@@ -51,7 +51,7 @@ class Web(StreamUI):
 
     @cached_property
     def _queue(self):
-        return asyncio.Queue()
+        return asyncio.Queue[JR]()
 
     @cached_property
     def _s(self):
@@ -106,7 +106,7 @@ class Web(StreamUI):
         key = f"r{s}"
         s = self.format_record(record)
         klass = self.format_class(sticky)
-        await self._queue.put(['add', key, klass, s])
+        await self._queue.put(('add', key, klass, s))
         self.cache.append((key, sticky, s))
         if len(self.cache) > self.cache_max_len:
             self.cache.pop(0)
@@ -120,11 +120,11 @@ class Web(StreamUI):
         klass = self.format_class(sticky)
         if record is not None:
             s = self.format_record(record)
-        await self._queue.put(['edit', key, klass, s])
+        await self._queue.put(('edit', key, klass, s))
         self.cache[i] = key, sticky, s
 
     async def remove(self, key):
-        await self._queue.put(['del', key])
+        await self._queue.put(('del', key))
         i = next(i for i, c in enumerate(self.cache) if c[0] == key)
         del self.cache[i]
 
@@ -144,7 +144,7 @@ class Web(StreamUI):
         await ws.prepare(request)
 
         logger.info("ws connection from {}".format(request.get_extra_info('peername')))
-        await ws.send_json(['fs', self.render_cache()])
+        await ws.send_json(('fs', self.render_cache()))
         self.connected_ws.append(ws)
 
         msg: aiohttp.WSMessage
