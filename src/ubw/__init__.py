@@ -35,7 +35,7 @@ def patch_config(config: dict, patch=None, *, toml_patch=None):
         assert isinstance(patch, dict)
         for k, v in patch.items():
             if isinstance(v, dict) and isinstance(config.get(k, None), dict):
-                patch_config(config[k])
+                patch_config(config[k], v)
             else:
                 config[k] = v
     if toml_patch is not None:
