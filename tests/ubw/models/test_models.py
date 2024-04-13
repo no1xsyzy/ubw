@@ -147,4 +147,4 @@ def test_danmu_msg():
     c = COMMAND_ADAPTER.validate_python(j)
     s = c.summarize()
 
-    assert s.msg == "呃呃"
+    assert s.msg == "。"

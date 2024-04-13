@@ -1,15 +1,20 @@
 {
   "cmd": "DANMU_MSG",
-  "ct": "2024-03-25T22:35:45.781328+08:00",
+  "ct": "2024-04-14T02:04:00.038583+08:00",
   "info": {
-    "mode": 1,
+    "mode": 4,
     "font_size": 25,
-    "color": 5816798,
-    "timestamp": "2024-03-25T14:15:27.685000+00:00",
-    "rnd": -2126799550,
-    "uid_crc32": "8a164cd7",
+    "color": [
+      151,
+      94,
+      249
+    ],
+    "timestamp": "2024-04-13T18:03:59.839000+00:00",
+    "rnd": 1712932336,
+    "uid_crc32": "98095d8b",
     "msg_type": 0,
-    "bubble": 0,
+    "bubble_type": 5,
+    "bubble_color": "#1453BAFF,#4C2263A2,#3353BAFF",
     "dm_type": 0,
     "emoticon_options": {},
     "voice_config": {},
@@ -20,19 +25,19 @@
         "send_from_me": false,
         "mode": 0,
         "color": [
-          88,
-          193,
-          222
+          151,
+          94,
+          249
         ],
         "dm_type": 0,
         "font_size": 25,
-        "player_mode": 1,
+        "player_mode": 4,
         "show_player_type": 0,
-        "content": "\u5443\u5443",
-        "user_hash": "2316717271",
+        "content": "。",
+        "user_hash": "2550750603",
         "emoticon_unique": "",
         "bulge_display": 0,
-        "recommend_score": 4,
+        "recommend_score": 5,
         "main_state_dm_color": "",
         "objective_state_dm_color": "",
         "direction": 0,
@@ -46,23 +51,22 @@
         "space_url": "",
         "animation": {},
         "is_audited": false,
-        "id_str": "0bf4d44973a2402e2169ea26e266018649",
+        "id_str": "6dcb2088fdc4b9341ccc754777661ac945",
         "show_reply": true
       },
       "user": {
-        "uid": 1708908573,
+        "uid": 2351778,
         "base": {
-          "name": "\u72fc\u84ec",
-          "face": "https://i0.hdslb.com/bfs/face/97187e9129dcfe19a13676217940d2b5f6e8f12a.jpg",
+          "name": "橘枳橼",
           "name_color": [
             0,
             0,
             0
           ],
-          "is_mystery": false,
+          "face": "https://i0.hdslb.com/bfs/face/b9c0bd810fb1fefac2ff423b756a6d4b013209fe.jpg",
           "origin_info": {
-            "name": "\u72fc\u84ec",
-            "face": "https://i0.hdslb.com/bfs/face/97187e9129dcfe19a13676217940d2b5f6e8f12a.jpg"
+            "name": "橘枳橼",
+            "face": "https://i0.hdslb.com/bfs/face/b9c0bd810fb1fefac2ff423b756a6d4b013209fe.jpg"
           },
           "official_info": {
             "role": 0,
@@ -76,32 +80,62 @@
           "old_title_css_id": "",
           "title_css_id": ""
         },
-        "guard_leader": {
-          "is_guard_leader": false
-        }
+        "guard_leader": {}
       }
     },
-    "msg": "\u5443\u5443",
-    "uid": 1708908573,
-    "uname": "\u72fc\u84ec",
-    "admin": 0,
-    "vip": 0,
-    "svip": 0,
+    "aggre": {},
+    "bubble_id": 43,
+    "msg": "。",
+    "uid": 2351778,
+    "uname": "橘枳橼",
+    "admin": false,
+    "vip": false,
+    "svip": false,
     "urank": 10000,
     "mobile_verify": 1,
-    "uname_color": "",
-    "medal_level": 0,
-    "medal_name": "",
-    "runame": "",
-    "medal_room_id": 0,
-    "mcolor": 0,
-    "special_medal": "",
-    "user_level": 6,
-    "ulevel_color": 9868950,
+    "uname_color": "#00D1F1",
+    "medal_info": {
+      "medal_level": 29,
+      "medal_name": "艾薯条",
+      "anchor_uname": "艾尔莎_Channel",
+      "anchor_roomid": 81004,
+      "medal_color": [
+        45,
+        8,
+        85
+      ],
+      "special": "",
+      "icon_id": 0,
+      "medal_color_border": [
+        103,
+        232,
+        255
+      ],
+      "medal_color_start": [
+        45,
+        8,
+        85
+      ],
+      "medal_color_end": [
+        157,
+        155,
+        255
+      ],
+      "guard_level": 3,
+      "is_lighted": 1,
+      "target_id": 1521415
+    },
+    "user_level": 25,
+    "ulevel_color": [
+      88,
+      150,
+      222
+    ],
     "ulevel_rank": ">50000",
     "old_title": "",
     "title": "",
-    "privilege_type": 0
+    "privilege_type": 3,
+    "wealth_level": 38
   },
   "dm_v2": ""
 }
