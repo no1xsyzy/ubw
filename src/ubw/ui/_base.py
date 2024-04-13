@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 __all__ = (
     'Segment',
-    'PlainText', 'Anchor', 'User', 'Room', 'RoomTitle', 'ColorSeeSee', 'DebugInfo', 'Currency',
+    'PlainText', 'Anchor', 'User', 'Room', 'RoomTitle', 'ColorSeeSee', 'DebugInfo', 'Currency', 'Picture',
     'Record',
     'StreamUI', 'Literal', 'Field',
     'demo',
@@ -33,6 +33,7 @@ class User(Segment):
     type: Literal['user'] = 'user'
     name: str
     uid: int
+    face: str = ''
 
 
 class Room(Segment):
@@ -62,6 +63,12 @@ class Currency(Segment):
     type: Literal['currency'] = 'currency'
     price: float
     mark: str = '￥'
+
+
+class Picture(Segment):
+    type: Literal['picture'] = 'picture'
+    url: str
+    alt: str
 
 
 class Record(BaseModel):

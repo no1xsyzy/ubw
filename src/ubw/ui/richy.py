@@ -25,7 +25,7 @@ class Richy(StreamUI):
         d = {}
         for seg in record.segments:
             match seg:
-                case PlainText(text=text):
+                case PlainText(text=text) | Picture(alt=text):
                     s += escape(text)
                 case Anchor(text=text, href=href):
                     s += f"[blue u link={href}]{text}[/]"

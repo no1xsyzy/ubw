@@ -3,13 +3,12 @@ import itertools
 import json
 import logging
 from functools import cached_property
-from html import escape
 from typing import Union
 
 import aiohttp
 import lxml
 from aiohttp import web
-from lxml.html.builder import HTML, BODY, HEAD, DIV, META, TITLE, SCRIPT, STYLE
+from lxml.html.builder import HTML, BODY, HEAD, DIV, META, TITLE, SCRIPT, STYLE, SPAN, A, IMG, ATTR, CLASS
 
 from ._base import *
 
@@ -76,30 +75,44 @@ class Web(StreamUI):
             return ''
 
     def format_record(self, record: Record) -> str:
-        s = ""
+        h = []
         for seg in record.segments:
             match seg:
                 case PlainText(text=text):
-                    s = f'{s}{escape(text)}'
+                    h.append(text)
                 case Anchor(text=text, href=href):
-                    s = f'{s}<a href="{href}">{escape(text)}</a>'
-                case User(name=name, uid=uid):
-                    s = f'{s}<a href="https://space.bilibili.com/{uid}" ' \
-                        f'class="{self.color_class(str(uid))}">{escape(name)}</a>'
+                    h.append(A({'href': href}, text))
+                case User(name=name, uid=uid, face=face):
+                    if face == '':
+                        h.append(
+                            A({'href': f"https://space.bilibili.com/{uid}", 'class': self.color_class(str(uid))},
+                              name))
+                    else:
+                        h.append(
+                            A({'href': f"https://space.bilibili.com/{uid}", 'class': self.color_class(str(uid))},
+                              IMG(src=face, style="height: 1em; width: 1em; border-radius: 0.5em;"),
+                              name))
                 case Room(owner_name=name, room_id=room_id):
-                    s = f'{s}<a href="https://live.bilibili.com/{room_id}">{escape(name)}的直播间</a>'
+                    h.append(
+                        A(ATTR(href=f"https://live.bilibili.com/{room_id}"), f"{name}的直播间"))
                 case RoomTitle(title=title, room_id=room_id):
-                    s = f'{s}<a href="https://live.bilibili.com/{room_id}">《{escape(title)}》</a>'
+                    h.append(
+                        A(ATTR(href=f"https://live.bilibili.com/{room_id}"), f"《{title}》"))
                 case ColorSeeSee(text=text):
-                    s = f'{s}<span class="{self.color_class(text)}">{escape(text)}</span>'
+                    h.append(
+                        SPAN(CLASS(self.color_class(text)),
+                             text))
                 case DebugInfo(text=text, info=info):
-                    s = f'{s}<span class="debug-info" ' \
-                        f'data-debug-info="{escape(json.dumps(info))}">({escape(text)})</span>'
+                    h.append(
+                        SPAN(CLASS('debug-info'), {'data-debug-info': json.dumps(info)},
+                             text))
                 case Currency(price=price, mark=mark):
                     if price > 0:
-                        s = f'{s}<span class="currency"> [{escape(mark)}{price}]</span>'
-
-        return s
+                        h.append(
+                            SPAN(CLASS('currency'), f" [{mark}{price}]"))
+                case Picture(url=url, alt=alt):
+                    h.append(IMG(src=url, alt=alt))
+        return lxml.html.tostring(SPAN(*h), encoding='unicode')
 
     async def add_record(self, record: Record, sticky: bool = False):
         s = next(self._s)

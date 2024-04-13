@@ -12,7 +12,7 @@ class ConsoleUI(StreamUI):
         s = [rf"{record.time.strftime(self.datetime_format)} "]
         for seg in record.segments:
             match seg:
-                case PlainText(text=text):
+                case PlainText(text=text) | Picture(alt=text):
                     s[0] += text
                 case Anchor(text=text, href=href):
                     s[0] += f"[{text}]({href})"
