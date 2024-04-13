@@ -27,6 +27,8 @@ class EdgeCollector(BaseHandler):
                 reason = 'DANMU_MSG.info.0.6'
             elif command['info'][0][8] != 0:
                 reason = 'DANMU_MSG.info.0.8'
+            elif command['info'][0][16] != {"activity_identity": "", "activity_source": 0, "not_show": 0}:
+                reason = 'DANMU_MSG.info.0.16'
             elif command['info'][0][17] not in {0, 4, 42, 43}:
                 reason = 'DANMU_MSG.info.0.17'
             elif len(command['info'][0]) > 18:
