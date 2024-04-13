@@ -7,7 +7,9 @@ from html import escape
 from typing import Union
 
 import aiohttp
+import lxml
 from aiohttp import web
+from lxml.html.builder import HTML, BODY, HEAD, DIV, META, TITLE, SCRIPT, STYLE
 
 from ._base import *
 
@@ -129,18 +131,19 @@ class Web(StreamUI):
     async def _main_task(self):
         while True:
             msg = await self._queue.get()
-            logger.debug('ws send_json %s' % msg)
+            logger.debug(f'ws send_json {msg=}')
             for ws in self.connected_ws[:]:
                 if not ws.closed:
                     try:
                         await ws.send_json(msg)
                     except Exception as e:
-                        logger.exception('ws send_json exception %s' % e)
+                        logger.exception('ws send_json exception', exc_info=e)
 
-    async def websocket_handler(self, request):
+    async def websocket_handler(self, request: web.Request):
         ws = web.WebSocketResponse()
         await ws.prepare(request)
 
+        logger.info("ws connection from {}".format(request.get_extra_info('peername')))
         await ws.send_json(['fs', self.render_cache()])
         self.connected_ws.append(ws)
 
@@ -148,11 +151,14 @@ class Web(StreamUI):
         async for msg in ws:
             if msg.type == aiohttp.WSMsgType.ERROR:
                 logger.exception('ws connection closed with exception', exc_info=ws.exception())
+                continue
+            logger.warning('ws received information from client but not understand, ignored')
         self.connected_ws.remove(ws)
+        await ws.close()
 
         return ws
 
-    async def index_handler(self, request):
+    async def index_handler(self, request: web.Request):
         script = """
 const socket = new WebSocket("ws://localhost:8080/ws");
 
@@ -197,26 +203,22 @@ socket.addEventListener("message", (event) => {
     }
 });
 """
-        text = f"""
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{self.title}</title>
-    <script>{script}</script>
-    <style>{self.color_css()}</style>
-</head>
-<body>
 
-<div id="sticky"></div>
-<div id="main">
-{self.render_cache()}
-</div>
-
-</body>
-</html>
-"""
-        return web.Response(body=text, headers={'content-type': 'text/html; chatset=utf-8'})
+        body = lxml.html.tostring(
+            HTML(
+                HEAD(
+                    META(charset='UTF-8'),
+                    TITLE(self.title),
+                    SCRIPT(script),
+                    STYLE(self.color_css()),
+                ),
+                BODY(
+                    DIV(id='sticky'),
+                    lxml.html.fromstring(f'<div id="main">{self.render_cache()}</div>'),
+                ),
+            )
+        )
+        return web.Response(body=body, headers={'content-type': 'text/html; chatset=utf-8'})
 
     @cached_property
     def app(self):
