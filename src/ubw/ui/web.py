@@ -25,7 +25,7 @@ JR = Union[
 
 class Web(StreamUI):
     uic: Literal['web'] = 'web'
-    palette: list[str] = 'red,green,yellow,blue,magenta,cyan'.split(',')
+    palette: list[str] = ["red", "green", "blue", "magenta"]
     title: str = 'Web Stream UI'
 
     bind_host: str = 'localhost'
