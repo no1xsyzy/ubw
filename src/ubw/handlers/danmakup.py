@@ -168,6 +168,7 @@ class DanmakuPHandler(BaseHandler):
         msg = message.info.msg
         uid = message.info.uid
         room_id = client.room_id
+        face = message.info.mode_info.user.base.face
         trivial_rate = self.trivial_rate(message.info)
 
         # ==== testing: entropy ====
@@ -186,7 +187,7 @@ class DanmakuPHandler(BaseHandler):
             if self.ui is not None:
                 await self.ui.add_record(Record(segments=[
                     ColorSeeSee(text=f"[{room_id}] "),
-                    User(name=uname, uid=uid),
+                    User(name=uname, uid=uid, face=face),
                     PlainText(text=f": "),
                     PlainText(text=f"{tokens}"),
                     PlainText(
@@ -206,7 +207,7 @@ class DanmakuPHandler(BaseHandler):
             if self.ui is not None:
                 await self.ui.add_record(Record(segments=[
                     ColorSeeSee(text=f"[{room_id}] "),
-                    User(name=uname, uid=uid),
+                    User(name=uname, uid=uid, face=face),
                     PlainText(text=f": "),
                     PlainText(text=msg),
                 ], time=message.ct))
@@ -218,7 +219,7 @@ class DanmakuPHandler(BaseHandler):
             if self.ui is not None:
                 await self.ui.add_record(Record(segments=[
                     ColorSeeSee(text=f"[{room_id}] "),
-                    User(name=uname, uid=uid),
+                    User(name=uname, uid=uid, face=face),
                     PlainText(text=f"说: "),
                     PlainText(text=msg),
                 ], time=message.ct))
@@ -286,7 +287,7 @@ class DanmakuPHandler(BaseHandler):
         if self.ui is not None:
             await self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
-                User(name=uname, uid=uid),
+                User(name=uname, uid=uid, face=message.data.user_info.face),
                 PlainText(text=f"[¥{price}]: {msg}")
             ], time=message.ct))
         else:
@@ -343,7 +344,7 @@ class DanmakuPHandler(BaseHandler):
         if self.ui is not None:
             await self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
-                User(name=model.data.uname, uid=uid),
+                User(name=model.data.uname, uid=uid, face=model.data.uinfo.base.face),
                 PlainText(text=model.MSG_NAME[model.data.msg_type]),
                 PlainText(text="了直播间"),
             ], time=model.ct))
@@ -360,6 +361,7 @@ class DanmakuPHandler(BaseHandler):
         room_id = client.room_id
         uid = model.data.uid
         money = model.data.price * model.data.num / 1000
+        uname = model.data.uname
 
         if money < self.gift_threshold:
             return
@@ -367,7 +369,7 @@ class DanmakuPHandler(BaseHandler):
         if self.ui is not None:
             segments = [
                 ColorSeeSee(text=f"[{room_id}] "),
-                User(name=model.data.uname, uid=uid),
+                User(name=uname, uid=uid, face=model.data.face),
                 PlainText(text=f"{model.data.action}了 {model.data.giftName}x{model.data.num}"),
             ]
             if model.data.coin_type == 'gold':
@@ -375,7 +377,7 @@ class DanmakuPHandler(BaseHandler):
             await self.ui.add_record(Record(segments=segments, time=model.ct))
         else:
             msg = rf"\[{model.ct.strftime('%Y-%m-%d %H:%M:%S')}] " \
-                  rf"\[[bright_cyan]{room_id}[/]] {css(f'{model.data.uname} (uid={uid})', uid)}" \
+                  rf"\[[bright_cyan]{room_id}[/]] {css(f'{uname} (uid={uid})', uid)}" \
                   rf"{model.data.action}了 {model.data.giftName}x{model.data.num}"
             if model.data.coin_type == 'gold':
                 msg += f" [￥{money}]"
