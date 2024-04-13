@@ -79,6 +79,7 @@ class BaseHandler(BaseModel):
             try:
                 model: models.CommandModel = ANNOTATED_COMMAND_ADAPTER.validate_python(command)
             except ValidationError as e:
+                logger.exception('error validating {}'.format(cmd), exc_info=e)
                 logger.debug(f"got a {cmd}, processed with {_func_info(self.on_unknown_cmd)}")
                 return await self.on_unknown_cmd(client, command, e)
             else:
