@@ -85,82 +85,82 @@ class DanmakuAggre(BaseModel):
 
 class DanmakuInfo(BaseModel):
     """弹幕消息
-    :var rnd: 这是每一个终端单独拥有的一个随机数，用以保证自己发送的弹幕在同终端上不会重复。 TODO：这是发送弹幕时即包含的吗？
-    :var bubble_type: 右侧评论栏气泡类型
-    :var bubble_color: 右侧评论栏气泡颜色，形如 "#1453BAFF,#4C2263A2,#3353BAFF"
-    :var bubble_id: 右侧评论栏气泡相关信息，似乎 43代表舰长 42代表提督  TODO：还存在4但含义不明，与实际情况作过比对但也没有发现
+    :var mode: 采集自 .info[0][1] 弹幕显示模式， 1代表滚动 4代表底部
+    :var font_size: 采集自 .info[0][2] 字体大小
+    :var color: 采集自 .info[0][3] 弹幕字体颜色
+    :var timestamp: 采集自 .info[0][4] 发送时间
+    :var rnd: 采集自 .info[0][5] 这是每一个终端单独拥有的一个“随机数”，用以保证自己发送的弹幕在同终端上不会重复。
+    可以注意到为了保证反应速度，发送弹幕时会即刻显示到弹幕栏。我们需要在同终端上去重但不同终端也要保证显示，这个“随机数”就是当前终端的标志。
+    实际操作中它并不是一个随机数而是某一时刻的时间戳。
+    :var uid_crc32: 采集自 .info[0][7] 用户ID文本CRC32校验
+    :var msg_type: 采集自 .info[0][9] 是否礼物弹幕（节奏风暴）
+    :var bubble_type: 采集自 .info[0][10] 右侧评论栏气泡类型
+    :var bubble_color: 采集自 .info[0][11] 右侧评论栏气泡颜色，形如 "#1453BAFF,#4C2263A2,#3353BAFF"
+    :var dm_type: 采集自 .info[0][12] 弹幕类型，0文本，1表情，2语音
+    :var emoticon_options: 采集自 .info[0][13] 表情参数
+    :var voice_config: 采集自 .info[0][14] 语音参数
+    :var mode_info: 采集自 .info[0][15] 附加参数
+    :var aggre: 采集自 .info[0][16] TODO：可能是聚合弹幕
+    :var bubble_id: 采集自 .info[0][17] 右侧评论栏气泡相关信息，似乎 43代表舰长 42代表提督  TODO：还存在4但含义不明，与实际情况作过比对但也没有发现
+    :var msg: 弹幕内容
+    :var uid: 用户ID
+    :var uname: 用户名
+    :var admin: 是否房管
+    :var vip: 是否月费老爷
+    :var svip: 是否年费老爷
+    :var urank: 用户身份，用来判断是否正式会员，猜测非正式会员为5000，正式会员为10000
+    :var mobile_verify: 是否绑定手机
+    :var uname_color: 用户名颜色
+    :var medal_info: 粉丝牌信息
+    :var user_level: 用户等级
+    :var ulevel_color: 用户等级颜色
+    :var ulevel_rank: 用户等级排名，>50000时为'>50000'
+    :var old_title: 旧头衔
+    :var title: 头衔
+    :var privilege_type: 舰队类型，0非舰队，1总督，2提督，3舰长
+    :var wealth_level: 荣耀等级
+    :var group_medal: GroupMedal
     """
 
     mode: int
-    """弹幕显示模式（滚动、顶部、底部）"""
     font_size: int
-    """字体尺寸"""
     color: Color
-    """颜色"""
     timestamp: datetime
-    """时间戳（毫秒）"""
     rnd: int
     uid_crc32: str
-    """用户ID文本的CRC32"""
     msg_type: int
-    """是否礼物弹幕（节奏风暴）"""
     bubble_type: int
     bubble_color: str
     dm_type: int
-    """弹幕类型，0文本，1表情，2语音"""
     emoticon_options: DanmakuInfoEmoticonOptions
-    """表情参数"""
     voice_config: dict
-    """语音参数"""
     mode_info: DanmakuInfoModeInfo
-    """一些附加参数"""
     aggre: DanmakuAggre
     bubble_id: int
 
     msg: str
-    """弹幕内容"""
 
     uid: int
-    """用户ID"""
     uname: str
-    """用户名"""
     admin: bool
-    """是否房管"""
     vip: bool
-    """是否月费老爷"""
     svip: bool
-    """是否年费老爷"""
     urank: int
-    """用户身份，用来判断是否正式会员，猜测非正式会员为5000，正式会员为10000"""
     mobile_verify: int
-    """是否绑定手机"""
     uname_color: str
-    """用户名颜色"""
 
     medal_info: MedalInfo | None = None
-
     user_level: int
-    """用户等级"""
     ulevel_color: Color
-    """用户等级颜色"""
     ulevel_rank: int | Literal['>50000']
-    """用户等级排名，>50000时为'>50000'"""
-
     old_title: str
-    """旧头衔"""
     title: str
-    """头衔"""
-
     privilege_type: int
-    """舰队类型，0非舰队，1总督，2提督，3舰长"""
-
     wealth_level: int | None = None
-    """荣耀等级"""
-
     group_medal: GroupMedal | None = None
 
+    # validators
     validate_emoticon_options = field_validator('emoticon_options', mode='before')(strange_dict)
-
     validate_voice_config = field_validator('voice_config', mode='before')(strange_dict)
 
 
