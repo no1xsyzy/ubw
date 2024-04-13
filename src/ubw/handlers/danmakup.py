@@ -103,6 +103,8 @@ class DanmakuPHandler(BaseHandler):
     ignore_rate: float = 0.0
     dim_rate: float = 0.25
 
+    gift_threshold: float = 0.0
+
     show_interact_word: bool = False
     test_flags: list[str] = []
 
@@ -358,6 +360,9 @@ class DanmakuPHandler(BaseHandler):
         room_id = client.room_id
         uid = model.data.uid
         money = model.data.price * model.data.num / 1000
+
+        if money < self.gift_threshold:
+            return
 
         if self.ui is not None:
             segments = [
