@@ -30,6 +30,21 @@ def load_config(c: Path):
         return toml.load(f)
 
 
+def patch_config(config: dict, patch=None, *, toml_patch=None):
+    if patch is not None:
+        assert isinstance(patch, dict)
+        for k, v in patch.items():
+            if isinstance(v, dict) and isinstance(config.get(k, None), dict):
+                patch_config(config[k])
+            else:
+                config[k] = v
+    if toml_patch is not None:
+        if isinstance(toml_patch, (list, tuple)):
+            toml_patch = '\n'.join(toml_patch)
+        import toml
+        patch_config(config, toml.loads(toml_patch))
+
+
 @app.command('ss')
 @app.command('strange_stalker')
 @sync
@@ -398,18 +413,7 @@ def main(
             config_override.append('logging.root.level="DEBUG"')
             config_override.append('logging.root.handlers=["richconsole"]')
     for c in config_override:
-        ks, v = c.split("=", 1)
-        from ast import literal_eval
-        v = literal_eval(v)
-        p = config
-        *kk, lk = ks.split('.')
-        for k in kk:
-            if k in p:
-                p = p[k]
-            else:
-                p = p.setdefault(k, {})
-        else:
-            p[lk] = v
+        patch_config(config, toml_patch=c)
     if log:
         init_logging(config)
     if sentry:
