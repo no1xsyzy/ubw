@@ -87,7 +87,7 @@ class DanmakuInfo(BaseModel):
     """弹幕消息
     :var rnd: 这是每一个终端单独拥有的一个随机数，用以保证自己发送的弹幕在同终端上不会重复。 TODO：这是发送弹幕时即包含的吗？
     :var bubble_type: 右侧评论栏气泡类型
-    :var bubble_color: 右侧评论栏气泡颜色
+    :var bubble_color: 右侧评论栏气泡颜色，形如 "#1453BAFF,#4C2263A2,#3353BAFF"
     :var bubble_id: 右侧评论栏气泡相关信息，似乎 43=舰 42=提
     """
 
@@ -105,7 +105,7 @@ class DanmakuInfo(BaseModel):
     msg_type: int
     """是否礼物弹幕（节奏风暴）"""
     bubble_type: int
-    bubble_color: Color
+    bubble_color: str
     dm_type: int
     """弹幕类型，0文本，1表情，2语音"""
     emoticon_options: DanmakuInfoEmoticonOptions
