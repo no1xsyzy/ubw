@@ -88,7 +88,7 @@ class DanmakuInfo(BaseModel):
     :var rnd: 这是每一个终端单独拥有的一个随机数，用以保证自己发送的弹幕在同终端上不会重复。 TODO：这是发送弹幕时即包含的吗？
     :var bubble_type: 右侧评论栏气泡类型
     :var bubble_color: 右侧评论栏气泡颜色，形如 "#1453BAFF,#4C2263A2,#3353BAFF"
-    :var bubble_id: 右侧评论栏气泡相关信息，似乎 43=舰 42=提
+    :var bubble_id: 右侧评论栏气泡相关信息，似乎 43代表舰长 42代表提督  TODO：还存在4但含义不明，与实际情况作过比对但也没有发现
     """
 
     mode: int
