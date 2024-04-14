@@ -19,7 +19,8 @@ class EdgeCollector(BaseHandler):
 
         reason = None
         if cmd == 'DANMU_MSG:3:7:1:1:1:1':
-            reason = 'DANMU_MSG371111'
+            if len(command['info']) != 17:
+                reason = 'DANMU_MSG371111.info.length'
         elif cmd == 'DANMU_MSG':
             if command['info'][0][0] != 0:
                 reason = 'DANMU_MSG.info.0.0'
@@ -31,7 +32,7 @@ class EdgeCollector(BaseHandler):
                 reason = 'DANMU_MSG.info.0.16'
             elif command['info'][0][17] not in {0, 4, 42, 43}:
                 reason = 'DANMU_MSG.info.0.17'
-            elif len(command['info'][0]) > 18:
+            elif len(command['info'][0]) != 18:
                 reason = 'DANMU_MSG.info.0.length'
             elif command['info'][3]:
                 if command['info'][3][5] != '':
@@ -46,7 +47,9 @@ class EdgeCollector(BaseHandler):
                 reason = 'DANMU_MSG.info.13'
             elif command['info'][14] != 0:
                 reason = 'DANMU_MSG.info.14'
-            elif len(command['info']) > 18:
+            elif len(command['info'][16]) != 1:
+                reason = 'DANMU_MSG.info.16.length'
+            elif len(command['info']) != 18:
                 reason = 'DANMU_MSG.info.length'
         elif cmd in ['COMBO_SEND',
                      'SEND_GIFT',
