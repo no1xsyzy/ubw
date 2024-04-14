@@ -30,19 +30,28 @@ def load_config(c: Path):
         return toml.load(f)
 
 
-def patch_config(config: dict, patch=None, *, toml_patch=None):
+NOT_MODIFY = object()
+
+
+def patch_config(config: dict, patch: dict, *, toml_patch: list[str] | tuple[str, ...] = None):
+    new_config = {}
     if patch is not None:
         assert isinstance(patch, dict)
-        for k, v in patch.items():
-            if isinstance(v, dict) and isinstance(config.get(k, None), dict):
-                patch_config(config[k], v)
+        for k in config.keys() | patch.keys():
+            vp = patch.get(k, NOT_MODIFY)
+            if vp is NOT_MODIFY:
+                if k in config:
+                    new_config[k] = config[k]
+            elif isinstance(vp, dict) and isinstance(config.get(k, None), dict):
+                new_config[k] = patch_config(config[k], vp)
             else:
-                config[k] = v
+                new_config[k] = vp
     if toml_patch is not None:
         if isinstance(toml_patch, (list, tuple)):
             toml_patch = '\n'.join(toml_patch)
         import toml
-        patch_config(config, toml.loads(toml_patch))
+        return patch_config(config, toml.loads(toml_patch))
+    return new_config
 
 
 @app.command('ss')
@@ -114,6 +123,12 @@ async def danmakup(
     elif ui == 'live':
         from .ui import LiveUI
         ui = LiveUI(alternate_screen=True)
+        handler = DanmakuPHandler(**settings, ui=ui, owned_ui=False)
+        async with ui:
+            await listen_to_all(rooms, handler)
+    elif ui == 'rich':
+        from .ui import Richy
+        ui = Richy(alternate_screen=True)
         handler = DanmakuPHandler(**settings, ui=ui, owned_ui=False)
         async with ui:
             await listen_to_all(rooms, handler)
@@ -407,13 +422,13 @@ def main(
         config_override: Annotated[list[str], typer.Option('--config-override', '-D')] = (),
 ):
     cd = Path(cd)
-    main.config = config = load_config(cd)
+    config = load_config(cd)
     if log:
         if verbose > 0:
             config_override.append('logging.root.level="DEBUG"')
             config_override.append('logging.root.handlers=["richconsole"]')
-    for c in config_override:
-        patch_config(config, toml_patch=c)
+    config = patch_config(config, {}, toml_patch=config_override)
+    main.config = config
     if log:
         init_logging(config)
     if sentry:
