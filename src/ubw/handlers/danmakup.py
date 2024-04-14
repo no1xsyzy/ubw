@@ -6,7 +6,7 @@ from functools import cached_property
 
 from pydantic import field_validator, model_validator
 
-from ubw.ui import Record, PlainText, User, RoomTitle, UI, ColorSeeSee, Currency
+from ubw.ui import Record, PlainText, User, RoomTitle, UI, ColorSeeSee, Currency, Richy
 from ._base import *
 
 KAOMOJIS = [
@@ -108,7 +108,7 @@ class DanmakuPHandler(BaseHandler):
     show_interact_word: bool = False
     test_flags: list[str] = []
 
-    ui: UI | None = None
+    ui: UI = Richy()
     owned_ui: bool = True
 
     @model_validator(mode='after')
@@ -184,49 +184,34 @@ class DanmakuPHandler(BaseHandler):
                 else:
                     tokens.extend(self.tokenizer.lcut(s))
             entropy = self.entropy.calculate_and_add_tokens(tokens)
-            if self.ui is not None:
-                await self.ui.add_record(Record(segments=[
-                    ColorSeeSee(text=f"[{room_id}] "),
-                    User(name=uname, uid=uid, face=face),
-                    PlainText(text=f": "),
-                    PlainText(text=f"{tokens}"),
-                    PlainText(
-                        text=f" ({entropy=:.3f}, {entropy/len(tokens)=:.3f}, {trivial_rate=:.3f})"),
-                ], time=message.ct))
-            else:
-                rich.print(
-                    rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
-                    rf"\[[bright_cyan]{room_id}[/]] {css(f'{uname} (uid={uid})', uid)}: {escape(str(tokens))}"
-                    f" ({entropy=:.3f}, {entropy/len(tokens)=:.3f}, {trivial_rate=:.3f})")
+            await self.ui.add_record(Record(segments=[
+                ColorSeeSee(text=f"[{room_id}] "),
+                User(name=uname, uid=uid, face=face),
+                PlainText(text=f": "),
+                PlainText(text=f"{tokens}"),
+                PlainText(
+                    text=f" ({entropy=:.3f}, {entropy/len(tokens)=:.3f}, {trivial_rate=:.3f})"),
+            ], time=message.ct))
             return
         # ==== testing: entropy ====
 
         if trivial_rate < self.ignore_rate:
             pass
         elif trivial_rate < self.dim_rate:
-            if self.ui is not None:
-                await self.ui.add_record(Record(segments=[
-                    ColorSeeSee(text=f"[{room_id}] "),
-                    User(name=uname, uid=uid, face=face),
-                    PlainText(text=f": "),
-                    PlainText(text=msg),
-                ], time=message.ct))
-            else:
-                rich.print(
-                    rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
-                    rf"\[[bright_cyan]{room_id}[/]] {css(f'{uname} (uid={uid})', uid)}: [grey]{escape(msg)}[/]")
+            await self.ui.add_record(Record(segments=[
+                ColorSeeSee(text=f"[{room_id}] "),
+                User(name=uname, uid=uid, face=face),
+                PlainText(text=f": "),
+                PlainText(text=msg),
+            ], time=message.ct))
+
         else:
-            if self.ui is not None:
-                await self.ui.add_record(Record(segments=[
-                    ColorSeeSee(text=f"[{room_id}] "),
-                    User(name=uname, uid=uid, face=face),
-                    PlainText(text=f"说: "),
-                    PlainText(text=msg),
-                ], time=message.ct))
-            else:
-                rich.print(
-                    rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
-                    rf"\[[bright_cyan]{room_id}[/]] {css(f'{uname} (uid={uid})', uid)}: [bright_white]{escape(msg)}[/]")
+            await self.ui.add_record(Record(segments=[
+                ColorSeeSee(text=f"[{room_id}] "),
+                User(name=uname, uid=uid, face=face),
+                PlainText(text=f"说: "),
+                PlainText(text=msg),
+            ], time=message.ct))
 
     async def on_room_change(self, client, message):
         title = message.data.title
@@ -234,48 +219,28 @@ class DanmakuPHandler(BaseHandler):
         area_name = message.data.area_name
         room_id = client.room_id
 
-        if self.ui is not None:
-            await self.ui.add_record(Record(segments=[
-                ColorSeeSee(text=f"[{room_id}] "),
-                PlainText(text=f"直播间信息变更"),
-                RoomTitle(title=title, room_id=room_id),
-                PlainText(text=f"，分区：{parent_area_name}/{area_name}"),
-            ], time=message.ct))
-        else:
-            rich.print(
-                rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
-                rf"\[[bright_cyan]{room_id}[/]] "
-                f"直播间信息变更《[rgb(255,212,50)]{escape(title)}[/]》，分区：{parent_area_name}/{area_name}")
+        await self.ui.add_record(Record(segments=[
+            ColorSeeSee(text=f"[{room_id}] "),
+            PlainText(text=f"直播间信息变更"),
+            RoomTitle(title=title, room_id=room_id),
+            PlainText(text=f"，分区：{parent_area_name}/{area_name}"),
+        ], time=message.ct))
 
     async def on_summary(self, client, summary):
         room_id = client.room_id
-        if self.ui is not None:
-            await self.ui.add_record(Record(segments=[
-                ColorSeeSee(text=f"[{room_id}] "),
-                PlainText(text=summary.msg),
-                Currency(price=summary.price),
-                PlainText(text=f" ({summary.raw.cmd})"),
-            ], time=summary.t.astimezone(timezone(timedelta(seconds=8 * 3600)))))
-        else:
-            text = rf"\[{summary.t.astimezone(timezone(timedelta(seconds=8 * 3600))).strftime('%Y-%m-%d %H:%M:%S')}] " \
-                   rf"\[[bright_cyan]{room_id}[/]] " \
-                   f"{summary.msg}"
-            if summary.price != 0:
-                text += f" [￥{summary.price}]"
-            text += f" ({summary.raw.cmd})"
-            rich.print(text)
+        await self.ui.add_record(Record(segments=[
+            ColorSeeSee(text=f"[{room_id}] "),
+            PlainText(text=summary.msg),
+            Currency(price=summary.price),
+            PlainText(text=f" ({summary.raw.cmd})"),
+        ], time=summary.t.astimezone(timezone(timedelta(seconds=8 * 3600)))))
 
     async def on_warning(self, client, message: models.WarningCommand):
         room_id = client.room_id
-        if self.ui is not None:
-            await self.ui.add_record(Record(segments=[
-                ColorSeeSee(text=f"[{room_id}] "),
-                PlainText(text=f"受到警告 {message.msg}"),
-            ], time=message.ct))
-        else:
-            rich.print(
-                rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
-                rf"\[[bright_cyan]{room_id}[/]] [white on red]{message.msg}[/]")
+        await self.ui.add_record(Record(segments=[
+            ColorSeeSee(text=f"[{room_id}] "),
+            PlainText(text=f"受到警告 {message.msg}"),
+        ], time=message.ct))
 
     async def on_super_chat_message(self, client, message):
         uname = message.data.user_info.uname
@@ -284,75 +249,46 @@ class DanmakuPHandler(BaseHandler):
         msg = message.data.message
         color = message.data.message_font_color
         room_id = client.room_id
-        if self.ui is not None:
-            await self.ui.add_record(Record(segments=[
-                ColorSeeSee(text=f"[{room_id}] "),
-                User(name=uname, uid=uid, face=message.data.user_info.face),
-                PlainText(text=f"[¥{price}]: {msg}")
-            ], time=message.ct))
-        else:
-            rich.print(
-                rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
-                rf"\[[bright_cyan]{room_id}[/]] {css(f'{uname} (uid={uid})', uid)} "
-                rf"\[[bright_cyan]¥{price}[/]]: [{color}]{escape(msg)}[/]")
+        await self.ui.add_record(Record(segments=[
+            ColorSeeSee(text=f"[{room_id}] "),
+            User(name=uname, uid=uid, face=message.data.user_info.face),
+            PlainText(text=f"[¥{price}]: {msg}")
+        ], time=message.ct))
 
     async def on_room_block_msg(self, client, message):
         room_id = client.room_id
         uid = message.data.uid
-        if self.ui is not None:
-            await self.ui.add_record(Record(segments=[
-                ColorSeeSee(text=f"[{room_id}] "),
-                PlainText(text="用户被封禁"),
-                User(name=message.data.uname, uid=uid),
-            ], time=message.ct))
-        else:
-            rich.print(
-                rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
-                rf"\[[bright_cyan]{room_id}[/]] "
-                f"[red]用户 {css(f'{message.data.uname} (uid={uid})', uid)} 被封禁[/]")
+        await self.ui.add_record(Record(segments=[
+            ColorSeeSee(text=f"[{room_id}] "),
+            PlainText(text="用户被封禁"),
+            User(name=message.data.uname, uid=uid),
+        ], time=message.ct))
 
     async def on_live(self, client, message):
         room_id = client.room_id
-        if self.ui is not None:
-            await self.ui.add_record(Record(segments=[
-                ColorSeeSee(text=f"[{room_id}] "),
-                PlainText(text="\N{Black Right-Pointing Triangle With Double Vertical Bar}\N{VS16}直播开始"),
-            ], time=message.ct))
-        else:
-            rich.print(
-                rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
-                rf"\[[bright_cyan]{room_id}[/]] "
-                "[black on #eeaaaa]:black_right__pointing_triangle_with_double_vertical_bar-text:直播开始[/]")
+        await self.ui.add_record(Record(segments=[
+            ColorSeeSee(text=f"[{room_id}] "),
+            PlainText(text="\N{Black Right-Pointing Triangle With Double Vertical Bar}\N{VS16}直播开始"),
+        ], time=message.ct))
 
     async def on_preparing(self, client, message):
         room_id = client.room_id
-        if self.ui is not None:
-            await self.ui.add_record(Record(segments=[
-                ColorSeeSee(text=f"[{room_id}] "),
-                PlainText(text="\N{Black Square For Stop}\N{VS16}直播结束"),
-            ], time=message.ct))
-        else:
-            rich.print(
-                rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
-                rf"\[[bright_cyan]{room_id}[/]] [black on #eeaaaa]:black_square_for_stop-text:直播结束[/]")
+        await self.ui.add_record(Record(segments=[
+            ColorSeeSee(text=f"[{room_id}] "),
+            PlainText(text="\N{Black Square For Stop}\N{VS16}直播结束"),
+        ], time=message.ct))
 
     async def on_interact_word(self, client, model):
         if not self.show_interact_word:
             return
         uid = model.data.uid
         room_id = client.room_id
-        if self.ui is not None:
-            await self.ui.add_record(Record(segments=[
-                ColorSeeSee(text=f"[{room_id}] "),
-                User(name=model.data.uname, uid=uid, face=model.data.uinfo.base.face),
-                PlainText(text=model.MSG_NAME[model.data.msg_type]),
-                PlainText(text="了直播间"),
-            ], time=model.ct))
-        else:
-            rich.print(
-                rf"\[{model.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
-                rf"\[[bright_cyan]{room_id}[/]] 用户 {css(f'{model.data.uname} (uid={uid})', uid)}"
-                rf"{model.MSG_NAME[model.data.msg_type]}了直播间")
+        await self.ui.add_record(Record(segments=[
+            ColorSeeSee(text=f"[{room_id}] "),
+            User(name=model.data.uname, uid=uid, face=model.data.uinfo.base.face),
+            PlainText(text=model.MSG_NAME[model.data.msg_type]),
+            PlainText(text="了直播间"),
+        ], time=model.ct))
 
     async def on_x_ubw_heartbeat(self, client, message):
         pass
@@ -366,19 +302,11 @@ class DanmakuPHandler(BaseHandler):
         if money < self.gift_threshold:
             return
 
-        if self.ui is not None:
-            segments = [
-                ColorSeeSee(text=f"[{room_id}] "),
-                User(name=uname, uid=uid, face=model.data.face),
-                PlainText(text=f"{model.data.action}了 {model.data.giftName}x{model.data.num}"),
-            ]
-            if model.data.coin_type == 'gold':
-                segments.append(Currency(price=money))
-            await self.ui.add_record(Record(segments=segments, time=model.ct))
-        else:
-            msg = rf"\[{model.ct.strftime('%Y-%m-%d %H:%M:%S')}] " \
-                  rf"\[[bright_cyan]{room_id}[/]] {css(f'{uname} (uid={uid})', uid)}" \
-                  rf"{model.data.action}了 {model.data.giftName}x{model.data.num}"
-            if model.data.coin_type == 'gold':
-                msg += f" [￥{money}]"
-            rich.print(msg)
+        segments = [
+            ColorSeeSee(text=f"[{room_id}] "),
+            User(name=uname, uid=uid, face=model.data.face),
+            PlainText(text=f"{model.data.action}了 {model.data.giftName}x{model.data.num}"),
+        ]
+        if model.data.coin_type == 'gold':
+            segments.append(Currency(price=money))
+        await self.ui.add_record(Record(segments=segments, time=model.ct))
