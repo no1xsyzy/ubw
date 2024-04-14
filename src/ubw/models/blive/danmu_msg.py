@@ -318,6 +318,6 @@ class Danmaku371111Command(DanmakuCommand):
                 "privilege_type": v[7],
 
                 'wealth_level': v[16][0],
-                'group_medal': parse_group_medal(v[17]),
+                'group_medal': None,
             }
         return v
