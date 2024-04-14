@@ -3,7 +3,7 @@ import itertools
 import json
 import logging
 from functools import cached_property
-from typing import Union
+from typing import Union, NamedTuple
 
 import aiohttp
 import lxml
@@ -22,6 +22,12 @@ JR = Union[
 ]
 
 
+class Formatted(NamedTuple):
+    key: str
+    sticky: bool
+    element: lxml.html.HtmlElement
+
+
 class Web(StreamUI):
     uic: Literal['web'] = 'web'
     palette: list[str] = ["red", "green", "blue", "magenta"]
@@ -37,12 +43,21 @@ class Web(StreamUI):
     _task: asyncio.Task | None = None
 
     @cached_property
-    def cache(self) -> list[tuple[str, bool, str]]:
+    def cache_sticky(self) -> list[Formatted]:
         return []
 
-    def render_cache(self):
-        return ''.join(f'<div id="{key}" class="{self.format_class(sticky)}">{s}</div>'
-                       for key, sticky, s in self.cache)
+    @cached_property
+    def cache(self) -> list[Formatted]:
+        return []
+
+    def render_body(self):
+        return BODY(
+            DIV({'id': 'sticky'},
+                *(DIV({'id': key, 'class': self.format_class(sticky)}, s)
+                  for key, sticky, s in self.cache_sticky)),
+            DIV({'id': 'main'},
+                *(DIV({'id': key, 'class': self.format_class(sticky)}, s)
+                  for key, sticky, s in self.cache)))
 
     @cached_property
     def connected_ws(self) -> list[web.WebSocketResponse]:
@@ -74,7 +89,7 @@ class Web(StreamUI):
         else:
             return ''
 
-    def format_record(self, record: Record) -> str:
+    def format_record(self, record: Record) -> lxml.html.HtmlElement:
         h = []
         for seg in record.segments:
             match seg:
@@ -112,34 +127,49 @@ class Web(StreamUI):
                             SPAN(CLASS('currency'), f" [{mark}{price}]"))
                 case Picture(url=url, alt=alt):
                     h.append(IMG(src=url, alt=alt))
-        return lxml.html.tostring(SPAN(*h), encoding='unicode')
+        return SPAN(*h)
+
+    def find_key(self, key):
+        for i, c in enumerate(self.cache_sticky):
+            if c[0] == key:
+                return self.cache_sticky, i
+        for i, c in enumerate(self.cache):
+            if c[0] == key:
+                return self.cache, i
+        return None, None
 
     async def add_record(self, record: Record, sticky: bool = False):
-        s = next(self._s)
-        key = f"r{s}"
+        key = f"r{next(self._s)}"
         s = self.format_record(record)
         klass = self.format_class(sticky)
-        await self._queue.put(('add', key, klass, s))
-        self.cache.append((key, sticky, s))
+        await self._queue.put(('add', key, klass, lxml.html.tostring(s, encoding='unicode')))
+        self.cache.append(Formatted(key, sticky, s))
+
         if len(self.cache) > self.cache_max_len:
-            self.cache.pop(0)
+            g = self.cache.pop(0)
+            if g.sticky:
+                self.cache_sticky.append(g)
+
         return key
 
     async def edit_record(self, key, *, record=None, sticky=None):
-        i = next(i for i, c in enumerate(self.cache) if c[0] == key)
-        key, old_sticky, s = self.cache[i]
+        cache, i = self.find_key(key)
+        key, old_sticky, s = cache[i]
         if sticky is None:
             sticky = old_sticky
-        klass = self.format_class(sticky)
         if record is not None:
             s = self.format_record(record)
-        await self._queue.put(('edit', key, klass, s))
-        self.cache[i] = key, sticky, s
+        if sticky is False and cache is self.cache_sticky:
+            del cache[i]
+            await self._queue.put(('del', key))
+        cache[i] = Formatted(key, sticky, s)
+        klass = self.format_class(sticky)
+        await self._queue.put(('edit', key, klass, lxml.html.tostring(s, encoding='unicode')))
 
     async def remove(self, key):
         await self._queue.put(('del', key))
-        i = next(i for i, c in enumerate(self.cache) if c[0] == key)
-        del self.cache[i]
+        cache, i = self.find_key(key)
+        del cache[i]
 
     async def _main_task(self):
         while True:
@@ -157,7 +187,7 @@ class Web(StreamUI):
         await ws.prepare(request)
 
         logger.info("ws connection from {}".format(request.get_extra_info('peername')))
-        await ws.send_json(('fs', self.render_cache()))
+        await ws.send_json(('fs', lxml.html.tostring(self.render_body(), encoding='unicode')))
         self.connected_ws.append(ws)
 
         msg: aiohttp.WSMessage
@@ -199,7 +229,7 @@ socket.addEventListener("message", (event) => {
         el.remove();
     } else if (op === 'fs') {
         sticky.innerHTML = ""
-        main.innerHTML = data[1];
+        body.innerHTML = data[1];
     }
 
     for (let el of document.querySelectorAll("#sticky :not(.sticky)")){
@@ -225,11 +255,10 @@ socket.addEventListener("message", (event) => {
                     SCRIPT(script),
                     STYLE(self.color_css()),
                 ),
-                BODY(
-                    DIV(id='sticky'),
-                    lxml.html.fromstring(f'<div id="main">{self.render_cache()}</div>'),
-                ),
-            )
+                self.render_body()
+            ),
+            encoding='unicode',
+            pretty_print=True,
         )
         return web.Response(body=body, headers={'content-type': 'text/html; chatset=utf-8'})
 
