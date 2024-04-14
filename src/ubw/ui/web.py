@@ -33,6 +33,8 @@ class Web(StreamUI):
     palette: list[str] = ["red", "green", "blue", "magenta"]
     title: str = 'Web Stream UI'
 
+    show_date: bool = True
+
     bind_host: str = 'localhost'
     bind_port: int = 8080
 
@@ -90,7 +92,10 @@ class Web(StreamUI):
             return ''
 
     def format_record(self, record: Record) -> lxml.html.HtmlElement:
-        h = []
+        if self.show_date:
+            h = [SPAN({'class': 'datetime'}, record.time.strftime('[%Y-%m-%d %H:%M:%S] '))]
+        else:
+            h = []
         for seg in record.segments:
             match seg:
                 case PlainText(text=text):
@@ -247,6 +252,11 @@ socket.addEventListener("message", (event) => {
 });
 """
 
+        style = """
+span.datetime { color: darkcyan; }
+span.debug-info { color: orange; }
+"""
+
         body = lxml.html.tostring(
             HTML(
                 HEAD(
@@ -254,6 +264,7 @@ socket.addEventListener("message", (event) => {
                     TITLE(self.title),
                     SCRIPT(script),
                     STYLE(self.color_css()),
+                    STYLE(style),
                 ),
                 self.render_body()
             ),
