@@ -37,16 +37,16 @@ class MockClient(LiveClientABC):
 
     close = cached_property(lambda self: AsyncMock(name='close'))
     join = cached_property(lambda self: AsyncMock(name='join'))
-    start = cached_property(lambda self: Mock(name='start'))
-    stop = cached_property(lambda self: Mock(name='stop'))
+    start = cached_property(lambda self: AsyncMock(name='start'))
+    stop = cached_property(lambda self: AsyncMock(name='stop'))
     user_ident = cached_property(lambda self: Mock(name='user_ident'))
     add_handler = cached_property(lambda self: Mock(name='add_handler'))
 
     if TYPE_CHECKING:
         close: AsyncMock
         join: AsyncMock
-        start: Mock
-        stop: Mock
+        start: AsyncMock
+        stop: AsyncMock
         user_ident: Mock
         add_handler: Mock
 

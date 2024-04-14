@@ -226,7 +226,7 @@ async def app_show(app_name: str):
 async def app_run(app_name: str):
     application = AppTypeAdapter.validate_python(main.config['apps'].get(app_name))
     try:
-        application.start()
+        await application.start()
         await application.join()
     finally:
         await application.close()

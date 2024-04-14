@@ -70,12 +70,12 @@ class BaseActor(BaseModel, abc.ABC):
     async def _run(self):
         ...
 
-    def start(self):
+    async def start(self):
         if self._task is not None:
             return warnings.warn(f"{self.role} is already running")
         self._task = asyncio.create_task(self._run())
         for a in self.nested_actors():
-            a.start()
+            await a.start()
 
     async def join(self):
         if self._task is None:

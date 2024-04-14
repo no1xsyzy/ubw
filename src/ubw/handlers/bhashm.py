@@ -16,7 +16,7 @@ async def get_live_start_time(room_id: int) -> datetime | None:
         return (await client.get_info_by_room(room_id)).room_info.live_start_time
 
 
-def create_csv_writer(room_id: int) -> asyncio.Queue:
+def create_csv_writer(room_id: int) -> tuple[asyncio.Task, asyncio.Queue]:
     queue = asyncio.Queue()
 
     async def task():
@@ -47,18 +47,20 @@ def create_csv_writer(room_id: int) -> asyncio.Queue:
                         await afp.flush()
                         queue.task_done()
 
-    asyncio.create_task(task())
-    return queue
+    task = asyncio.create_task(task())
+    return task, queue
 
 
 class HashMarkHandler(BaseHandler):
     cls: Literal['bhashm'] = 'bhashm'
     famous_people: list[int] = []
+
+    _csv_writer_task: dict[int, asyncio.Task] = {}
     _csv_queues: dict[int, asyncio.Queue] = {}
 
     def get_csv_queue_for(self, room_id) -> asyncio.Queue:
         if room_id not in self._csv_queues:
-            self._csv_queues[room_id] = create_csv_writer(room_id)
+            self._csv_writer_task[room_id], self._csv_queues[room_id] = create_csv_writer(room_id)
         return self._csv_queues[room_id]
 
     async def on_summary(self, client, summary):

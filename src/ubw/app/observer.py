@@ -40,9 +40,8 @@ class ObserverApp(InitLoopFinalizeApp):
         )
         self._live_handler = Observer(room_id=self._room_id)
         self._live_client.add_handler(self._live_handler)
-        self._live_handler.start(self._live_client)
-        await self._live_handler.astart(self._live_client)  # checkpoint2
-        self._live_client.start()
+        await self._live_handler.start(self._live_client)
+        await self._live_client.start()
         if self._last_got is None:
             self._last_got = set()
         await self._fetch_print_update()
@@ -70,12 +69,10 @@ class ObserverApp(InitLoopFinalizeApp):
 
     async def _finalize(self):
         if self._live_client is not None:
-            stop = self._live_client.stop()
-            if stop is not None:
-                try:
-                    await stop
-                except asyncio.CancelledError:
-                    pass
+            try:
+                await self._live_client.stop()
+            except asyncio.CancelledError:
+                pass
 
     async def close(self):
         await self._live_client.close()

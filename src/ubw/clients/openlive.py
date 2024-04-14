@@ -3,6 +3,7 @@ import asyncio
 import json as json_
 import logging
 import uuid
+import warnings
 from datetime import datetime
 from typing import Optional, Annotated
 
@@ -218,31 +219,31 @@ class OpenLiveClient(WSMessageParserMixin, LiveClientABC):
     _start_data: StartData | None = None
     _ws: aiohttp.ClientWebSocketResponse | None = None
 
-    def start(self):
+    async def start(self):
         if self.is_running:
-            logger.warning('start() while running')
-            return
+            return warnings.warn('start() while running')
         self._task = asyncio.create_task(self._run())
 
     async def join(self):
         if not self.is_running:
-            logger.warning('join() while stopped')
-            return
+            return warnings.warn('join() while stopped')
         await asyncio.shield(self._task)
 
-    def stop(self):
+    async def stop(self):
         if not self.is_running:
-            logger.warning('stop() while stopped')
-            return
+            return warnings.warn('stop() while stopped')
 
         task = self._task
         if task.cancel('stop'):
             self._task = None
-            return task
+            try:
+                await task
+            except asyncio.CancelledError:
+                return
 
     async def close(self):
         if self.is_running:
-            logger.warning('close() while running')
+            return warnings.warn('close() while running')
         if self._own_session:
             await self._session.close()
 

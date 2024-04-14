@@ -40,13 +40,13 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
     _heartbeat_timer_task: asyncio.Task | None = None
     _session: aiohttp.ClientSession | None = None
 
-    def start(self):
+    async def start(self):
         if self.is_running:
             return warnings.warn(f'room={self.room_id} client is running, cannot start() again')
 
         self._task = asyncio.create_task(self.main())
 
-    def stop(self):
+    async def stop(self):
         if not self.is_running:
             return warnings.warn(f'room={self.room_id} client is stopped, cannot stop() again')
 
@@ -55,7 +55,10 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
             return
         if task.cancel('stop'):
             self._task = None
-            return task
+            try:
+                await task
+            except asyncio.CancelledError:
+                return
 
     async def join(self):
         if not self.is_running:

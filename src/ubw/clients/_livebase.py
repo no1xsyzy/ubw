@@ -71,7 +71,7 @@ class LiveClientABC(BaseModel, abc.ABC):
         return self._task is not None
 
     @abc.abstractmethod
-    def start(self):
+    async def start(self):
         ...
 
     @abc.abstractmethod
@@ -79,7 +79,7 @@ class LiveClientABC(BaseModel, abc.ABC):
         ...
 
     @abc.abstractmethod
-    def stop(self):
+    async def stop(self):
         ...
 
     @abc.abstractmethod
@@ -88,9 +88,7 @@ class LiveClientABC(BaseModel, abc.ABC):
 
     async def stop_and_close(self):
         try:
-            task = self.stop()
-            if task is not None:
-                await task
+            await self.stop()
         finally:
             await self.close()
 

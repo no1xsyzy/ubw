@@ -22,7 +22,7 @@ class LivingStatusHandler(BaseHandler):
             self._info_by_room_cache[room_id] = [title, parent_area_name, area_name, living]
         return self._info_by_room_cache[room_id]
 
-    async def astart(self, client):
+    async def start(self, client):
         now = datetime.now()
         room_id = client.room_id
         title, parent_area_name, area_name, living = await self.info_by_room(room_id, client.bilibili_client)

@@ -48,10 +48,10 @@ class LiveUI(StreamUI):
     def _lock(self):
         return threading.RLock()
 
-    def start(self):
+    async def start(self):
         self._live.start(True)
 
-    def stop(self):
+    async def stop(self):
         self._live.stop()
 
     def format_record(self, record: Record) -> 'RichRenderable':

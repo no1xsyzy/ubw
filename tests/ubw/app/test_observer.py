@@ -49,9 +49,7 @@ async def test_observer():
         handler = liv.add_async_mock()
         client = liv.add_async_mock()
 
-        handler.start = liv.add_sync_mock()(returns())
         client.add_handler = liv.add_sync_mock()(returns())
-        client.start = liv.add_sync_mock()(returns())
 
         handler_class = liv.add_sync_patch('ubw.app.observer.Observer')(returns(handler))
         client_class = liv.add_sync_patch('ubw.app.observer.WSWebCookieLiveClient')(returns(client))
@@ -61,7 +59,7 @@ async def test_observer():
 
         app = ObserverApp(uid=uid, bilibili_client=bilibili_client, dynamic_poll_interval=1)
 
-        app.start()
+        await app.start()
 
         c = await liv.get_call(target=bilibili_client.read_cookie, f='async')
         c.assert_match_call()
@@ -80,15 +78,13 @@ async def test_observer():
         c = await liv.get_call(target=client.add_handler, f='sync')
         c.assert_match_call(handler)
 
-        c = await liv.get_call(target=handler.start, f='sync')
-        c.assert_match_call(client)
-
-        c = await liv.get_call(target=handler.astart, f='async')
+        c = await liv.get_call(target=handler.start, f='async')
         c.assert_match_call(client)
         c.set_result(None)
 
-        c = await liv.get_call(target=client.start, f='sync')
+        c = await liv.get_call(target=client.start, f='async')
         c.assert_match_call()
+        c.set_result(None)
 
         c = await liv.get_call(target=bilibili_client.get_user_dynamic, f='async')
         c.assert_match_call(uid)
@@ -130,14 +126,13 @@ async def test_observer():
             re.compile(r"\\\[\d{4}-\d\d-\d\d \d\d:\d\d:\d\d] 发布动态：TEXT=4 \[link url://4]链接\[/]$").match
         )
 
-        stop = app.stop()
+        t = asyncio.create_task(app.stop())
 
         c = await liv.get_call(target=client.stop, f='async')
         c.assert_match_call()
         c.set_exception(asyncio.CancelledError)
 
-        with pytest.raises(asyncio.CancelledError):
-            await stop
+        await t
 
         t = asyncio.create_task(app.close())
 

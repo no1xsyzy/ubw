@@ -79,8 +79,8 @@ class AddAndThen(JustStartOtherActorsMixin):
 async def test_actor():
     adder1 = Adder()
     adder2 = Adder()
-    adder1.start()
-    adder2.start()
+    await adder1.start()
+    await adder2.start()
     await adder1.x.put(1)
     await adder2.x.put(2)
     await adder2.y.put(4)
@@ -98,8 +98,8 @@ async def test_actor():
 async def test_connect():
     adder = Adder()
     multi = Multiplier(by=1.5)
-    adder.start()
-    multi.start()
+    await adder.start()
+    await multi.start()
     await adder.x.put(3)
     await adder.y.put(4)
     adder.z.connect(multi.i)
@@ -124,7 +124,7 @@ async def test_nested():
             ],
         }
     })
-    comp.start()
+    await comp.start()
     await comp.x.put(0.3)
     await comp.y.put(0.7)
     res = await comp.z.get()

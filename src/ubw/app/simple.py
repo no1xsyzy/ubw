@@ -10,9 +10,8 @@ class SimpleApp(BaseApp):
 
     async def _run(self):
         self.client.add_handler(self.handler)
-        self.handler.start(self.client)
-        await self.handler.astart(self.client)
-        self.client.start()
+        await self.handler.start(self.client)
+        await self.client.start()
         await self.client.join()
 
     async def close(self):

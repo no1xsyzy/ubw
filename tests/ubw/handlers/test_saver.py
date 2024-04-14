@@ -68,7 +68,7 @@ async def test_saver():
                 gibr(1712308994),  # 2024-04-05T17:23:14+08:00
                 gibr(0),
             ]
-            handler.start(client)
+            await handler.start(client)
 
             (a, s), = await mock_db.queue.get()
             assert bilibili_client.get_info_by_room.await_count == 1

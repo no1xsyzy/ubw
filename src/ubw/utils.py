@@ -28,9 +28,8 @@ async def listen_to_all(
                 clients[room_id] = client = \
                     WSWebCookieLiveClient(bilibili_client=b, bilibili_client_owner=False, room_id=room_id)
             client.add_handler(handler if handler is not None else handler_factory(room_id))
-            handler.start(client)
-            await handler.astart(client)
-            client.start()
+            await handler.start(client)
+            await client.start()
 
         try:
             await asyncio.gather(*(client.join() for client in clients.values()))

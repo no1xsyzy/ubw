@@ -10,7 +10,7 @@ from ubw.models import InfoByRoom, RoomChangeCommand, PreparingCommand, LiveComm
 
 class TestObserve:
     @pytest.mark.asyncio
-    async def test_astart(self):
+    async def test_observer_handler(self):
         room_id = 123
 
         handler = Observer(room_id=room_id)
@@ -25,7 +25,7 @@ class TestObserve:
         )
 
         with patch('rich.print') as rp:
-            await handler.astart(client)
+            await handler.start(client)
             client.bilibili_client.get_info_by_room.assert_awaited_once_with(room_id)
             rp.assert_called_once()
             call_args = rp.call_args

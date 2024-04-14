@@ -144,7 +144,7 @@ async def test_wsweb():
 
                 patch_sleep.side_effect = sleep
 
-                client.start()
+                await client.start()
 
                 def pre_check_send_bytes(await_args, operation) -> bytes:
                     assert await_args.kwargs == {}
@@ -207,7 +207,7 @@ async def test_wsweb():
                     await original_sleep(0)
                     await original_sleep(0)
                     await original_sleep(0)
-                    client.stop()
+                    await client.stop()
 
                 stopper_task = asyncio.create_task(stopper())
                 with pytest.raises(asyncio.CancelledError):
@@ -310,7 +310,7 @@ async def test_auth_error_reconnect():
 
                 patch_sleep.side_effect = sleep
 
-                client.start()
+                await client.start()
 
                 await checkpoint1
                 await checkpoint2
@@ -322,8 +322,7 @@ async def test_auth_error_reconnect():
                 assert client.user_ident == f'u={self_uid}|r={room_id}'
                 assert bilibili_client.get_danmaku_server.await_count == 2
 
-                with pytest.raises(asyncio.CancelledError):
-                    await client.stop_and_close()
+                await client.stop_and_close()
 
     except asyncio.TimeoutError as e:
         expected = []

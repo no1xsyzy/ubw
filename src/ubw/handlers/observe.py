@@ -10,9 +10,9 @@ class Observer(BaseHandler):
     async def _get_room_info(self, bclient) -> models.RoomInfo:
         return (await bclient.get_info_by_room(self.room_id)).room_info
 
-    async def astart(self, client):
+    async def start(self, client):
         now = datetime.now()
-        room_id = client.room_id
+        room_id = self.room_id
         room_info = await self._get_room_info(client.bilibili_client)
         title = room_info.title
         parent_area_name = room_info.parent_area_name

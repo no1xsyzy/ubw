@@ -12,6 +12,7 @@ import rich
 import sentry_sdk
 from pydantic import ValidationError, BaseModel, TypeAdapter
 from rich.markup import escape
+from typing_extensions import deprecated
 
 from .. import models
 from ..clients import LiveClientABC
@@ -46,11 +47,15 @@ class BaseHandler(BaseModel):
     cls: str
     ignored_cmd: list[str] = []
 
-    def start(self, client: LiveClientABC):
+    async def start(self, client: LiveClientABC):
         pass
 
-    async def astart(self, client: LiveClientABC):
+    async def stop(self):
         pass
+
+    @deprecated("astart is deprecated, start is now awaitable")
+    async def astart(self, client: LiveClientABC):
+        await self.start(client)
 
     if DEBUGGING_TOO_LONG:
         async def handle(self, client: LiveClientABC, command: dict):
@@ -226,9 +231,19 @@ class QueuedProcessorMixin(BaseHandler):
     def _queue(self) -> asyncio.Queue[tuple[LiveClientABC, dict]]:
         return asyncio.Queue()
 
-    def start(self, client):
+    async def start(self, client):
         self._process_task = asyncio.create_task(self.t_process())
-        super().start(client)
+        await super().start(client)
+
+    async def stop(self):
+        task = self._process_task
+        self._process_task = None
+        task.cancel('stop')
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+        await super().stop()
 
     async def handle(self, client: LiveClientABC, command: dict):
         await self._queue.put((client, command))

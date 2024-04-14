@@ -43,9 +43,19 @@ class SaverHandler(BaseHandler):
     _wait_sharding: asyncio.Future | None = None
     _sharder_task: asyncio.Task | None = None
 
-    def start(self, client):
+    async def start(self, client):
         self._sharder_task = asyncio.create_task(self.t_sharder())
-        super().start(client)
+        await super().start(client)
+
+    async def stop(self):
+        task = self._sharder_task
+        self._sharder_task = None
+        task.cancel('stop')
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+        await super().stop()
 
     @cached_property
     def shard_start(self):

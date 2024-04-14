@@ -159,7 +159,7 @@ class DanmakuPHandler(BaseHandler):
                 msg = msg.replace(emot, "\ue000")
         return len(msg.replace("\ue000", "")) / len(msg)
 
-    async def astart(self, client):
+    async def start(self, client):
         if self.owned_ui and self.ui is not None:
             await self.ui.start()
 

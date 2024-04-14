@@ -18,7 +18,7 @@ class BaseApp(BaseModel, abc.ABC):
     cls: str
     _task: asyncio.Task | None = None
 
-    def start(self):
+    async def start(self):
         if self._task is not None:
             return warnings.warn("This app is already running")
         self._task = asyncio.create_task(self._run())
@@ -33,13 +33,16 @@ class BaseApp(BaseModel, abc.ABC):
         logger.debug('app=%s joining', self)
         await asyncio.shield(self._task)
 
-    def stop(self):
+    async def stop(self):
         task = self._task
+        self._task = None
         if task is None:
             return warnings.warn('This app is stopped, cannot stop() again')
         if task.cancel('stop'):
-            self._task = None
-            return task
+            try:
+                await task
+            except asyncio.CancelledError:
+                return
 
     @abc.abstractmethod
     async def close(self):
@@ -47,9 +50,7 @@ class BaseApp(BaseModel, abc.ABC):
 
     async def stop_and_close(self):
         try:
-            task = self.stop()
-            if task is not None:
-                await task
+            await self.stop()
         finally:
             await self.close()
 
