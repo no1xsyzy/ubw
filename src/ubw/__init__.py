@@ -229,8 +229,13 @@ async def run(cc: list[str]):
 
 @app.command('app_show')
 @sync
-async def app_show(app_name: str):
-    application = AppTypeAdapter.validate_python(main.config['apps'].get(app_name))
+async def app_show(
+        app_name: str,
+        app_override: Annotated[list[str], typer.Option('--app-override', '-X')] = (),
+):
+    appconf = main.config['apps'].get(app_name)
+    appconf = patch_config(appconf, {}, toml_patch=app_override)
+    application = AppTypeAdapter.validate_python(appconf)
     from rich.pretty import pprint
     pprint(application)
     return application
@@ -238,8 +243,13 @@ async def app_show(app_name: str):
 
 @app.command('app_run')
 @sync
-async def app_run(app_name: str):
-    application = AppTypeAdapter.validate_python(main.config['apps'].get(app_name))
+async def app_run(
+        app_name: str,
+        app_override: Annotated[list[str], typer.Option('--app-override', '-X')] = (),
+):
+    appconf = main.config['apps'].get(app_name)
+    appconf = patch_config(appconf, {}, toml_patch=app_override)
+    application = AppTypeAdapter.validate_python(appconf)
     try:
         await application.start()
         await application.join()
