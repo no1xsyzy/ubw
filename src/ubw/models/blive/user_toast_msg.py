@@ -33,6 +33,9 @@ class UserToastMsgData(BaseModel):
     is_group: int = 0
     room_group_effect_id: int = 1337
 
+    room_gift_effect_id: int = 0
+    source: int = 0
+
 
 class UserToastMsgCommand(CommandModel):
     cmd: Literal['USER_TOAST_MSG']
