@@ -90,6 +90,7 @@ class PkBattleStartData(BaseModel):
     pk_votes_type: int
     star_light_msg: str
     battle_sub_type: int = 0
+    toast: str = ''
 
 
 class PkBattleStartCommand(CommandModel):
