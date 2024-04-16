@@ -1,5 +1,4 @@
 import functools
-import math
 import re
 from datetime import timezone, timedelta
 from functools import cached_property
@@ -44,40 +43,6 @@ KAOMOJIS = [
     "( ◡‿◡)",
     "( *・ω・)✄",
 ]
-
-
-class TokenEntropy:
-    def __init__(self, dispersion=0.9, disappear=0.01):
-        self.dispersion = dispersion
-        self.disappear = disappear
-        self.generation = 0
-        self.cgs: dict[str, tuple[float, int]] = {}
-        self.total = 0
-
-    def get_current(self, token: str) -> float:
-        if token not in self.cgs:
-            return 0
-        c, g = self.cgs[token]
-        c = c * (self.dispersion ** (self.generation - g))
-        if c < self.disappear:
-            del self.cgs[token]
-            self.total -= c
-            return 0
-        return c
-
-    def calculate_and_add_tokens(self, tokens: list[str]):
-        self.generation += 1
-        self.total = self.total * self.dispersion + len(tokens)
-        entropy = 0
-        for token in tokens:
-            c = self.get_current(token)
-            c += 1.
-            entropy += -math.log2(c / self.total)
-            self.cgs[token] = c, self.generation
-        return entropy
-
-    def cleanup(self):
-        pass
 
 
 def colorseesee(palette):
@@ -133,10 +98,6 @@ class DanmakuPHandler(BaseHandler):
         return re.compile('|'.join(re.escape(kaomoji) for kaomoji in self.kaomojis))
 
     @cached_property
-    def entropy(self):
-        return TokenEntropy()
-
-    @cached_property
     def tokenizer(self):
         import jieba
         tok = jieba.Tokenizer()
@@ -170,30 +131,6 @@ class DanmakuPHandler(BaseHandler):
         room_id = client.room_id
         face = message.info.mode_info.user.base.face
         trivial_rate = self.trivial_rate(message.info)
-
-        # ==== testing: entropy ====
-        if 'entropy' in self.test_flags:
-            tokens = []
-            if message.info.mode_info.extra.emots is not None:
-                self.kaomojis.update(message.info.mode_info.extra.emots.keys())
-            for s in re.split('(' + '|'.join(re.escape(kaomoji) for kaomoji in self.kaomojis) + ')', msg):
-                if s == "":
-                    pass
-                elif s in self.kaomojis:
-                    tokens.append(s)
-                else:
-                    tokens.extend(self.tokenizer.lcut(s))
-            entropy = self.entropy.calculate_and_add_tokens(tokens)
-            await self.ui.add_record(Record(segments=[
-                ColorSeeSee(text=f"[{room_id}] "),
-                User(name=uname, uid=uid, face=face),
-                PlainText(text=f": "),
-                PlainText(text=f"{tokens}"),
-                PlainText(
-                    text=f" ({entropy=:.3f}, {entropy/len(tokens)=:.3f}, {trivial_rate=:.3f})"),
-            ], time=message.ct))
-            return
-        # ==== testing: entropy ====
 
         if trivial_rate < self.ignore_rate:
             pass
