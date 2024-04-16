@@ -70,7 +70,8 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
     async def close(self):
         if self.is_running:
             return warnings.warn(f'room={self.room_id} is calling close(), but client is running')
-        await self._session.close()
+        if self._session is not None:
+            await self._session.close()
         if self.bilibili_client_owner:
             await self.bilibili_client.close()
 
