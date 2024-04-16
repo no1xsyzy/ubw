@@ -130,13 +130,13 @@ class DanmakuInfo(BaseModel):
     uid_crc32: str
     msg_type: int
     bubble_type: int
-    bubble_color: str
+    bubble_color: str | None = None
     dm_type: int
     emoticon_options: DanmakuInfoEmoticonOptions
     voice_config: dict
     mode_info: DanmakuInfoModeInfo
-    aggre: DanmakuAggre
-    bubble_id: int
+    aggre: DanmakuAggre | None = None
+    bubble_id: int | None = None
 
     msg: str
 
