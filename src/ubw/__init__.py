@@ -200,7 +200,9 @@ async def living_status(
             acc = await c.get_account_info(m)
             rooms.add(acc.live_room_id)
 
-        await listen_to_all(list(rooms), LivingStatusHandler(), b_client=c)
+        await listen_to_all(list(rooms),
+                            LivingStatusHandler(bilibili_client=c, bilibili_client_owner=False),
+                            b_client=c)
 
 
 @app.command('run')

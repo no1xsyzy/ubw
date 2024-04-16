@@ -73,6 +73,7 @@ class SilentRoomInfo(BaseModel):
 class InfoByRoom(BaseModel):
     room_info: RoomInfo
     silent_room_info: SilentRoomInfo
+    anchor_info: AnchorInfo
     ct: datetime = Field(default_factory=lambda: datetime.now(timezone(timedelta(seconds=8 * 3600))))
 
 

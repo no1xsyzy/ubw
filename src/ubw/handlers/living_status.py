@@ -1,63 +1,134 @@
-from datetime import datetime
-from functools import cached_property
+import asyncio
+import random
+from datetime import datetime, timedelta
+
+from pydantic import Field
+from typing_extensions import TypedDict
 
 from ._base import *
+from ..clients import BilibiliClient
+from ..ui import *
+
+
+class Info(TypedDict):
+    up_id: int
+    up_name: str
+    title: str
+    parent_area_name: str
+    area_name: str
+    living: bool
+
+    update_time: datetime
 
 
 class LivingStatusHandler(BaseHandler):
+    # id
     cls: Literal['living_status'] = 'living_status'
+
+    # high config
     interactive: bool = False
 
-    @cached_property
-    def _info_by_room_cache(self):
-        return {}
+    # low config
+    active_refresh_interval: timedelta = timedelta(seconds=60)
 
-    async def info_by_room(self, room_id, bclient):
-        if room_id not in self._info_by_room_cache:
-            info: models.InfoByRoom = await bclient.get_info_by_room(room_id)
-            title = info.room_info.title
-            parent_area_name = info.room_info.parent_area_name
-            area_name = info.room_info.area_name
-            living = info.room_info.live_start_time is not None
-            self._info_by_room_cache[room_id] = [title, parent_area_name, area_name, living]
-        return self._info_by_room_cache[room_id]
+    # DI
+    bilibili_client: BilibiliClient
+    bilibili_client_owner: bool = True
+    ui: UI = Richy()
+    owned_ui: bool = True
+
+    # states
+    info_cache: dict[int, Info] = Field(default_factory=dict)
+    ui_keys: dict[int, str] = Field(default_factory=dict)
+
+    # runtime
+    _bilibili_client_started: bool = False
+    _ui_started: bool = False
+    _refresh_task: asyncio.Task | None = None
+
+    async def ensure_info(self, room_id, force_update=False):
+        if not force_update and room_id in self.info_cache:
+            return False
+        info: models.InfoByRoom = await self.bilibili_client.get_info_by_room(room_id)
+        up_id = info.room_info.uid
+        up_name = info.anchor_info.base_info.uname
+        title = info.room_info.title
+        parent_area_name = info.room_info.parent_area_name
+        area_name = info.room_info.area_name
+        living = info.room_info.live_start_time is not None
+        if room_id not in self.info_cache:
+            updated = True
+        else:
+            cached = self.info_cache[room_id]
+            if (title != cached['title'] or parent_area_name != cached['parent_area_name'] or
+                    area_name != cached['area_name'] or living != cached['living']):
+                updated = True
+            else:
+                updated = False
+        self.info_cache[room_id] = Info(
+            up_id=up_id, up_name=up_name,
+            title=title,
+            parent_area_name=parent_area_name, area_name=area_name,
+            living=living,
+            update_time=datetime.now(),
+        )
+        return updated
+
+    async def get_info(self, room_id, force_update=False) -> Info:
+        if room_id not in self.info_cache:
+            await self.ensure_info(room_id, force_update)
+        return self.info_cache[room_id]
 
     async def start(self, client):
-        now = datetime.now()
         room_id = client.room_id
-        title, parent_area_name, area_name, living = await self.info_by_room(room_id, client.bilibili_client)
-        rich.print(
-            rf"\[{now.strftime('%Y-%m-%d %H:%M:%S')}] "
-            rf"\[[bright_cyan]{room_id}[/]] "
-            f":ear-text:开始侦听，当前"
-            + ("[bright_green]直播中[/]" if living else "未直播") +
-            f"，标题《[rgb(255,212,50)]{escape(title)}[/]》，分区：{parent_area_name}/{area_name}"
-        )
+        if self.bilibili_client_owner and not self._bilibili_client_started:
+            await self.bilibili_client.__aenter__()
+        if self.owned_ui and not self._ui_started:
+            await self.ui.start()
+        await self.refresh_record(room_id)
+        self._refresh_task = asyncio.create_task(self.t_active_refresh())
+
+    async def refresh_record(self, room_id):
+        info = await self.get_info(room_id)
+        record = self.make_record(room_id, info)
+        if room_id in self.ui_keys:
+            await self.ui.edit_record(self.ui_keys[room_id], record=record)
+        else:
+            self.ui_keys[room_id] = await self.ui.add_record(record, sticky=True)
+
+    @staticmethod
+    def make_record(room_id: int, info: Info):
+        return Record(time=info['update_time'], segments=[
+            PlainText(text=f"[{room_id}] "),
+            PlainText(text=f"\N{Ear}开始侦听，当前"),
+            (PlainText(text=f"\N{Black Right-Pointing Triangle With Double Vertical Bar}\N{VS16}直播中")
+             if info['living'] else
+             PlainText(text="\N{Black Square For Stop}\N{VS16}未直播")),
+            PlainText(text="，标题"),
+            RoomTitle(title=info['title'], room_id=room_id),
+            PlainText(text=f"，分区：{info['parent_area_name']}/{info['area_name']}")
+        ])
+
+    async def t_active_refresh(self):
+        while True:
+            await asyncio.sleep(self.active_refresh_interval.total_seconds())
+            to_refresh = random.choice(list(self.info_cache.keys()))
+            await self.ensure_info(to_refresh)
 
     async def on_room_change(self, client, message):
         room_id = client.room_id
         title = message.data.title
         parent_area_name = message.data.parent_area_name
         area_name = message.data.area_name
-
-        self._info_by_room_cache[room_id][0:3] = title, parent_area_name, area_name
-
-        rich.print(
-            rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
-            rf"\[[bright_cyan]{room_id}[/]] "
-            f"直播间信息变更《[rgb(255,212,50)]{escape(title)}[/]》，分区：{parent_area_name}/{area_name}")
+        self.info_cache[room_id].update(title=title, parent_area_name=parent_area_name, area_name=area_name)
+        await self.refresh_record(room_id)
 
     async def on_live(self, client, message):
         room_id = client.room_id
-        self._info_by_room_cache[room_id][3] = True
-        rich.print(
-            rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
-            rf"\[[bright_cyan]{room_id}[/]] "
-            ":black_right__pointing_triangle_with_double_vertical_bar-text:直播开始")
+        self.info_cache[room_id]['living'] = True
+        await self.refresh_record(room_id)
 
     async def on_preparing(self, client, message):
         room_id = client.room_id
-        self._info_by_room_cache[room_id][3] = False
-        rich.print(
-            rf"\[{message.ct.strftime('%Y-%m-%d %H:%M:%S')}] "
-            rf"\[[bright_cyan]{room_id}[/]] :black_square_for_stop-text:直播结束")
+        self.info_cache[room_id]['living'] = False
+        await self.refresh_record(room_id)
