@@ -1,119 +1,124 @@
-import re
-from unittest.mock import patch
+import asyncio
+from datetime import datetime
 
 import pytest
 
-from ubw.clients import MockClient
-from ubw.handlers.observe import Observer
-from ubw.models import InfoByRoom, RoomChangeCommand, PreparingCommand, LiveCommand
+from ubw.clients import BilibiliUnauthorizedClient
+from ubw.handlers.observe import ObserverHandler
+from ubw.models import InfoByRoom, RoomChangeCommand, LiveCommand, PreparingCommand
+from ubw.testing.asyncstory import AsyncStoryline, AsyncMock
+from ubw.testing.generate import generate_type, generate_random_string
+from ubw.ui import RoomTitle, Richy
 
 
-class TestObserve:
-    @pytest.mark.asyncio
-    async def test_observer_handler(self):
-        room_id = 123
+class ASMockBC(AsyncMock):
+    def make_session(self):
+        return self.session
 
-        handler = Observer(room_id=room_id)
-        # bclient = MockBilibiliClient()
-        client = MockClient(room_id=room_id, bilibili_client={})
-        # client.bilibili_c/lient = bclient
-        client.bilibili_client.get_info_by_room.return_value = InfoByRoom(
-            room_info={'room_id': 1, 'short_id': 1, 'uid': 1, 'live_start_time': 0, 'title': "title", 'cover': "cover",
-                       'area_id': 1, 'area_name': "area_name", 'parent_area_id': 1,
-                       'parent_area_name': "parent_area_name", 'keyframe': "keyframe"},
-            silent_room_info={'type': "type", 'level': 1, 'second': 1, 'expire_time': 1},
-        )
+    @property
+    def auth_type(self):
+        return 'no'
 
-        with patch('rich.print') as rp:
-            await handler.start(client)
-            client.bilibili_client.get_info_by_room.assert_awaited_once_with(room_id)
-            rp.assert_called_once()
-            call_args = rp.call_args
-            assert call_args.kwargs == {}
-            assert len(call_args.args) == 1
-            assert re.match(
-                r".+未直播.+分区：parent_area_name/area_name",
-                call_args.args[0]
-            )
+    @property
+    def __class__(self):
+        return BilibiliUnauthorizedClient
 
-    @pytest.mark.asyncio
-    async def test_on_room_change(self):
-        room_id = 123
 
-        handler = Observer(room_id=room_id)
-        client = MockClient(room_id=room_id)
-        message = RoomChangeCommand(
-            cmd='ROOM_CHANGE',
-            data={
-                'title': "title",
-                'area_id': 1,
-                'parent_area_id': 1,
-                'area_name': "area_name",
-                'parent_area_name': "parent_area_name",
-                'live_key': "live_key",
-                'sub_session_key': "sub_session_key",
-            }
-        )
+class MockUI(AsyncMock):
+    @property
+    def uic(self):
+        return 'richy'
 
-        with patch('rich.print') as rp:
-            await handler.on_room_change(client, message)
-            rp.assert_called_once()
-            call_args = rp.call_args
-            assert call_args.kwargs == {}
-            assert len(call_args.args) == 1
-            assert re.match(
-                r".+直播间信息变更.+title.+分区：parent_area_name/area_name",
-                call_args.args[0]
-            )
+    @property
+    def __class__(self):
+        return Richy
 
-    @pytest.mark.asyncio
-    async def test_on_live(self):
-        room_id = 123
 
-        handler = Observer(room_id=room_id)
-        client = MockClient(room_id=room_id)
-        message = LiveCommand(
-            cmd='LIVE',
-            live_key="live_key",
-            voice_background="voice_background",
-            sub_session_key="sub_session_key",
-            live_platform="live_platform",
-            live_model=0,
-            live_time=None,
-            roomid=room_id,
-        )
+@pytest.mark.asyncio
+async def test_observer_handler():
+    async with asyncio.timeout(5):
+        with AsyncStoryline() as liv:
+            room_id = 123
+            title = generate_random_string('title')
+            title2 = generate_random_string('title2')
+            parent_area_name = generate_random_string('parent_area_name')
+            area_name = generate_random_string('area_name')
 
-        with patch('rich.print') as rp:
-            await handler.on_live(client, message)
+            ui = liv.add_async_mock(mock_class=MockUI)
+            client = liv.add_async_mock()
+            client.bilibili_client = bilibili_client = liv.add_async_mock(mock_class=ASMockBC)
+            handler = ObserverHandler(room_id=room_id, ui=ui)
 
-            rp.assert_called_once()
-            call_args = rp.call_args
-            assert call_args.kwargs == {}
-            assert len(call_args.args) == 1
-            assert re.match(
-                r".+直播开始",
-                call_args.args[0]
-            )
+            # start
+            t = asyncio.create_task(handler.start(client))
+            c = await liv.get_call(target=ui.start, f='async')
+            c.assert_match_call()
+            c.set_result(None)
+            c = await liv.get_call(target=bilibili_client.get_info_by_room, f='async')
+            c.assert_match_call(123)
+            c.set_result(generate_type(InfoByRoom, {
+                'room_info': {
+                    'title': title,
+                    'parent_area_name': parent_area_name,
+                    'area_name': area_name,
+                    'live_start_time': None,
+                }
+            }))
+            c = await liv.get_call(target=ui.add_record, f='async')
+            assert c.args[0].segments[0].text == f"[{room_id}] "
+            assert "未直播" in c.args[0].segments[2].text
+            assert c.args[0].segments[4] == RoomTitle(title=title, room_id=room_id)
+            assert c.args[0].segments[5].text == f"，分区：{parent_area_name}/{area_name}"
+            assert c.kwargs == {'sticky': True}
+            c.set_result('a')
+            await t
 
-    @pytest.mark.asyncio
-    async def test_on_preparing(self):
-        room_id = 123
+            # room change
+            t = asyncio.create_task(handler.on_room_change(client, generate_type(RoomChangeCommand, {
+                'data': {
+                    'title': title2,
+                    'parent_area_name': parent_area_name,
+                    'area_name': area_name,
+                },
+                'ct': datetime.now(),
+            })))
+            c = await liv.get_call(target=ui.add_record, f='async')
+            assert c.args[0].segments[0].text == "直播间信息变更"
+            assert c.args[0].segments[1].title == title2
+            c.set_result(None)
+            c = await liv.get_call(target=ui.edit_record, f='async')
+            c.assert_match_call('a', sticky=False)
+            c.set_result(None)
+            c = await liv.get_call(target=ui.add_record, f='async')
+            assert c.args[0].segments[4] == RoomTitle(title=title2, room_id=room_id)
+            assert c.kwargs == {'sticky': True}
+            c.set_result('b')
+            await t
 
-        handler = Observer(room_id=room_id)
-        client = MockClient(room_id=room_id)
-        message = PreparingCommand(
-            cmd='PREPARING',
-            roomid=123,
-            round=False,
-        )
+            # live
+            t = asyncio.create_task(handler.on_live(client, generate_type(LiveCommand)))
+            c = await liv.get_call(target=ui.add_record, f='async')
+            assert "直播开始" in c.args[0].segments[0].text
+            c.set_result(None)
+            c = await liv.get_call(target=ui.edit_record, f='async')
+            c.assert_match_call('b', sticky=False)
+            c.set_result(None)
+            c = await liv.get_call(target=ui.add_record, f='async')
+            assert "直播中" in c.args[0].segments[2].text
+            assert c.kwargs == {'sticky': True}
+            c.set_result('c')
+            await t
 
-        with patch('rich.print') as rp:
-            await handler.on_preparing(client, message)
-            rp.assert_called_once()
-            call_args = rp.call_args
-            assert call_args.kwargs == {}
-            assert len(call_args.args) == 1
-            assert re.match(
-                r".+直播结束",
-                call_args.args[0]
-            )
+            # preparing
+            t = asyncio.create_task(handler.on_preparing(client, generate_type(PreparingCommand)))
+            c = await liv.get_call(target=ui.add_record, f='async')
+            assert "直播结束" in c.args[0].segments[0].text
+            c.set_result(None)
+            c = await liv.get_call(target=ui.edit_record, f='async')
+            c.assert_match_call('c', sticky=False)
+            c.set_result(None)
+            c = await liv.get_call(target=ui.add_record, f='async')
+            assert "未直播" in c.args[0].segments[2].text
+            assert c.kwargs == {'sticky': True}
+            c.set_result('d')
+            await t
