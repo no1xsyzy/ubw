@@ -30,7 +30,6 @@ from .guard_achievement_room import GuardAchievementRoomCommand
 from .guard_benefit_receive import GuardBenefitReceiveCommand
 from .guard_buy import GuardBuyCommand
 from .guard_honor_thousand import GuardHonorThousandCommand
-from .heartbeat import XHeartbeatCommand
 from .hot_buy_num import HotBuyNumCommand
 from .hot_rank_settlement import HotRankSettlementCommand, HotRankSettlementV2Command
 from .hot_room_notify import HotRoomNotifyCommand
@@ -113,6 +112,7 @@ from .wealth_notify import WealthNotifyCommand
 from .widget_banner import WidgetBannerCommand
 from .widget_gift_star_process import WidgetGiftStarProcessCommand
 from .widget_wish_list import WidgetWishListCommand
+from .x import XHeartbeatCommand, XStartCommand, XStopCommand
 
 AnnotatedCommandModel = Annotated[Union[
     ActivityBannerChangeCommand, ActivityBannerChangeV2Command,
@@ -143,7 +143,6 @@ AnnotatedCommandModel = Annotated[Union[
     GuardBenefitReceiveCommand,
     GuardBuyCommand,
     GuardHonorThousandCommand,
-    XHeartbeatCommand,
     HotBuyNumCommand,
     HotRankSettlementCommand, HotRankSettlementV2Command,
     HotRoomNotifyCommand,
@@ -224,6 +223,7 @@ AnnotatedCommandModel = Annotated[Union[
     WidgetBannerCommand,
     WidgetGiftStarProcessCommand,
     WidgetWishListCommand,
+    XHeartbeatCommand, XStartCommand, XStopCommand,
 ], Field(discriminator='cmd')]
 
 __all__ = (
@@ -255,7 +255,6 @@ __all__ = (
     'GuardBenefitReceiveCommand',
     'GuardBuyCommand',
     'GuardHonorThousandCommand',
-    'XHeartbeatCommand',
     'HotBuyNumCommand',
     'HotRankSettlementCommand', 'HotRankSettlementV2Command',
     'HotRoomNotifyCommand',
@@ -335,5 +334,6 @@ __all__ = (
     'WidgetBannerCommand',
     'WidgetGiftStarProcessCommand',
     'WidgetWishListCommand',
+    'XHeartbeatCommand', 'XStartCommand', 'XStopCommand',
     'AnnotatedCommandModel', 'Summary', 'Summarizer', 'CommandModel',
 )
