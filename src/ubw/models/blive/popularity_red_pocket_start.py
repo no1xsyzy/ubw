@@ -28,8 +28,19 @@ class PopularityRedPocketStartData(BaseModel):
     total_price: int
     user_status: int
     wait_num: int
+    wait_num_v2: int = 0
+    is_mystery: bool = False
+    rp_type: int = 0
+    sender_uinfo: Uinfo | None = None
+    icon_url: str = ''
+    animation_icon_url: str = ''
 
 
 class PopularityRedPocketStartCommand(CommandModel):
     cmd: Literal['POPULARITY_RED_POCKET_START']
+    data: PopularityRedPocketStartData
+
+
+class PopularityRedPocketV2StartCommand(CommandModel):
+    cmd: Literal['POPULARITY_RED_POCKET_V2_START']
     data: PopularityRedPocketStartData

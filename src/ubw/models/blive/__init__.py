@@ -68,9 +68,12 @@ from .pk import (
 )
 from .playtogether_icon_change import PlaytogetherIconChangeCommand
 from .popular_rank_changed import PopularRankChangedCommand
-from .popularity_red_pocket_new import PopularityRedPocketNewCommand
-from .popularity_red_pocket_start import PopularityRedPocketStartCommand
-from .popularity_red_pocket_winner_list import PopularityRedPocketWinnerListCommand
+from .popularity_red_pocket_new import PopularityRedPocketNewCommand, PopularityRedPocketV2NewCommand
+from .popularity_red_pocket_start import PopularityRedPocketStartCommand, PopularityRedPocketV2StartCommand
+from .popularity_red_pocket_winner_list import (
+    PopularityRedPocketWinnerListCommand,
+    PopularityRedPocketV2WinnerListCommand,
+)
 from .preparing import PreparingCommand
 from .recommend_card import RecommendCardCommand
 from .reenter_live_room import ReenterLiveRoomCommand
@@ -179,9 +182,9 @@ AnnotatedCommandModel = Annotated[Union[
     PkBattlePunishBeginCommand,
     PlaytogetherIconChangeCommand,
     PopularRankChangedCommand,
-    PopularityRedPocketNewCommand,
-    PopularityRedPocketStartCommand,
-    PopularityRedPocketWinnerListCommand,
+    PopularityRedPocketNewCommand, PopularityRedPocketV2NewCommand,
+    PopularityRedPocketStartCommand, PopularityRedPocketV2StartCommand,
+    PopularityRedPocketWinnerListCommand, PopularityRedPocketV2WinnerListCommand,
     PreparingCommand,
     RecommendCardCommand,
     ReenterLiveRoomCommand,
@@ -291,9 +294,9 @@ __all__ = (
     'PkBattleMultipleResCommand',
     'PkBattlePunishBeginCommand',
     'PlaytogetherIconChangeCommand',
-    'PopularityRedPocketNewCommand',
-    'PopularityRedPocketStartCommand',
-    'PopularityRedPocketWinnerListCommand',
+    'PopularityRedPocketNewCommand', 'PopularityRedPocketV2NewCommand',
+    'PopularityRedPocketStartCommand', 'PopularityRedPocketV2StartCommand',
+    'PopularityRedPocketWinnerListCommand', 'PopularityRedPocketV2WinnerListCommand',
     'RecommendCardCommand',
     'ReenterLiveRoomCommand',
     'RingStatusChangeCommand', 'RingStatusChangeCommandV2',
