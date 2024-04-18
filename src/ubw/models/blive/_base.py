@@ -91,7 +91,7 @@ class Color(RootModel):
 
 def strange_dict(cls, v):
     try:
-        if not isinstance(v, dict):
+        if isinstance(v, (str, bytes, bytearray,)):
             v = json.loads(v)
         if not v:
             return {}
