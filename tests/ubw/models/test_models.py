@@ -20,8 +20,11 @@ def test_with_history():
         jsons = jsonfile.read_text('utf-8')
         idx = 0
         while idx < len(jsons):
-            json, idx = decoder.raw_decode(jsons, idx)
-            m = COMMAND_ADAPTER.validate_python(json)
+            if jsons[idx].isspace():
+                idx += 1
+                continue
+            jj, idx = decoder.raw_decode(jsons, idx)
+            m = COMMAND_ADAPTER.validate_python(jj)
             c = m.__class__
             assert models.CommandModel in c.mro() and c is not models.CommandModel
 
