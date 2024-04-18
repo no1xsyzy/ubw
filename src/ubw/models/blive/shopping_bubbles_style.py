@@ -10,7 +10,7 @@ class ShoppingBubble(BaseModel):
 
 
 class ShoppingBubblesStyleData(BaseModel):
-    bubbles_list: list[ShoppingBubble]
+    bubbles_list: list[ShoppingBubble] | None = None
     checksum: str
     cycle_time: int
     goods_count: int
