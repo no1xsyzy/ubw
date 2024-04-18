@@ -1,7 +1,9 @@
+import contextlib
 import random
 import string
 import types
 import typing
+from contextvars import ContextVar
 from datetime import datetime, timedelta
 from typing import Type, Mapping, TypeVar, TypeGuard
 
@@ -18,6 +20,7 @@ def generate_random_string(mark=None, *, length=16):
 
 _T = TypeVar('_T')
 UNSET = object()
+path = ContextVar[tuple[typing.Any, ...]]('path', default=())
 
 
 def isrootmodel(t) -> TypeGuard[Type[RootModel]]:
@@ -28,15 +31,23 @@ def ismodel(t) -> TypeGuard[Type[BaseModel]]:
     return issubclass(t, BaseModel)
 
 
+@contextlib.contextmanager
+def sub_path(p):
+    pp = path.get()
+    p_: tuple[typing.Any, ...] = (*pp, p)
+    tok = path.set(p_)
+    try:
+        yield
+    finally:
+        path.reset(tok)
+
+
 def generate_type(
         type_: Type[_T],
         constraint: Mapping[str, typing.Any] = None,
 ) -> _T:
-    # print(f'{type_=} {constraint=}')
     if constraint is None:
         constraint = {}
-
-    path = constraint.setdefault('@@path', '')
 
     try:
         if '$value' in constraint:
@@ -47,22 +58,48 @@ def generate_type(
         if typing.get_origin(type_) in [typing.Union, types.UnionType]:
             sub_types = list(typing.get_args(type_))
             random.shuffle(sub_types)
-            err = None
-            for t in sub_types:  # maybe constraint makes some subtypes unavailable
-                try:
-                    return generate_type(t, constraint)
-                except Exception as e:
-                    err = e
-            raise err
+            t, *rt = sub_types
+            try:
+                return generate_type(t, constraint)
+            except Exception:
+                # maybe constraint makes some subtypes unavailable
+                # thus, all others will be tried in series.
+                # call others in except block so all exceptions are chained
+                return generate_type(typing.Union[*rt], constraint)
 
         if typing.get_origin(type_) is tuple:
             results = []
             for idx, t in enumerate(typing.get_args(type_)):
-                results.append(generate_type(t, {**constraint, '@@path': path + '.' + str(idx)}))
+                with sub_path(str(idx)):
+                    results.append(generate_type(t, constraint))
             return tuple(results)
 
         if typing.get_origin(type_) is typing.Literal:
             return random.choice(typing.get_args(type_))
+
+        if typing.get_origin(type_) is dict:
+            key_t, val_t = typing.get_args(type_)
+            constraint = {**constraint}
+            min_len = constraint.pop('$min_len', 1)
+            max_len = constraint.pop('$max_len', 3)
+            key_c = constraint.pop('$key', {})
+            val_c = constraint.pop('$val', {})
+            keys = [*constraint.keys()]
+            length = random.randint(min_len, max_len)
+            result = {}
+            for _ in range(length):
+                if keys:
+                    key = keys.pop(random.randrange(len(keys)))
+                else:
+                    with sub_path('$key'):
+                        key = generate_type(key_t, key_c)
+                with sub_path(key):
+                    val = generate_type(val_t, {**val_c, **constraint.get(key, {})})
+                result[key] = val
+            return result
+
+        if typing.get_origin(type_) is not None:
+            raise TypeError(f"{type_!r} is a parameterized generic but generate_type() don't know how to create one")
 
         if type_ is int:
             return random.randrange(constraint.get('$min', 0),
@@ -84,9 +121,11 @@ def generate_type(
             return random.random() * 10000
 
         if type_ is dict:
-            return {}
+            return constraint
 
         if type_ is types.NoneType or type_ is None:
+            if constraint:
+                raise ValueError('required None but have constraint')
             return None
 
         if isrootmodel(type_):
@@ -100,12 +139,11 @@ def generate_type(
                 # constraint
                 if field in constraint:
                     sub_constraint = constraint[field]
-                    if not isinstance(sub_constraint, Mapping):
-                        result[field] = generate_type(sub_type,
-                                                      {'$value': sub_constraint, '@@path': path + '.' + field})
-                    else:
-                        result[field] = generate_type(sub_type,
-                                                      {**sub_constraint, '@@path': path + '.' + field})
+                    with sub_path(field):
+                        if not isinstance(sub_constraint, Mapping):
+                            result[field] = generate_type(sub_type, {'$value': sub_constraint})
+                        else:
+                            result[field] = generate_type(sub_type, sub_constraint)
                 # default by model definition
                 elif info.default is not PydanticUndefined:
                     result[field] = info.default
@@ -113,10 +151,9 @@ def generate_type(
                     result[field] = info.default_factory()
                 # generates
                 else:
-                    result[field] = generate_type(sub_type,
-                                                  {**constraint.get(field, {}), '@@path': path + '.' + field})
+                    with sub_path(field):
+                        result[field] = generate_type(sub_type, constraint.get(field, {}))
             try:
-                # print(f"integrating {path}")
                 return type_.model_validate(result)
             except ValidationError:  # noqa, only for debug
                 raise ValueError(f"error when generating model, generated: {result}")
@@ -124,6 +161,6 @@ def generate_type(
         raise NotImplementedError
     except Exception:  # noqa, only for debug
         raise TypeError(
-            f"{path} requires a `{type_!r}` "
+            f"{path.get()} requires a `{type_!r}` "
             "but generate_type() don't know how to create one"
         )
