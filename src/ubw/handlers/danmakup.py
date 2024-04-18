@@ -1,4 +1,3 @@
-import functools
 import re
 from datetime import timezone, timedelta
 from functools import cached_property
@@ -45,22 +44,6 @@ KAOMOJIS = [
 ]
 
 
-def colorseesee(palette):
-    @functools.lru_cache()
-    def color_pair(text: str):
-        return palette[hash(text) % len(palette)], palette[(hash(text) + len(text)) % len(palette)]
-
-    def colored(text: str, color_override: str | int | None = None):
-        color_def = str(color_override) if color_override is not None else text
-        fg, bg = color_pair(color_def)
-        return f"[{fg}][on {bg}]{escape(text[:1])}[/]{escape(text[1:])}[/]"
-
-    return colored
-
-
-css = colorseesee(('red', 'green', 'yellow', 'blue', 'magenta', 'cyan'))
-
-
 class DanmakuPHandler(BaseHandler):
     cls: Literal['danmakup'] = 'danmakup'
     ignore_danmaku: re.Pattern | None = None
@@ -75,6 +58,8 @@ class DanmakuPHandler(BaseHandler):
 
     ui: UI = Richy()
     owned_ui: bool = True
+
+    _ui_started: bool = False
 
     @model_validator(mode='after')
     def ignore_less_than_dim(self):
@@ -97,15 +82,6 @@ class DanmakuPHandler(BaseHandler):
     def kaomoji_regex(self):
         return re.compile('|'.join(re.escape(kaomoji) for kaomoji in self.kaomojis))
 
-    @cached_property
-    def tokenizer(self):
-        import jieba
-        tok = jieba.Tokenizer()
-        for kmj in KAOMOJIS:
-            tok.add_word(kmj, tag='e')
-            tok.suggest_freq(kmj, True)
-        return tok
-
     def trivial_rate(self, info: models.blive.danmu_msg.DanmakuInfo) -> float:
         if self.ignore_danmaku is not None and self.ignore_danmaku.match(info.msg):
             return -1
@@ -121,7 +97,7 @@ class DanmakuPHandler(BaseHandler):
         return len(msg.replace("\ue000", "")) / len(msg)
 
     async def start(self, client):
-        if self.owned_ui and self.ui is not None:
+        if self.owned_ui and self.ui is not None and not self._ui_started:
             await self.ui.start()
 
     async def on_danmu_msg(self, client, message: models.DanmakuCommand):
@@ -129,7 +105,10 @@ class DanmakuPHandler(BaseHandler):
         msg = message.info.msg
         uid = message.info.uid
         room_id = client.room_id
-        face = message.info.mode_info.user.base.face
+        if message.info.mode_info.user is not None:
+            face = message.info.mode_info.user.base.face
+        else:
+            face = ''
         trivial_rate = self.trivial_rate(message.info)
 
         if trivial_rate < self.ignore_rate:
@@ -140,8 +119,7 @@ class DanmakuPHandler(BaseHandler):
                 User(name=uname, uid=uid, face=face),
                 PlainText(text=f": "),
                 PlainText(text=msg),
-            ], time=message.ct))
-
+            ], time=message.ct, importance=0))
         else:
             await self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
@@ -189,7 +167,8 @@ class DanmakuPHandler(BaseHandler):
         await self.ui.add_record(Record(segments=[
             ColorSeeSee(text=f"[{room_id}] "),
             User(name=uname, uid=uid, face=message.data.user_info.face),
-            PlainText(text=f"[¥{price}]: {msg}")
+            PlainText(text=f"{msg}"),
+            Currency(price=price),
         ], time=message.ct))
 
     async def on_room_block_msg(self, client, message):
@@ -233,10 +212,11 @@ class DanmakuPHandler(BaseHandler):
     async def on_send_gift(self, client, model: models.GiftCommand):
         room_id = client.room_id
         uid = model.data.uid
-        money = model.data.price * model.data.num / 1000
+        isgold = model.data.coin_type == 'gold'
+        gold = model.data.price * model.data.num / 1000 if isgold else 0
         uname = model.data.uname
 
-        if money < self.gift_threshold:
+        if gold < self.gift_threshold:
             return
 
         segments = [
@@ -244,6 +224,6 @@ class DanmakuPHandler(BaseHandler):
             User(name=uname, uid=uid, face=model.data.face),
             PlainText(text=f"{model.data.action}了 {model.data.giftName}x{model.data.num}"),
         ]
-        if model.data.coin_type == 'gold':
-            segments.append(Currency(price=money))
+        if isgold:
+            segments.append(Currency(price=gold))
         await self.ui.add_record(Record(segments=segments, time=model.ct))
