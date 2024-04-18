@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 import pkgutil
 import warnings
 from typing import NamedTuple, Callable
@@ -350,6 +351,13 @@ class AsyncStoryline:
 
         self._waiting_list.append(waiting)
         return await f
+
+    @contextlib.asynccontextmanager
+    async def in_task(self, coro, delay=1):
+        ct = asyncio.create_task(coro)
+        async with asyncio.timeout(delay):
+            yield ct
+        await ct
 
 
 def test_storyline():
