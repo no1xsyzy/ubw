@@ -72,8 +72,13 @@ class Picture(Segment):
 
 
 class Record(BaseModel):
+    """
+    :var importance: determines visibility.
+        generally trivial=0 normal=10 notice=20 essential=30 fatal=40
+    """
     segments: list[Segment]
     time: datetime = Field(default_factory=datetime.now)
+    importance: int = 10
 
 
 class StreamUI(BaseModel, abc.ABC):
