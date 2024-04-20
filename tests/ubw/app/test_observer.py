@@ -6,7 +6,7 @@ import pytest
 
 from ubw import models
 from ubw.app import ObserverApp
-from ubw.clients import BilibiliUnauthorizedClient
+from ubw.clients import BilibiliApiError, BilibiliUnauthorizedClient
 from ubw.testing.asyncstory import AsyncStoryline, AsyncMock, returns
 from ubw.testing.generate import generate_type
 from ubw.ui import Richy
@@ -65,6 +65,7 @@ async def test_observer():
 
             handler_class = liv.add_sync_patch('ubw.app.observer.ObserverHandler')(returns(handler))
             client_class = liv.add_sync_patch('ubw.app.observer.WSWebCookieLiveClient')(returns(client))
+            logger_exception = liv.add_sync_patch('ubw.app.observer.logger.exception')(returns(client))
 
             ass = liv.add_async_patch('asyncio.sleep')
 
@@ -145,6 +146,24 @@ async def test_observer():
                 DynamicItem(id_str='4', pub_date=datetime.now() - timedelta(hours=1),
                             text='TEXT=4', jump_url='url://4', is_topped=False),
             ]))
+
+            c = await liv.get_call(target=ui.add_record, f='async')
+            assert c.args[0].segments[0].text == "发布动态 "
+            assert c.args[0].segments[1].text == "TEXT=4"
+            assert c.args[0].segments[2].href == "url://4"
+            c.set_result(None)
+
+            c = await liv.get_call(target=ass, f='async')
+            c.assert_match_call(1)
+            c.set_result(None)
+
+            # if api raises error, log and continue
+            e = BilibiliApiError("error")
+            c = await liv.get_call(target=bilibili_client.get_user_dynamic, f='async')
+            c.assert_match_call(uid)
+            c.set_exception(e)
+            c = await liv.get_call(target=logger_exception, f='sync')
+            c.assert_match_call("exception in _fetch_print_update", exc_info=e)
 
             t = asyncio.create_task(app.stop())
 

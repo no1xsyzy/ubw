@@ -2,7 +2,7 @@ from typing import Annotated
 
 from pydantic import Field
 
-from ._b_base import BilibiliClientABC
+from ._b_base import BilibiliClientABC, BilibiliApiError
 from ._livebase import LiveClientABC, HandlerInterface
 from .bilibili import BilibiliUnauthorizedClient, BilibiliCookieClient, BilibiliClient
 from .openlive import OpenLiveClient
@@ -18,4 +18,5 @@ __all__ = (
     'LiveClientABC', 'HandlerInterface',
     'OpenLiveClient', 'WSWebCookieLiveClient', 'MockClient',
     'LiveClient',
+    'BilibiliApiError',
 )
