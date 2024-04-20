@@ -1,7 +1,8 @@
 import abc
 import logging
 import re
-from typing import Literal
+from contextvars import ContextVar
+from typing import Literal, Type, TypeVar
 
 import aiohttp
 from pydantic import BaseModel
@@ -31,6 +32,8 @@ MAGIC = [
 __all__ = ('BilibiliApiError', 'BilibiliClientABC', 'Literal', 'USER_AGENT',)
 
 logger = logging.getLogger('ubw.clients._b_base')
+_try_count = ContextVar('try_count', default=1)
+_T = TypeVar('_T')
 
 
 class BilibiliApiError(Exception):
@@ -40,7 +43,10 @@ class BilibiliApiError(Exception):
 class BilibiliClientABC(BaseModel, abc.ABC):
     auth_type: str
     headers: dict[str, str] = {}
+
     user_agent: str = USER_AGENT
+    try_limit: int = 3
+
     _session: aiohttp.ClientSession | None = None
     _mixin_key: str | None = None
 
@@ -69,6 +75,20 @@ class BilibiliClientABC(BaseModel, abc.ABC):
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.close()
 
+    async def _get_model(self, data_model: Type[_T], url, **kwargs) -> _T:
+        try:
+            async with self.session.get(url, **kwargs) as res:
+                data = Response[data_model].model_validate((await res.json()))
+                if data.code == 0:
+                    return data.data
+                else:
+                    raise BilibiliApiError(data.message)
+        except Exception:
+            if (try_count := _try_count.get()) < self.try_limit:
+                _try_count.set(try_count + 1)
+                return self._get_model(data_model, url, **kwargs)
+            raise
+
     async def get_info_by_room(self, room_id: int) -> InfoByRoom:
         async with self.session.get('https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom',
                                     params={'room_id': room_id}) as res:
@@ -78,7 +98,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
             else:
                 raise BilibiliApiError(data.message)
 
-    async def get_info_by_room_raw(self, room_id: int) -> InfoByRoom:
+    async def get_info_by_room_raw(self, room_id: int):
         async with self.session.get('https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom',
                                     params={'room_id': room_id}) as res:
             json_ = await res.json()
@@ -184,13 +204,10 @@ class BilibiliClientABC(BaseModel, abc.ABC):
         params = {'host_mid': uid, 'features': 'itemOpusStyle'}
         if offset != 0:
             params['offset'] = offset
-        async with self.session.get("https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space",
-                                    params=params) as res:
-            data = Response[OffsetList[DynamicItem]].model_validate(await res.json())
-            if data.code == 0:
-                return data.data
-            else:
-                raise BilibiliApiError(data.message)
+
+        return await self._get_model(
+            OffsetList[DynamicItem],
+            "https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space", params=params)
 
     async def iter_user_dynamic(self, uid):
         has_more = True
