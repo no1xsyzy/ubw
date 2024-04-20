@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from datetime import datetime, timedelta
 
 from pydantic import Field
@@ -8,6 +9,8 @@ from ubw.handlers.observe import ObserverHandler
 from ._base import *
 from .. import models
 from ..ui import *
+
+logger = logging.getLogger('observer')
 
 
 def key(dyn: models.DynamicItem):
@@ -79,7 +82,10 @@ class ObserverApp(InitLoopFinalizeApp):
 
     async def _loop(self):
         await asyncio.sleep(self.dynamic_poll_interval)
-        await self._fetch_print_update()
+        try:
+            await self._fetch_print_update()
+        except Exception as e:
+            logger.exception("exception in _fetch_print_update", exc_info=e)
 
     async def _finalize(self):
         if self._live_client is not None:
