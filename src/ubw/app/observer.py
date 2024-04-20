@@ -55,7 +55,7 @@ class ObserverApp(InitLoopFinalizeApp):
         await self.ui.add_record(Record(segments=[PlainText(text=" ===== 以上为历史消息 ===== ")]))
 
     async def _fetch_print_update(self):
-        s = await self.bilibili_client.get_user_dynamic(self.uid)  # checkpoint3
+        s = await self.bilibili_client.get_user_dynamic(self.uid)
         for item in sorted(s.items, key=key):
             if item.id_str not in self.last_got:
                 if item.is_topped:
@@ -64,9 +64,6 @@ class ObserverApp(InitLoopFinalizeApp):
                         PlainText(text=item.text),
                         Anchor(href=item.jump_url, text="链接")
                     ], time=item.pub_date))
-                    # rich.print(rf"\[{item.pub_date.strftime('%Y-%m-%d %H:%M:%S')}] "
-                    #            f"[bright_blue]置顶动态[/]：{escape(item.text)}"
-                    #            f" [link {item.jump_url}]链接[/]")
                 elif (datetime.now() - item.pub_date) > timedelta(days=2):
                     pass
                 else:
@@ -75,9 +72,6 @@ class ObserverApp(InitLoopFinalizeApp):
                         PlainText(text=item.text),
                         Anchor(href=item.jump_url, text="链接")
                     ], time=item.pub_date))
-                    # rich.print(rf"\[{item.pub_date.strftime('%Y-%m-%d %H:%M:%S')}] "
-                    #            f"发布动态：{escape(item.text)}"
-                    #            f" [link {item.jump_url}]链接[/]")
         self.last_got = {item.id_str for item in s.items}
 
     async def _loop(self):
