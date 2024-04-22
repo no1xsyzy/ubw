@@ -16,7 +16,7 @@ level = "INFO"
 format = "%(message)s"
 datefmt = "[%Y-%m-%d %H:%M:%S]"
 disable_existing_loggers = false
-[logging.handlers.richconsole]
+[logging.handlers.rich]
 class = 'rich.logging.RichHandler'
 tracebacks_suppress = ['logging', 'rich']
 show_path = false
@@ -26,7 +26,7 @@ filename = 'ubw.log'
 encoding = 'utf-8'
 [logging.root]
 level = "INFO"
-handlers = ['richconsole']
+handlers = ['rich']
 [logging.loggers.live]
 level = "INFO"
 handlers = ['file']

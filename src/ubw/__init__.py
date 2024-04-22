@@ -427,7 +427,7 @@ def print_config():
 @app.callback()
 def main(
         cd: Annotated[Path, typer.Option('--config', '-c')] = "config.toml",
-        sentry: bool = True,
+        sentry: Annotated[bool, typer.Option(' /--no-sentry', ' /-S')] = True,
         log: bool = True,
         verbose: Annotated[int, typer.Option('--verbose', '-v', count=True)] = 0,
         remote_debug_with_port: int = 0,
@@ -436,9 +436,10 @@ def main(
     cd = Path(cd)
     config = load_config(cd)
     if log:
-        if verbose > 0:
+        if verbose > 1:
             config_override.append('logging.root.level="DEBUG"')
-            config_override.append('logging.root.handlers=["richconsole"]')
+        if verbose > 0:
+            config_override.append('logging.root.handlers=["rich"]')
     config = patch_config(config, {}, toml_patch=config_override)
     main.config = config
     if log:

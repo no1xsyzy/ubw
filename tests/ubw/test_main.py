@@ -62,7 +62,7 @@ def test_print_config():
     s = generate_random_string()
     config = {}
     config_manipulated = {
-        'logging': {'root': {'level': 'DEBUG', 'handlers': ["richconsole"]}},
+        'logging': {'root': {'level': 'DEBUG', 'handlers': ["rich"]}},
         'path': {'to': {'key': s}},
     }
     with patch('ubw.load_config') as p_load:
@@ -73,7 +73,7 @@ def test_print_config():
                     result = runner.invoke(
                         ubw.app,
                         ['--config', config_path,
-                         '--verbose',
+                         '--verbose', '--verbose',  # verbose 2
                          '--config-override', f'path.to.key="{s}"',
                          '--remote-debug-with-port', '10203',
                          'print-config'])
