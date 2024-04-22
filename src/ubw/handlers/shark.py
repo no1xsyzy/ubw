@@ -7,6 +7,7 @@ import pathlib
 import aiofiles
 
 from ._base import *
+from ..models.blive.danmu_msg import parse_danmaku_info
 
 logger = logging.getLogger('shark')
 
@@ -61,9 +62,11 @@ def eval_on_cmd(expr, command: dict):
             v_slice = eval_on_cmd(x_slice, command)
             return v_value[v_slice]
         case ast.Name(id=x_id):
-            # add builtins
             if x_id == '_':
                 return command
+            elif x_id == 'danmaku_info' and 'info' in command:
+                return parse_danmaku_info(command['info'])
+            # add builtins here
             return command.get(x_id, None)
         case ast.Constant(value=x_value):
             return x_value
