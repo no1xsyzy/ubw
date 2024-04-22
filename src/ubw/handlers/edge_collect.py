@@ -37,6 +37,10 @@ class EdgeCollector(BaseHandler):
             elif command['info'][3]:
                 if command['info'][3][5] != '':
                     reason = 'MedalInfo.special'
+            elif command['info'][4][1] != 0:
+                reason = 'DANMU_MSG.info.4.1'
+            elif command['info'][4][4] != 0:
+                reason = 'DANMU_MSG.info.4.4'
             elif command['info'][10] != 0:
                 reason = 'DANMU_MSG.info.10'
             elif command['info'][11] != 0:
