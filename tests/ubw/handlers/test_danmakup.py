@@ -1,5 +1,7 @@
 import asyncio
+import json
 import random
+from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
@@ -65,6 +67,17 @@ async def test_danmakup():
                     'mode_info': {'extra': {'emots': {'[dog]': {}}}},
                 }
             })))
+            c = await asl.get_call(target=ui.add_record, f='async')
+            assert isinstance(c.args[0].segments[1], User)
+            assert c.args[0].segments[2].text == ": "
+            assert c.args[0].importance == 0
+            c.set_result(None)
+            await t
+
+            # info.mode_info.extra.emoticon_unique
+            with open(Path(__file__).parent / 'danmu_msg_emoticon_unique.json', encoding='utf-8') as f:
+                command = json.load(f)
+            t = asyncio.create_task(handler.handle(client, command))
             c = await asl.get_call(target=ui.add_record, f='async')
             assert isinstance(c.args[0].segments[1], User)
             assert c.args[0].segments[2].text == ": "
