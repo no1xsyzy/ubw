@@ -419,6 +419,18 @@ async def get_play_url(room_id: int,
 
 
 @app.command()
+@sync
+async def shark(
+        expr: str,
+        rooms: list[int],
+):
+    from .handlers.shark import SharkHandler
+    from datetime import datetime
+    handler = SharkHandler(rule=expr, outf=f"output/shark/{datetime.now().replace(microsecond=0)}")
+    await listen_to_all(rooms, handler)
+
+
+@app.command()
 def print_config():
     from rich import print
     print(main.config)
