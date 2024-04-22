@@ -196,6 +196,64 @@ def parse_group_medal(v17):
         )
 
 
+def parse_danmaku_info(v):
+    return {
+        # .0.0
+        "mode": v[0][1],
+        "font_size": v[0][2],
+        "color": v[0][3],
+        "timestamp": v[0][4],
+        "rnd": v[0][5],
+        # .0.6
+        "uid_crc32": v[0][7],
+        # .0.8
+        "msg_type": v[0][9] or 0,
+        "bubble_type": v[0][10] or 0,
+        'bubble_color': v[0][11],
+        "dm_type": v[0][12],
+        "emoticon_options": v[0][13],
+        "voice_config": v[0][14],
+        "mode_info": v[0][15],
+        'aggre': v[0][16],
+        'bubble_id': v[0][17],
+
+        "msg": v[1],
+
+        "uid": v[2][0],
+        "uname": v[2][1],
+        "admin": v[2][2],
+        "vip": v[2][3],
+        "svip": v[2][4],
+        "urank": v[2][5],
+        "mobile_verify": v[2][6],
+        "uname_color": v[2][7],  # 似乎与舰有关
+
+        'medal_info': parse_medal_info(v[3]),
+
+        "user_level": v[4][0] if v[4] else 0,
+        # 4.1 always 0?
+        "ulevel_color": v[4][2] if v[4] else 0xffffff,
+        "ulevel_rank": v[4][3] if v[4] else ">50000",
+        # 4.4 always 0?
+
+        "old_title": v[5][0] if v[5] else "",
+        "title": v[5][1] if v[5] else "",
+
+        # .6
+        "privilege_type": v[7],
+        # .8
+        # .9 validation { "ts": int maybe datetime, "ct": hex str upper, not CRC32. Or is? }
+        # .10
+        # .11
+        # .12
+        # .13
+        # .14 lpl 这与 LPL 联赛有关吗？
+        # .15 score 一个 int，对相同用户更经常是相同的，对不同用户通常是不同的，但都不绝对
+        'wealth_level': v[16][0],
+        'group_medal': parse_group_medal(v[17]) if len(v) > 17 else None,
+    }
+
+
 class DanmakuCommand(CommandModel):
     cmd: Literal['DANMU_MSG']
     info: DanmakuInfo
@@ -210,114 +268,11 @@ class DanmakuCommand(CommandModel):
         )
 
     @field_validator('info', mode='before')
-    def parse_dankamu_info(cls, v):
+    def parse_danmaku_info(cls, v):
         if not isinstance(v, list):
             return v
-
-        return {
-            # .0.0
-            "mode": v[0][1],
-            "font_size": v[0][2],
-            "color": v[0][3],
-            "timestamp": v[0][4],
-            "rnd": v[0][5],
-            # .0.6
-            "uid_crc32": v[0][7],
-            # .0.8
-            "msg_type": v[0][9],
-            "bubble_type": v[0][10],
-            'bubble_color': v[0][11],
-            "dm_type": v[0][12],
-            "emoticon_options": v[0][13],
-            "voice_config": v[0][14],
-            "mode_info": v[0][15],
-            'aggre': v[0][16],
-            'bubble_id': v[0][17],
-
-            "msg": v[1],
-
-            "uid": v[2][0],
-            "uname": v[2][1],
-            "admin": v[2][2],
-            "vip": v[2][3],
-            "svip": v[2][4],
-            "urank": v[2][5],
-            "mobile_verify": v[2][6],
-            "uname_color": v[2][7],  # 似乎与舰有关
-
-            'medal_info': parse_medal_info(v[3]),
-
-            "user_level": v[4][0],
-            "ulevel_color": v[4][2],
-            "ulevel_rank": v[4][3],
-
-            "old_title": v[5][0],
-            "title": v[5][1],
-
-            # .6
-            "privilege_type": v[7],
-            # .8
-            # .9 validation { "ts": int maybe datetime, "ct": hex str upper, not CRC32. Or is? }
-            # .10
-            # .11
-            # .12
-            # .13
-            # .14 lpl 这与 LPL 联赛有关吗？
-            # .15 score 一个 int，对相同用户更经常是相同的，对不同用户通常是不同的，但都不绝对
-            'wealth_level': v[16][0],
-            'group_medal': parse_group_medal(v[17]),
-        }
+        return parse_danmaku_info(v)
 
 
 class Danmaku371111Command(DanmakuCommand):
     cmd: Literal['DANMU_MSG:3:7:1:1:1:1']
-
-    @field_validator('info', mode='before')
-    def parse_dankamu_info(cls, v):
-        if isinstance(v, list):
-            return {
-                # .0.0
-                "mode": v[0][1],
-                "font_size": v[0][2],
-                "color": v[0][3],
-                "timestamp": v[0][4],
-                "rnd": v[0][5],
-                # .0.6
-                "uid_crc32": v[0][7],
-                # .0.8
-                "msg_type": 0,
-                "bubble_type": 0,
-                'bubble_color': v[0][11],
-                "dm_type": v[0][12],
-                "emoticon_options": v[0][13],
-                "voice_config": v[0][14],
-                "mode_info": v[0][15],
-                'aggre': v[0][16],
-                'bubble_id': v[0][17],
-
-                "msg": v[1],
-
-                "uid": v[2][0],
-                "uname": v[2][1],
-                "admin": v[2][2],
-                "vip": v[2][3],
-                "svip": v[2][4],
-                "urank": v[2][5],
-                "mobile_verify": v[2][6],
-                "uname_color": v[2][7],
-
-                'medal_info': parse_medal_info(v[3]),
-
-                "user_level": 0,
-                "ulevel_color": 0xffffff,
-                "ulevel_rank": ">50000",
-
-                "old_title": "",
-                "title": "",
-
-                "privilege_type": v[7],
-
-                'wealth_level': v[16][0],
-                'group_medal': None,
-            }
-        return v
