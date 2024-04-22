@@ -187,19 +187,20 @@ async def test_danmakup():
 
 @pytest.mark.asyncio
 async def test_interact_word():
-    with AsyncStoryline() as asl:
-        ui = asl.add_async_mock(mock_class=MockUI)
-        client = asl.add_async_mock()
+    async with asyncio.timeout(5):
+        with AsyncStoryline() as asl:
+            ui = asl.add_async_mock(mock_class=MockUI)
+            client = asl.add_async_mock()
 
-        handler = DanmakuPHandler(ui=ui, gift_threshold=10, show_interact_word=True)
+            handler = DanmakuPHandler(ui=ui, gift_threshold=10, show_interact_word=True)
 
-        t = asyncio.create_task(handler.on_interact_word(client, generate_type(models.InteractWordCommand, {
-            'data': {'msg_type': 1}
-        })))
-        c = await asl.get_call(target=ui.add_record, f='async')
-        assert "进入" in c.args[0].segments[2].text
-        c.set_result(None)
-        await t
+            async with asl.in_task(handler.on_interact_word(client, generate_type(models.InteractWordCommand, {
+                'data': {'msg_type': 1, 'uinfo': {'base': {'face': 'face'}}}
+            }))):
+                c = await asl.get_call(target=ui.add_record, f='async')
+                assert c.args[0].segments[1].face == 'face'
+                assert "进入" in c.args[0].segments[2].text
+                c.set_result(None)
 
 
 @pytest.mark.asyncio
