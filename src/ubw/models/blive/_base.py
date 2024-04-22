@@ -209,7 +209,7 @@ class UheadFrame(BaseModel):
 
 class Uinfo(BaseModel):
     uid: int
-    base: UinfoBase
+    base: UinfoBase | None = None
     medal: UinfoMedal | None = None
     wealth: UinfoWealth | None = None
     title: UinfoTitle | None = None
