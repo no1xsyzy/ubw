@@ -38,11 +38,14 @@ async def test_danmakup():
             c.set_result(None)
             await t
 
+            # fully ignore ignore_danmaku specified pattern
             t = asyncio.create_task(handler.on_danmu_msg(client, generate_type(models.DanmakuCommand, {
                 'info': {'msg': "ignore this"}
             })))
+            # no ui.add_record call at all
             await t
 
+            # trivial_rate very low for KAOMOJIS
             t = asyncio.create_task(handler.on_danmu_msg(client, generate_type(models.DanmakuCommand, {
                 'info': {
                     'msg': "(⌒▽⌒)",
@@ -51,9 +54,11 @@ async def test_danmakup():
             c = await asl.get_call(target=ui.add_record, f='async')
             assert isinstance(c.args[0].segments[1], User)
             assert c.args[0].segments[2].text == ": "
+            assert c.args[0].importance == 0
             c.set_result(None)
             await t
 
+            # info.mode_info.extra.emots
             t = asyncio.create_task(handler.on_danmu_msg(client, generate_type(models.DanmakuCommand, {
                 'info': {
                     'msg': "[dog]",
@@ -63,9 +68,11 @@ async def test_danmakup():
             c = await asl.get_call(target=ui.add_record, f='async')
             assert isinstance(c.args[0].segments[1], User)
             assert c.args[0].segments[2].text == ": "
+            assert c.args[0].importance == 0
             c.set_result(None)
             await t
 
+            # normal text
             t = asyncio.create_task(handler.on_danmu_msg(client, generate_type(models.DanmakuCommand, {
                 'info': {
                     'msg': "你好",
@@ -76,6 +83,7 @@ async def test_danmakup():
             assert isinstance(c.args[0].segments[1], User)
             assert c.args[0].segments[1].face == 'face'
             assert c.args[0].segments[2].text == "说: "
+            assert c.args[0].importance == 10
             c.set_result(None)
             await t
 
