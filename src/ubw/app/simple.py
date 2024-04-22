@@ -16,3 +16,4 @@ class SimpleApp(BaseApp):
 
     async def close(self):
         await self.client.close()
+        await self.handler.close()

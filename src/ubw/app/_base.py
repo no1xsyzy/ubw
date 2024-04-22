@@ -31,7 +31,7 @@ class BaseApp(BaseModel, abc.ABC):
         if self._task is None:
             return warnings.warn('This app is stopped, cannot join()')
         logger.debug('app=%s joining', self)
-        await asyncio.shield(self._task)
+        await self._task
 
     async def stop(self):
         task = self._task

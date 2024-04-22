@@ -51,10 +51,8 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
             return warnings.warn(f'room={self.room_id} client is stopped, cannot stop() again')
 
         task = self._task
-        if task is None:  # noqa
-            return
+        self._task = None
         if task.cancel('stop'):
-            self._task = None
             try:
                 await task
             except asyncio.CancelledError:
@@ -77,8 +75,6 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
 
     async def _init_room(self):
         res = True
-        # if not await self._try_init_from_environ() and not await self._init_buvid():
-        #     res = False
         cookies = self._session.cookie_jar.filter_cookies(yarl.URL('https://www.bilibili.com/'))
         self._uid = int(cookies['DedeUserID'].value)
         self._buvid3 = cookies['buvid3'].value
@@ -133,7 +129,6 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
             logger.exception(f'room={self.room_id} WSWebClient._network_coroutine() finished with exception:')
         finally:
             logger.info(f'room={self.room_id} WSWebClient._network_coroutine() finalized')
-            self._task = None
 
     async def _network_coroutine(self):
         # 如果之前未初始化则初始化
