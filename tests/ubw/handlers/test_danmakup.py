@@ -10,7 +10,7 @@ from ubw import models
 from ubw.handlers import DanmakuPHandler
 from ubw.testing.asyncstory import AsyncStoryline, AsyncMock
 from ubw.testing.generate import generate_type
-from ubw.ui import Richy, User, RoomTitle, Currency
+from ubw.ui import Richy, User, RoomTitle, Currency, PlainText
 
 
 class MockUI(AsyncMock):
@@ -99,6 +99,12 @@ async def test_danmakup():
             assert c.args[0].importance == 10
             c.set_result(None)
             await t
+
+            command = generate_type(models.GuardBuyCommand, {})
+            async with asl.in_task(handler.on_summary(client, command.summarize())):
+                c = await asl.get_call(target=ui.add_record, f='async')
+                assert c.args[0].segments[3] == PlainText(text=" (GUARD_BUY)")
+                c.set_result(None)
 
             t = asyncio.create_task(handler.on_room_change(client, generate_type(models.RoomChangeCommand, {})))
             c = await asl.get_call(target=ui.add_record, f='async')
