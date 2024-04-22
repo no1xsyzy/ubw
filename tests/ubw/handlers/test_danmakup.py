@@ -85,6 +85,15 @@ async def test_danmakup():
             c.set_result(None)
             await t
 
+            # DANMU_MSG:3:7:1:1:1:1
+            with open(Path(__file__).parent / 'danmu_msg_emoticon_unique.json', encoding='utf-8') as f:
+                command = json.load(f)
+            t = asyncio.create_task(handler.handle(client, command))
+            c = await asl.get_call(target=ui.add_record, f='async')
+            # TODO: how to process correctly?
+            c.set_result(None)
+            await t
+
             # normal text
             t = asyncio.create_task(handler.on_danmu_msg(client, generate_type(models.DanmakuCommand, {
                 'info': {
