@@ -14,11 +14,7 @@ logger = logging.getLogger('shark')
 
 @functools.lru_cache()
 def parse_expr(expr_str):
-    mod = ast.parse(expr_str)
-    assert len(mod.body) == 1
-    expr = mod.body[0]
-    assert isinstance(expr, ast.Expr)
-    return expr.value
+    return ast.parse(expr_str, mode='eval').body
 
 
 def eval_on_cmd(expr, command: dict):
@@ -79,7 +75,7 @@ def eval_on_cmd(expr, command: dict):
             v_left = eval_on_cmd(x_left, command)
             return json.loads(v_left)
         case _:
-            raise ValueError(f"unsupported {expr=}")
+            raise ValueError(f"unsupported expr\n{ast.dump(expr)}")
 
 
 class SharkHandler(BaseHandler):
