@@ -12,7 +12,6 @@ import rich
 import sentry_sdk
 from pydantic import ValidationError, BaseModel, TypeAdapter
 from rich.markup import escape
-from typing_extensions import deprecated
 
 from .. import models
 from ..clients import LiveClientABC
@@ -52,10 +51,6 @@ class BaseHandler(BaseModel):
 
     async def stop(self):
         pass
-
-    @deprecated("astart is deprecated, start is now awaitable")
-    async def astart(self, client: LiveClientABC):
-        await self.start(client)
 
     if DEBUGGING_TOO_LONG:
         async def handle(self, client: LiveClientABC, command: dict):
