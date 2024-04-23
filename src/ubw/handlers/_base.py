@@ -52,6 +52,9 @@ class BaseHandler(BaseModel):
     async def stop(self):
         pass
 
+    async def close(self):
+        pass
+
     if DEBUGGING_TOO_LONG:
         async def handle(self, client: LiveClientABC, command: dict):
             start = time.time()
