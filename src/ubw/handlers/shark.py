@@ -101,7 +101,7 @@ class SharkHandler(BaseHandler):
         try:
             if eval_on_cmd(parse_expr(self.rule), command):
                 basename = str(datetime.now().replace(microsecond=0)).replace(':', '.')
-                async with aiofiles.open(self.outf / f"{basename}.json",
+                async with aiofiles.open(self.out_dir / f"{basename}.json",
                                          mode='a', encoding='utf-8') as afp:
                     await afp.write(json.dumps(command, indent=2, ensure_ascii=False))
         except Exception as e:
