@@ -139,3 +139,6 @@ async def test_saver():
                 (a, s), = await mock_db.queue.get()
                 assert a == 'insert' and s == {'UNKNOWN': True}
                 g.assert_awaited_once_with(client, unknown_cmd, err)
+
+            await handler.stop()
+            await handler.close()
