@@ -64,7 +64,7 @@ class SaverHandler(BaseHandler):
     @cached_property
     def db(self):
         fname = f"output/blive_saver/{self.room_id}/{self.shard_start.strftime('%Y年%m月%d日%H点%M%S')}.json"
-        logger.debug(f"[{self.room_id}] creating db: {fname}")
+        logger.info(f"creating db: {fname}")
         # you need serialization for each TinyDB instance, or it will always write to last instance
         serialization = SerializationMiddleware(AIOJSONStorage)
         serialization.register_serializer(DateTimeSerializer(), 'TinyDate')
@@ -96,15 +96,15 @@ class SaverHandler(BaseHandler):
             db.insert(message.model_dump(exclude_defaults=True, by_alias=True))
 
     async def on_live(self, client, message):
-        logger.debug(f'received LIVE while {self._living=}')
         if self._living != _State.living:
+            logger.info(f'received LIVE when {self._living=}')
             await self.m_shard_now()
         else:
             logger.warning(f'!!STRANGE!! received LIVE while {self._living=}')
 
     async def on_preparing(self, client, message):
-        logger.debug(f'received PREPARING while {self._living=}')
         if self._living != _State.preparing:
+            logger.info(f'received PREPARING when {self._living=}')
             await self.m_shard_now()
         else:
             logger.warning(f'!!STRANGE!! received PREPARING while {self._living=}')
@@ -127,15 +127,20 @@ class SaverHandler(BaseHandler):
         while True:
             await self.m_new_shard()
             try:
-                logger.debug(f"next sharding in {self.max_shard_length}")
+                logger.info(f"next sharding in {self.max_shard_length}")
                 async with asyncio.timeout(self.max_shard_length.total_seconds()):
                     await self._wait_sharding
                     self._wait_sharding = asyncio.Future()
             except asyncio.TimeoutError:
-                pass
+                logger.info("timeout happened")
 
     async def m_shard_now(self):
-        self._wait_sharding.set_result(None)
+        logger.info("m_shard_now()")
+        try:
+            self._wait_sharding.set_result(None)
+        except asyncio.InvalidStateError:
+            # ???
+            logger.exception("!!STRANGE!! self._wait_sharding is set_result'ed, but not re-created")
 
     async def m_new_shard(self):
         logger.info("check if shard")
