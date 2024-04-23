@@ -3,6 +3,7 @@ import functools
 import json
 import logging
 import pathlib
+from datetime import datetime
 
 import aiofiles
 
@@ -82,12 +83,14 @@ class SharkHandler(BaseHandler):
     cls: Literal['shark'] = 'shark'
 
     rule: str
-    outf: pathlib.Path
+    out_dir: pathlib.Path
 
     async def process_one(self, client, command):
         try:
             if eval_on_cmd(parse_expr(self.rule), command):
-                async with aiofiles.open(self.outf, mode='a', encoding='utf-8') as afp:
+                basename = str(datetime.now().replace(microsecond=0)).replace(':', '.')
+                async with aiofiles.open(self.outf / f"{basename}.json",
+                                         mode='a', encoding='utf-8') as afp:
                     await afp.write(json.dumps(command, indent=2, ensure_ascii=False))
         except Exception as e:
             logger.exception("exception", exc_info=e)

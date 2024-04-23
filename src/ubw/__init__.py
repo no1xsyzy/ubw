@@ -423,10 +423,10 @@ async def get_play_url(room_id: int,
 async def shark(
         expr: str,
         rooms: list[int],
+        directory: Annotated[Path, typer.Option('--dir', '-d')] = 'output/shark'
 ):
     from .handlers.shark import SharkHandler
-    from datetime import datetime
-    handler = SharkHandler(rule=expr, outf=f"output/shark/{datetime.now().replace(microsecond=0)}")
+    handler = SharkHandler(rule=expr, out_dir=directory)
     await listen_to_all(rooms, handler)
 
 
