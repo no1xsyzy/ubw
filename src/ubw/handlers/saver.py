@@ -129,7 +129,7 @@ class SaverHandler(BaseHandler):
             try:
                 logger.info(f"next sharding in {self.max_shard_length}")
                 async with asyncio.timeout(self.max_shard_length.total_seconds()):
-                    await self._wait_sharding
+                    await asyncio.shield(self._wait_sharding)
                     self._wait_sharding = asyncio.get_running_loop().create_future()
             except asyncio.TimeoutError:
                 logger.info("timeout happened")
