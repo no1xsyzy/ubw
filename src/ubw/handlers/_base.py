@@ -230,7 +230,8 @@ class QueuedProcessorMixin(BaseHandler):
         return asyncio.Queue()
 
     async def start(self, client):
-        self._process_task = asyncio.create_task(self.t_process())
+        if self._process_task is None:
+            self._process_task = asyncio.create_task(self.t_process())
         await super().start(client)
 
     async def stop(self):
