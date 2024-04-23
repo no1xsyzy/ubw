@@ -20,10 +20,22 @@ def parse_expr(expr_str):
 
 def eval_on_cmd(expr, command: dict):
     match expr:
-        case ast.BoolOp(values=[l, r], op=ast.And()):
-            return eval_on_cmd(l, command) and eval_on_cmd(r, command)
-        case ast.BoolOp(values=[l, r], op=ast.Or()):
-            return eval_on_cmd(l, command) or eval_on_cmd(r, command)
+        case ast.BoolOp(values=x_values, op=ast.And()):
+            v_value = True
+            for x_value in x_values:
+                v_value = eval_on_cmd(x_value, command)
+                if not v_value:
+                    return v_value
+            else:
+                return v_value
+        case ast.BoolOp(values=x_values, op=ast.Or()):
+            v_value = False
+            for x_value in x_values:
+                v_value = eval_on_cmd(x_value, command)
+                if v_value:
+                    return v_value
+            else:
+                return v_value
         case ast.Compare(left=left, comparators=comparators, ops=ops):
             leftv = eval_on_cmd(left, command)
             for op, right in zip(ops, comparators):
