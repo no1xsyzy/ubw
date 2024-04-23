@@ -123,14 +123,14 @@ class SaverHandler(BaseHandler):
         await super().on_unknown_cmd(client, command, err)
 
     async def t_sharder(self):
-        self._wait_sharding = asyncio.Future()
+        self._wait_sharding = asyncio.get_running_loop().create_future()
         while True:
             await self.m_new_shard()
             try:
                 logger.info(f"next sharding in {self.max_shard_length}")
                 async with asyncio.timeout(self.max_shard_length.total_seconds()):
                     await self._wait_sharding
-                    self._wait_sharding = asyncio.Future()
+                    self._wait_sharding = asyncio.get_running_loop().create_future()
             except asyncio.TimeoutError:
                 logger.info("timeout happened")
 
@@ -153,12 +153,12 @@ class SaverHandler(BaseHandler):
                 living = _State.preparing
             logger.info(f"{self._living=}, get_info_by_room({self.room_id}) returns {living=}")
             if self._living != living:
+                self._living = living
                 break
             await asyncio.sleep(60)
         else:
             return
         logger.info("really making shard")
-        self._living = living
         self.__dict__.pop('shard_start', None)
         self.__dict__.pop('db', None)
         async with self.db as db:
