@@ -98,14 +98,14 @@ class SaverHandler(BaseHandler):
     async def on_live(self, client, message):
         if self._living != _State.living:
             logger.info(f'received LIVE when {self._living=}')
-            await self.m_shard_now()
+            self.s_shard_now()
         else:
             logger.warning(f'!!STRANGE!! received LIVE while {self._living=}')
 
     async def on_preparing(self, client, message):
         if self._living != _State.preparing:
             logger.info(f'received PREPARING when {self._living=}')
-            await self.m_shard_now()
+            self.s_shard_now()
         else:
             logger.warning(f'!!STRANGE!! received PREPARING while {self._living=}')
 
@@ -123,41 +123,62 @@ class SaverHandler(BaseHandler):
         await super().on_unknown_cmd(client, command, err)
 
     async def t_sharder(self):
-        self._wait_sharding = asyncio.get_running_loop().create_future()
+        # self._wait_sharding = asyncio.get_running_loop().create_future()
+        t = 0
         while True:
-            await self.m_new_shard()
             try:
+                t += 1
+                logger.info(f"t_sharder: calling m_new_shard()")
+                await self._check_for_shard()
+                t = 0
                 logger.info(f"next sharding in {self.max_shard_length}")
                 async with asyncio.timeout(self.max_shard_length.total_seconds()):
-                    await asyncio.shield(self._wait_sharding)
                     self._wait_sharding = asyncio.get_running_loop().create_future()
+                    await self._wait_sharding
+                    # await asyncio.shield(self._wait_sharding)
+                    # self._wait_sharding = asyncio.get_running_loop().create_future()
             except asyncio.TimeoutError:
                 logger.info("timeout happened")
+            except Exception as e:
+                logger.exception("exception in t_sharder()", exc_info=e)
+                if t > 5:
+                    raise
+            except BaseException as e:
+                logger.exception("exception in t_sharder()", exc_info=e)
+                raise
 
-    async def m_shard_now(self):
+    def s_shard_now(self):
         logger.info("m_shard_now()")
         try:
             self._wait_sharding.set_result(None)
         except asyncio.InvalidStateError:
             # ???
-            logger.exception("!!STRANGE!! self._wait_sharding is set_result'ed, but not re-created")
+            logger.exception(f"!!STRANGE!! {self._wait_sharding=} is not re-created")
 
-    async def m_new_shard(self):
+    async def _check_for_shard(self):
         logger.info("check if shard")
         for _ in range(10):
-            async with BilibiliUnauthorizedClient() as client:
-                info = await client.get_info_by_room(self.room_id)
-            if info.room_info.live_start_time is not None:
-                living = _State.living
-            else:
-                living = _State.preparing
-            logger.info(f"{self._living=}, get_info_by_room({self.room_id}) returns {living=}")
-            if self._living != living:
-                self._living = living
-                break
+            try:
+                async with BilibiliUnauthorizedClient() as client:
+                    info = await client.get_info_by_room(self.room_id)
+                if info.room_info.live_start_time is not None:
+                    living = _State.living
+                else:
+                    living = _State.preparing
+                logger.info(f"get_info_by_room({self.room_id}) returns {info.room_info.live_start_time=}" "\n"
+                            f"causing maybe transact from {self._living} to {living}")
+                if self._living != living:
+                    self._living = living
+                    await self._really_make_shard(info)
+                    return
+            except Exception as e:
+                logger.exception("exception in checking if shard", exc_info=e)
+            except BaseException as e:
+                logger.exception("exception in checking if shard", exc_info=e)
+                raise
             await asyncio.sleep(60)
-        else:
-            return
+
+    async def _really_make_shard(self, info):
         logger.info("really making shard")
         self.__dict__.pop('shard_start', None)
         self.__dict__.pop('db', None)
