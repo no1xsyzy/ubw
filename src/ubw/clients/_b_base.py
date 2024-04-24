@@ -33,7 +33,7 @@ __all__ = ('BilibiliApiError', 'BilibiliClientABC', 'Literal', 'USER_AGENT',)
 
 logger = logging.getLogger('ubw.clients._b_base')
 _try_count = ContextVar('try_count', default=1)
-_T = TypeVar('_T')
+_T = TypeVar('_T', bound=BaseModel)
 
 
 class BilibiliApiError(Exception):
@@ -80,32 +80,41 @@ class BilibiliClientABC(BaseModel, abc.ABC):
             async with self.session.get(url, **kwargs) as res:
                 data = Response[data_model].model_validate((await res.json()))
                 if data.code == 0:
+                    logger.debug(f"successfully get {url!r} {kwargs!r}")
                     return data.data
                 else:
                     raise BilibiliApiError(data.message)
-        except Exception:
+        except Exception as e:
             if (try_count := _try_count.get()) < self.try_limit:
                 _try_count.set(try_count + 1)
-                return self._get_model(data_model, url, **kwargs)
+                return await self._get_model(data_model, url, **kwargs)
+            logger.exception(f"Bilibili API Error on get {url!r} {kwargs!r}", exc_info=e)
+            raise
+
+    async def _get_raw(self, url, **kwargs) -> dict:
+        try:
+            async with self.session.get(url, **kwargs) as res:
+                data = await res.json()
+                if data['code'] == 0:
+                    logger.debug(f"successfully get {url!r} {kwargs!r}")
+                    return data['data']
+                else:
+                    raise BilibiliApiError(data['message'])
+        except Exception as e:
+            if (try_count := _try_count.get()) < self.try_limit:
+                _try_count.set(try_count + 1)
+                return await self._get_raw(url, **kwargs)
+            logger.exception(f"Bilibili API Error on get {url!r} {kwargs!r}", exc_info=e)
             raise
 
     async def get_info_by_room(self, room_id: int) -> InfoByRoom:
-        async with self.session.get('https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom',
-                                    params={'room_id': room_id}) as res:
-            data = Response[InfoByRoom].model_validate(await res.json())
-            if data.code == 0:
-                return data.data
-            else:
-                raise BilibiliApiError(data.message)
+        return await self._get_model(InfoByRoom,
+                                     'https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom',
+                                     params={'room_id': room_id})
 
     async def get_info_by_room_raw(self, room_id: int):
-        async with self.session.get('https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom',
-                                    params={'room_id': room_id}) as res:
-            json_ = await res.json()
-            if json_['code'] == 0:
-                return json_['data']
-            else:
-                raise BilibiliApiError(json_['message'])
+        return await self._get_raw('https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom',
+                                   params={'room_id': room_id})
 
     async def get_danmaku_server(self, room_id: int) -> DanmuInfo:
         async with self.session.get(DANMAKU_SERVER_CONF_URL,
