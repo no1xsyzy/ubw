@@ -94,7 +94,7 @@ class GiftData(BaseModel):
     face_effect_id: int = 0
     face_effect_type: int = 0
     float_sc_resource_id: float = 0
-    gift_tag: list[None] = []
+    gift_tag: list[int] = []
     group_medal: GroupMedal | None = None
     is_first: bool = False
     is_join_receiver: bool = False
