@@ -74,7 +74,7 @@ class ObserverApp(InitLoopFinalizeApp):
                     ], time=item.pub_date))
                 elif item.is_live:
                     await self.ui.add_record(Record(segments=[
-                        Anchor(text="开始直播", href=item.jump_url),
+                        Anchor(text="直播动态", href=item.jump_url),
                         PlainText(text=" "),
                         PlainText(text=item.text),
                     ], time=item.pub_date))
