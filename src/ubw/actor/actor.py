@@ -3,6 +3,7 @@ from __future__ import annotations
 import abc
 import asyncio
 import warnings
+from functools import wraps, partial, cached_property
 from typing import Annotated, Union, Type, Literal
 
 from pydantic import BaseModel, Field, TypeAdapter, ConfigDict
@@ -108,6 +109,8 @@ class BaseActor(BaseModel, abc.ABC):
 
 
 class InitLoopFinalizeMixin(BaseActor, abc.ABC):
+    time_limit_per_loop: int | None = None
+
     async def _init(self):
         pass
 
@@ -118,11 +121,21 @@ class InitLoopFinalizeMixin(BaseActor, abc.ABC):
     async def _finalize(self):
         pass
 
+    async def _error_handle(self, exc):
+        pass
+
     async def _run(self: BaseActor):
         try:
             await self._init()
             while True:
-                await self._loop()
+                try:
+                    if self.time_limit_per_loop is not None:
+                        with asyncio.timeout(self.time_limit_per_loot):
+                            await self._loop()
+                    else:
+                        await self._loop()
+                except Exception as e:
+                    await self._error_handle(e)
         finally:
             await self._finalize()
 
@@ -133,3 +146,61 @@ class JustStartOtherActorsMixin(BaseActor, abc.ABC):
 
     async def _run(self):
         await self._init()
+
+
+def behaviour(f=None, /, name=None):
+    if f is None:
+        return partial(behaviour)
+
+    if name is None:
+        if f.__name__ == '<lambda>':
+            raise ValueError('define behaviour with lambdas must have name set')
+        else:
+            name = f.__name__
+
+    @wraps(f)
+    def behaviour_wrapper(self: BehaviourActor, *args, **kwargs):
+        self._bind_name(name, f)
+        try:
+            self._behaviour_call_queue.put_nowait((f.__name__, args, kwargs))
+            return True
+        except asyncio.QueueFull:
+            return False
+
+    def threadsafe(self: BehaviourActor, *args, **kwargs):
+        self._loop.call_soon_threadsafe(self._behaviour_call_queue.put, (f.__name__, args, kwargs))
+        return
+
+    behaviour_wrapper.threadsafe = threadsafe
+    behaviour_wrapper.__name__ = name
+
+    return behaviour_wrapper
+
+
+be = behaviour
+
+
+class BehaviourActor(InitLoopFinalizeMixin, BaseActor):
+    _behaviour_call_queue: asyncio.Queue
+
+    @cached_property
+    def _msg_registry(self):
+        return {}
+
+    def _bind_name(self, name, func):
+        if name in self._msg_registry:
+            if self._msg_registry[name] is not func:
+                raise ValueError(f'behaviour {name} is defined multiple times')
+        else:
+            self._msg_registry[name] = func
+
+    async def _init(self):
+        self._behaviour_call_queue = asyncio.Queue()
+        self._loop = asyncio.get_running_loop()
+
+    async def _loop(self):
+        f, args, kwargs = await self._behaviour_call_queue.get()
+        if asyncio.iscoroutinefunction(f):
+            await f(self, *args, **kwargs)
+        else:
+            f(self, *args, **kwargs)
