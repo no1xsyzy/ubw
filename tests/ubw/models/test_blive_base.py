@@ -2,9 +2,10 @@ from datetime import datetime
 
 from pydantic import TypeAdapter, BaseModel, field_validator, ValidationError
 
+from ubw.models._base import strange_dict
 # since it is testing
 # noinspection PyProtectedMember
-from ubw.models.blive._base import Color, strange_dict, convert_ns
+from ubw.models.blive._base import Color, convert_ns
 
 TAC = TypeAdapter(Color)
 

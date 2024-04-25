@@ -1,9 +1,10 @@
-import json
 from datetime import datetime, timezone, timedelta, date
 from typing import Annotated, runtime_checkable, Protocol, Union, Literal
 
 from pydantic import BaseModel as _BaseModel, Field, model_validator, field_validator, Field, RootModel, AliasChoices, \
     ConfigDict
+
+from .._base import *
 
 __all__ = (
     # pydantic
@@ -87,17 +88,6 @@ class Color(RootModel):
     @property
     def alpha(self) -> int | None:
         return int(self.root[3]) if len(self.root) > 3 else None
-
-
-def strange_dict(cls, v):
-    try:
-        if isinstance(v, (str, bytes, bytearray,)):
-            v = json.loads(v)
-        if not v:
-            return {}
-        return v
-    except (json.JSONDecodeError, TypeError):
-        return {}
 
 
 def convert_ns(cls, v):
