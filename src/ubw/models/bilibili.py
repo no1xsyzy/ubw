@@ -1,4 +1,5 @@
-import json
+from __future__ import annotations
+
 import warnings
 from datetime import datetime, timezone, timedelta
 from functools import cached_property
@@ -240,98 +241,224 @@ class RichTextNodeTypeEmoji(RichTextNodeBase):
     type: Literal['RICH_TEXT_NODE_TYPE_EMOJI']
 
 
+class RichTextNodeTypeWeb(RichTextNodeBase):
+    type: Literal['RICH_TEXT_NODE_TYPE_WEB']
+    jump_url: str
+
+
 RichTextNode = Annotated[
-    Union[RichTextNodeTypeText, RichTextNodeTypeAt, RichTextNodeTypeEmoji],
+    Union[RichTextNodeTypeText, RichTextNodeTypeAt, RichTextNodeTypeEmoji, RichTextNodeTypeWeb],
     Field(discriminator='type')
 ]
 
 TA_L_RTN = TypeAdapter(list[RichTextNode])
 
 
+class RichText(BaseModel):
+    rich_text_nodes: list[RichTextNode]
+    text: str
+
+
+class Opus(BaseModel):
+    jump_url: str
+    summary: RichText
+
+
+class Archive(BaseModel):
+    aid: str
+    jump_url: str
+
+    cover: str
+    title: str
+    desc: str
+    duration_text: timedelta
+
+
+class BaseMajor(BaseModel):
+    type: str | None
+
+
+class MajorOpus(BaseMajor):
+    type: Literal['MAJOR_TYPE_OPUS']
+    opus: Opus
+
+
+class MajorArchive(BaseMajor):
+    type: Literal['MAJOR_TYPE_ARCHIVE']
+    archive: Archive
+
+
+class LivePlayInfo(BaseModel):
+    title: str
+    room_id: int
+    live_start_time: datetime
+
+
+class LiveRcmdContent(BaseModel):
+    live_play_info: LivePlayInfo
+
+
+class LiveRcmd(BaseModel):
+    content: LiveRcmdContent
+
+    validate_content = field_validator('content', mode='before')(strange_dict)
+
+
+class MajorLiveRcmd(BaseMajor):
+    type: Literal['MAJOR_TYPE_LIVE_RCMD']
+    live_rcmd: LiveRcmd
+
+
+class Draw(BaseModel):
+    id: int
+
+
+class MajorDraw(BaseMajor):
+    type: Literal['MAJOR_TYPE_DRAW']
+    draw: Draw
+
+
+class MajorNone(BaseMajor):
+    type: Literal[None]
+
+
+class Common(BaseModel):
+    jump_url: str
+
+
+class MajorCommon(BaseMajor):
+    type: Literal['MAJOR_TYPE_COMMON']
+    common: Common
+
+
+Major = Annotated[Union[
+    MajorOpus, MajorArchive, MajorLiveRcmd, MajorDraw, MajorNone, MajorCommon,
+], Field(discriminator='type')]
+
+
+class ModuleDynamic(BaseModel):
+    major: Major | None = None
+    desc: RichText | None = None
+
+
+class ModuleTag(BaseModel):
+    text: str
+
+
+class ModuleCollection(BaseModel):
+    module_dynamic: ModuleDynamic | None = None
+    module_author: ModuleAuthor | None = None
+    module_tag: ModuleTag | None = None
+
+
 class DynamicItem(BaseModel):
+    """
+    :var type: 可能的值：
+    DYNAMIC_TYPE_ARTICLE=文章、笔记
+    DYNAMIC_TYPE_AV=视频
+    DYNAMIC_TYPE_COMMON_SQUARE=带链接
+    DYNAMIC_TYPE_DRAW=带图片
+    DYNAMIC_TYPE_FORWARD=转发
+    DYNAMIC_TYPE_WORD=纯文字
+    """
     basic: DynamicBasic
     id_str: str
-    modules: dict
+    modules: ModuleCollection
     type: str
     visible: bool
+    orig: DynamicItem | None = None
 
-    @cached_property
+    @property
+    def is_forward(self):
+        return self.type == 'DYNAMIC_TYPE_FORWARD'
+
+    @property
+    def is_video(self):
+        return self.type == 'DYNAMIC_TYPE_AV'
+
+    @property
+    def is_live(self):
+        return self.type == 'DYNAMIC_TYPE_LIVE_RCMD'
+
+    @property
+    def is_article(self):
+        return self.type == 'DYNAMIC_TYPE_ARTICLE'
+
+    @property
+    def archive(self):
+        return
+
+    @property
     def major_type(self):
         try:
-            major = self.modules['module_dynamic']['major']
+            major = self.modules.module_dynamic.major
             if major is None:
                 return None
-            return major['type']
+            return major.type
         except KeyError as e:
             warnings.warn(f"err in major_type {e=} {self.id_str=}")
             return None
 
     @cached_property
-    def live_rcmd(self):
-        try:
-            return json.loads(self.modules['module_dynamic']['major']['live_rcmd']['content'])
-        except KeyError as e:
-            warnings.warn(f"err in live_rcmd {e=} {self.id_str=}")
-            return {}
-
-    @cached_property
     def rich_text_nodes(self) -> list[RichTextNode]:
-        try:
-            major_type = self.major_type
-            if major_type is None or major_type == 'MAJOR_TYPE_DRAW':
-                return TA_L_RTN.validate_python(self.modules['module_dynamic']['desc']['rich_text_nodes'])
-            elif major_type == 'MAJOR_TYPE_OPUS':
-                return TA_L_RTN.validate_python(
-                    self.modules['module_dynamic']['major']['opus']['summary']['rich_text_nodes'])
-        except KeyError as e:
-            warnings.warn(f"err in rich_text_nodes {e=} {self.id_str=}")
+        match self.modules.module_dynamic.major:
+            case MajorNone() | MajorDraw() | MajorCommon():
+                return self.modules.module_dynamic.desc.rich_text_nodes
+            case MajorOpus(opus=opus):
+                opus: Opus
+                return opus.summary.rich_text_nodes
+            case None:
+                if self.type == 'DYNAMIC_TYPE_FORWARD':
+                    return self.modules.module_dynamic.desc.rich_text_nodes
         return []
 
     @cached_property
     def text(self) -> str:
-        try:
-            major_type = self.major_type
-            if major_type is None or major_type == 'MAJOR_TYPE_DRAW':
-                return self.modules['module_dynamic']['desc']['text']
-            elif major_type == 'MAJOR_TYPE_OPUS':
-                return self.modules['module_dynamic']['major']['opus']['summary']['text']
-            elif major_type == 'MAJOR_TYPE_LIVE_RCMD':
-                return self.live_rcmd['live_play_info']['title']
-            elif major_type == 'MAJOR_TYPE_ARCHIVE':
-                return self.modules['module_dynamic']['major']['archive']['title']
-        except KeyError as e:
-            warnings.warn(f"err in text {e=} {self.id_str=}")
-        return ""
+        match self.modules.module_dynamic.major:
+            case MajorNone() | MajorDraw() | MajorCommon():
+                return self.modules.module_dynamic.desc.text
+            case MajorOpus(opus=opus):
+                opus: Opus
+                return opus.summary.text
+            case MajorLiveRcmd(live_rcmd=live_rcmd):
+                live_rcmd: LiveRcmd
+                return live_rcmd.content.live_play_info.title
+            case MajorArchive(archive=archive):
+                return archive.title + '\n\n' + archive.desc
+            case None:
+                if self.type == 'DYNAMIC_TYPE_FORWARD':
+                    return self.modules.module_dynamic.desc.text
+        return ''
 
     @cached_property
     def jump_url(self) -> str:
-        try:
-            major_type = self.major_type
-            if major_type == 'MAJOR_TYPE_OPUS':
-                return "https:" + self.modules['module_dynamic']['major']['opus']['jump_url']
-            elif major_type == 'MAJOR_TYPE_LIVE_RCMD':
-                return f"https://live.bilibili.com/blanc/{self.live_rcmd['live_play_info']['room_id']}"
-            elif major_type == 'MAJOR_TYPE_ARCHIVE':
-                return "https:" + self.modules['module_dynamic']['major']['archive']['jump_url']
-        except KeyError as e:
-            warnings.warn(f"err in jump_url {e=} {self.id_str=}")
+        match self.modules.module_dynamic.major:
+            case MajorCommon(common=common):
+                common: Common
+                return common.jump_url
+            case MajorOpus(opus=opus):
+                opus: Opus
+                return "https:" + opus.jump_url
+            case MajorLiveRcmd(live_rcmd=live_rcmd):
+                live_rcmd: LiveRcmd
+                return f"https://live.bilibili.com/{live_rcmd.content.live_play_info.room_id}"
+            case MajorArchive(archive=archive):
+                return "https:" + archive.jump_url
         return f"https://t.bilibili.com/{self.id_str}"
 
     @cached_property
     def pub_date(self):
-        try:
-            return datetime.fromtimestamp(self.modules['module_author']['pub_ts'])
-        except KeyError as e:
-            warnings.warn(f"err in pub_date {e=} {self.id_str=}")
-            return datetime.now()
+        match self.modules.module_author:
+            case ModuleAuthor(pub_ts=pubtime):
+                return pubtime
+            case _:
+                return datetime.now()
 
     @cached_property
     def is_topped(self):
-        try:
-            return 'module_tag' in self.modules and self.modules['module_tag']['text'] == '置顶'
-        except KeyError as e:
-            warnings.warn(f"err in is_topped {e=} {self.id_str=}")
-            return False
+        if self.modules.module_tag is not None:
+            return self.modules.module_tag.text == '置顶'
+        return False
 
 
 class Dynamic(BaseModel):

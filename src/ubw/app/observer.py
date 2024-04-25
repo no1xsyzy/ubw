@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from pydantic import Field
 
@@ -60,17 +60,29 @@ class ObserverApp(InitLoopFinalizeApp):
             if item.id_str not in self.last_got:
                 if item.is_topped:
                     await self.ui.add_record(Record(segments=[
-                        PlainText(text="置顶动态 "),
+                        Anchor(text="置顶动态", href=item.jump_url),
+                        PlainText(text=" "),
                         PlainText(text=item.text),
-                        Anchor(href=item.jump_url, text="链接")
                     ], time=item.pub_date))
-                elif (datetime.now() - item.pub_date) > timedelta(days=2):
+                elif (datetime.now(timezone(timedelta(seconds=8 * 3600))) - item.pub_date) > timedelta(days=2):
                     pass
+                elif item.is_video:
+                    await self.ui.add_record(Record(segments=[
+                        Anchor(text="发布视频", href=item.jump_url),
+                        PlainText(text=" "),
+                        PlainText(text=item.text),
+                    ], time=item.pub_date))
+                elif item.is_live:
+                    await self.ui.add_record(Record(segments=[
+                        Anchor(text="开始直播", href=item.jump_url),
+                        PlainText(text=" "),
+                        PlainText(text=item.text),
+                    ], time=item.pub_date))
                 else:
                     await self.ui.add_record(Record(segments=[
-                        PlainText(text="发布动态 "),
+                        Anchor(text="发布动态", href=item.jump_url),
+                        PlainText(text=" "),
                         PlainText(text=item.text),
-                        Anchor(href=item.jump_url, text="链接")
                     ], time=item.pub_date))
         self.last_got = {item.id_str for item in s.items}
 

@@ -1,3 +1,4 @@
+from datetime import timezone, timedelta
 from functools import cached_property
 from itertools import count
 
@@ -21,7 +22,7 @@ class Richy(StreamUI):
     palette: list[str] = 'red,green,yellow,blue,magenta,cyan'.split(',')
 
     def format_record(self, record: Record) -> RichRenderable:
-        s = rf"[cyan dim]{escape(record.time.strftime(self.datetime_format))}[/] "
+        s = rf"[cyan dim]{escape(record.time.astimezone(timezone(timedelta(seconds=8 * 3600))).strftime(self.datetime_format))}[/] "
         d = {}
         for seg in record.segments:
             match seg:
