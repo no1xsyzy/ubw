@@ -2,7 +2,7 @@ import abc
 import logging
 import re
 from contextvars import ContextVar
-from typing import Literal, Type, TypeVar
+from typing import Literal, TypeVar
 
 import aiohttp
 from pydantic import BaseModel
@@ -75,7 +75,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.close()
 
-    async def _get_model(self, data_model: Type[_T], url, **kwargs) -> _T:
+    async def _get_model(self, data_model: type[_T], url, **kwargs) -> _T:
         try:
             async with self.session.get(url, **kwargs) as res:
                 data = Response[data_model].model_validate((await res.json()))

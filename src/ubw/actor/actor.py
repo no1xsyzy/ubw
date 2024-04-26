@@ -4,7 +4,7 @@ import abc
 import asyncio
 import warnings
 from functools import wraps, partial, cached_property
-from typing import Annotated, Union, Type, Literal
+from typing import Annotated, Union, Literal
 
 from pydantic import BaseModel, Field, TypeAdapter, ConfigDict
 
@@ -44,7 +44,7 @@ class BaseActor(BaseModel, abc.ABC):
         return result
 
     @classmethod
-    def make_discriminator(cls) -> Type[Union[BaseActor]]:
+    def make_discriminator(cls) -> type[BaseActor]:
         return Annotated[Union[*cls.leaf_subclasses()], Field(discriminator='role')]
 
     @classmethod

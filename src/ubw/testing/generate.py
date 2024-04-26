@@ -5,7 +5,7 @@ import types
 import typing
 from contextvars import ContextVar
 from datetime import datetime, timedelta
-from typing import Type, Mapping, TypeVar, TypeGuard
+from typing import Mapping, TypeVar, TypeGuard
 
 from pydantic import BaseModel, RootModel, ValidationError
 from pydantic_core import PydanticUndefined
@@ -23,11 +23,11 @@ UNSET = object()
 path = ContextVar[tuple[typing.Any, ...]]('path', default=())
 
 
-def isrootmodel(t) -> TypeGuard[Type[RootModel]]:
+def isrootmodel(t) -> TypeGuard[RootModel]:
     return issubclass(t, RootModel)
 
 
-def ismodel(t) -> TypeGuard[Type[BaseModel]]:
+def ismodel(t) -> TypeGuard[BaseModel]:
     return issubclass(t, BaseModel)
 
 
@@ -43,7 +43,7 @@ def sub_path(p):
 
 
 def generate_type(
-        type_: Type[_T],
+        type_: type[_T],
         constraint: Mapping[str, typing.Any] = None,
 ) -> _T:
     if constraint is None:
