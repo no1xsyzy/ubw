@@ -3,6 +3,7 @@ import logging
 from datetime import datetime, timezone, timedelta
 from enum import Enum
 from functools import cached_property
+from pathlib import Path
 
 from aiotinydb import AIOTinyDB, AIOJSONStorage
 from aiotinydb.middleware import AIOMiddleware
@@ -63,8 +64,9 @@ class SaverHandler(BaseHandler):
 
     @cached_property
     def db(self):
-        fname = f"output/blive_saver/{self.room_id}/{self.shard_start.strftime('%Y年%m月%d日%H点%M%S')}.json"
+        fname = f"output/blive_saver/{self.room_id}/{self.shard_start.strftime('%Y年%m月/%Y年%m月%d日%H点%M%S')}.json"
         logger.info(f"creating db: {fname}")
+        Path(fname).parent.mkdir(parents=True, exist_ok=True)
         # you need serialization for each TinyDB instance, or it will always write to last instance
         serialization = SerializationMiddleware(AIOJSONStorage)
         serialization.register_serializer(DateTimeSerializer(), 'TinyDate')
