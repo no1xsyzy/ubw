@@ -35,6 +35,13 @@ class LiveUI(StreamUI):
     datetime_format: str = '[%Y-%m-%d %H:%M:%S]'
 
     palette: list[str] = 'red,green,yellow,blue,magenta,cyan'.split(',')
+    currency_palette: list[tuple[int, str]] = [
+        (1000, 'on red'), (500, 'on orange3'), (100, 'on yellow'), (50, 'on cyan'), (30, 'on blue')]
+
+    def get_currency_style(self, currency):
+        for c, s in self.currency_palette:
+            if currency > c:
+                return s
 
     @cached_property
     def _records(self):
@@ -82,7 +89,7 @@ class LiveUI(StreamUI):
                         s += f"(info...)"
                 case Currency(price=price, mark=mark):
                     if price > 0:
-                        s += f" [{mark}{price}]"
+                        s += f" [{self.get_currency_style(price)}]\\[{mark}{price}][/]"
         res = [Text.from_markup(s)]
         for k, v in d.items():
             res.append(Panel.fit(JSON.from_data(v), title=f'[{k}]'))

@@ -20,6 +20,16 @@ class Richy(StreamUI):
     datetime_format: str = '[%Y-%m-%d %H:%M:%S]'
 
     palette: list[str] = 'red,green,yellow,blue,magenta,cyan'.split(',')
+    currency_palette: list[tuple[int, str]] = [
+        (1000, 'on red'), (500, 'on orange3'), (100, 'on yellow'), (50, 'on cyan'), (30, 'on blue')]
+
+    def get_currency_style(self, currency):
+        for c, s in self.currency_palette:
+            if currency > c:
+                return s
+
+    def get_color_see_see(self, text):
+        return self.palette[hash(text) % len(self.palette)]
 
     def format_record(self, record: Record) -> RichRenderable:
         s = rf"[cyan dim]{escape(record.time.astimezone(timezone(timedelta(seconds=8 * 3600))).strftime(self.datetime_format))}[/] "
@@ -49,7 +59,7 @@ class Richy(StreamUI):
                         s += f"(info...)"
                 case Currency(price=price, mark=mark):
                     if price > 0:
-                        s += f" [{mark}{price}]"
+                        s += f" [{self.get_currency_style(price)}]\\[{mark}{price}][/]"
         res = [Text.from_markup(s)]
         for k, v in d.items():
             res.append(Panel.fit(JSON.from_data(v), title=f'[{k}]'))
