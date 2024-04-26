@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import warnings
 from datetime import datetime, timezone, timedelta
 from functools import cached_property
@@ -237,8 +238,13 @@ class RichTextNodeTypeAt(RichTextNodeBase):
     rid: int
 
 
+class Emoji(BaseModel):
+    icon_url: str
+
+
 class RichTextNodeTypeEmoji(RichTextNodeBase):
     type: Literal['RICH_TEXT_NODE_TYPE_EMOJI']
+    emoji: Emoji
 
 
 class RichTextNodeTypeWeb(RichTextNodeBase):
@@ -259,9 +265,14 @@ class RichText(BaseModel):
     text: str
 
 
+class Pic(BaseModel):
+    url: str
+
+
 class Opus(BaseModel):
     jump_url: str
     summary: RichText
+    pics: list[Pic]
 
 
 class Archive(BaseModel):
@@ -351,6 +362,13 @@ class ModuleCollection(BaseModel):
     module_tag: ModuleTag | None = None
 
 
+def markdown_escape(x):
+    x = re.sub(r'([\\\[\](){}#+\-.!|*_`])', r'\\\1', x)
+    x = x.replace("\n", "\n\n")
+    x = re.sub(r'\n{2,}', r'\n\n', x)
+    return x
+
+
 class DynamicItem(BaseModel):
     """
     :var type: 可能的值：
@@ -413,6 +431,21 @@ class DynamicItem(BaseModel):
         return []
 
     @cached_property
+    def markdown(self) -> str:
+        s = ""
+        for n in self.rich_text_nodes:
+            match n:
+                case RichTextNodeTypeAt(text=text, rid=rid):
+                    s = f"{s}[{markdown_escape(text)}](https://space.bilibili.com/{rid})"
+                case RichTextNodeTypeEmoji(emoji=Emoji(icon_url=icon_url), text=text):
+                    s = f"{s}![{markdown_escape(text)}]({icon_url})"
+                case RichTextNodeTypeWeb(text=text, jump_url=jump_url):
+                    s = f"{s}[{markdown_escape(text)}]({jump_url})"
+                case RichTextNodeTypeText(text=text):
+                    s = f"{s}{markdown_escape(text)}"
+        return s
+
+    @cached_property
     def text(self) -> str:
         match self.modules.module_dynamic.major:
             case MajorNone() | MajorDraw() | MajorCommon():
@@ -445,6 +478,13 @@ class DynamicItem(BaseModel):
             case MajorArchive(archive=archive):
                 return "https:" + archive.jump_url
         return f"https://t.bilibili.com/{self.id_str}"
+
+    @cached_property
+    def pictures(self) -> list[str]:
+        match self.modules.module_dynamic.major:
+            case MajorOpus(opus=opus):
+                opus: Opus
+                return [pic.url for pic in opus.pics]
 
     @cached_property
     def pub_date(self):
