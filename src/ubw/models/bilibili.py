@@ -553,6 +553,10 @@ class DashAV(BaseModel):
     mime_type: str
     bandwidth: float
 
+    @property
+    def apparent_fid(self):
+        return re.search(r'-(\d+).m4s', self.base_url)[1]
+
 
 class Dash(BaseModel):
     duration: timedelta
