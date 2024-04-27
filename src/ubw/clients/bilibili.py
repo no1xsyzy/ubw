@@ -58,7 +58,7 @@ class BilibiliCookieClient(BilibiliClientABC):
 
         async with aiofiles.open(s, mode='rt', encoding='utf-8') as f:
             async for line in f:
-                line = line.strip()
+                line = line.strip('\r\n')
                 if line.startswith('#HttpOnly_'):
                     line = line[len('#HttpOnly_'):]
                 if not line or line.startswith('#'):
