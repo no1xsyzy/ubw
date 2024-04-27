@@ -234,10 +234,12 @@ class BilibiliClientABC(BaseModel, abc.ABC):
 
     async def get_video_download(self, bvid, cid):
         return await self._get_model(VideoPlayInfo, 'https://api.bilibili.com/x/player/playurl',
-                                     params={'bvid': bvid, 'cid': cid, 'qn': 127, 'otype': 'json', 'fnval': 4048},
+                                     params={'bvid': bvid, 'cid': cid, 'qn': 127, 'otype': 'json', 'fnval': 4048,
+                                             'fourk': 1},
                                      headers={'referer': 'https://www.bilibili.com/video/' + bvid})
 
     async def get_video_download_raw(self, bvid, cid):
         return await self._get_raw('https://api.bilibili.com/x/player/playurl',
-                                   params={'bvid': bvid, 'cid': cid, 'qn': 127, 'otype': 'json', 'fnval': 4048},
+                                   params={'bvid': bvid, 'cid': cid, 'qn': 127, 'otype': 'json', 'fnval': 4048,
+                                           'fourk': 1},
                                    headers={'referer': 'https://www.bilibili.com/video/' + bvid})
