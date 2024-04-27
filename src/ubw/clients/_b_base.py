@@ -159,7 +159,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
             else:
                 raise BilibiliApiError(data.message)
 
-    async def get_dynamic(self, dynamic_id: int, features: list[str] = ()) -> Dynamic:
+    async def get_dynamic(self, dynamic_id: int | str, features: list[str] = ()) -> Dynamic:
         async with self.session.get('https://api.bilibili.com/x/polymer/web-dynamic/v1/detail',
                                     params={'id': dynamic_id, 'features': ','.join(features)}, ) as res:
             data = Response[Dynamic].model_validate(await res.json())
