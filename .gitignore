@@ -8,6 +8,7 @@ dist/
 *.log
 .env
 cookies.txt
+cookies-*.txt
 libmpv*.dll
 build/
 .coverage
