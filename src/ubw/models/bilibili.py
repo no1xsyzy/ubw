@@ -487,6 +487,7 @@ class DynamicItem(BaseModel):
             case MajorOpus(opus=opus):
                 opus: Opus
                 return [pic.url for pic in opus.pics]
+        return []
 
     @cached_property
     def pub_date(self):
