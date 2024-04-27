@@ -33,7 +33,7 @@ __all__ = ('BilibiliApiError', 'BilibiliClientABC', 'Literal', 'USER_AGENT',)
 
 logger = logging.getLogger('ubw.clients._b_base')
 _try_count = ContextVar('try_count', default=1)
-_T = TypeVar('_T', bound=BaseModel)
+_T = TypeVar('_T')
 
 
 class BilibiliApiError(Exception):
@@ -227,3 +227,17 @@ class BilibiliClientABC(BaseModel, abc.ABC):
             offset = d.offset
             for item in d.items:
                 yield item
+
+    async def get_video_pagelist(self, bvid):
+        return await self._get_model(list[VideoP], 'https://api.bilibili.com/x/player/pagelist',
+                                     params={'bvid': bvid})
+
+    async def get_video_download(self, bvid, cid):
+        return await self._get_model(VideoPlayInfo, 'https://api.bilibili.com/x/player/playurl',
+                                     params={'bvid': bvid, 'cid': cid, 'qn': 127, 'otype': 'json', 'fnval': 4048},
+                                     headers={'referer': 'https://www.bilibili.com/video/' + bvid})
+
+    async def get_video_download_raw(self, bvid, cid):
+        return await self._get_raw('https://api.bilibili.com/x/player/playurl',
+                                   params={'bvid': bvid, 'cid': cid, 'qn': 127, 'otype': 'json', 'fnval': 4048},
+                                   headers={'referer': 'https://www.bilibili.com/video/' + bvid})

@@ -13,6 +13,7 @@ __all__ = (
     'RoomInfo', 'InfoByRoom', 'DanmuInfo', 'RoomEmoticons', 'FingerSPI', 'RoomPlayInfo',
     'Dynamic', 'DynamicItem', 'AccountInfo',
     'Nav',
+    'VideoP', 'VideoPlayInfo',
 )
 
 from ._base import *
@@ -278,6 +279,7 @@ class Opus(BaseModel):
 class Archive(BaseModel):
     aid: str
     jump_url: str
+    bvid: str
 
     cover: str
     title: str
@@ -522,3 +524,40 @@ class Nav(BaseModel):
         alias='wbi_img_sub_url',
         validation_alias=AliasChoices('wbi_img_sub_url',
                                       AliasPath('wbi_img', 'sub_url')))
+
+
+class VideoP(BaseModel):
+    """
+    视频分P
+    :var cid: 分P编号
+    :var page: 第几分P
+    """
+    cid: int
+    page: int
+
+
+class SegmentBase(BaseModel):
+    initialization: str
+    index_range: str
+
+
+class DashAV(BaseModel):
+    id: int
+    base_url: Annotated[str, Field(validation_alias=AliasChoices('baseUrl', 'base_url', 'url'))]
+    backup_url: Annotated[list[str], Field(validation_alias=AliasChoices('backupUrl', 'backup_url'))]
+    segment_base: Annotated[SegmentBase, Field(validation_alias=AliasChoices('segment_base', 'SegmentBase'))]
+    codecs: str
+    width: int
+    height: int
+    mime_type: str
+    bandwidth: float
+
+
+class Dash(BaseModel):
+    duration: timedelta
+    video: list[DashAV]
+    audio: list[DashAV]
+
+
+class VideoPlayInfo(BaseModel):
+    dash: Dash
