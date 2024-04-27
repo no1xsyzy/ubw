@@ -234,11 +234,15 @@ async def run(cc: list[str]):
 async def app_show(
         app_name: str,
         app_override: Annotated[list[str], typer.Option('--app-override', '-X')] = (),
+        raw: bool = False,
 ):
     appconf = main.config['apps'].get(app_name)
     appconf = patch_config(appconf, {}, toml_patch=app_override)
-    application = AppTypeAdapter.validate_python(appconf)
     from rich.pretty import pprint
+    if raw:
+        pprint(appconf)
+        return appconf
+    application = AppTypeAdapter.validate_python(appconf)
     pprint(application)
     return application
 
