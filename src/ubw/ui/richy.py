@@ -59,7 +59,11 @@ class Richy(StreamUI):
                         s += f"(info...)"
                 case Currency(price=price, mark=mark):
                     if price > 0:
-                        s += f" [{self.get_currency_style(price)}]\\[{mark}{price}][/]"
+                        style = self.get_currency_style(price)
+                        if style:
+                            s += f" [{style}]\\[{mark}{price}][/]"
+                        else:
+                            s += f" \\[{mark}{price}]"
         res = [Text.from_markup(s)]
         for k, v in d.items():
             res.append(Panel.fit(JSON.from_data(v), title=f'[{k}]'))
