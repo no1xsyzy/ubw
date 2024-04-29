@@ -140,6 +140,7 @@ class ObserverApp(InitLoopFinalizeApp):
             await self.ui.stop()
 
     async def close(self):
-        await self._live_client.close()
+        if self._live_client is not None:
+            await self._live_client.close()
         if self.bilibili_client_owner:
             await self.bilibili_client.close()
