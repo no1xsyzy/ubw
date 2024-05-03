@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
 from pydantic import Field
 
@@ -77,7 +77,7 @@ class ObserverApp(InitLoopFinalizeApp):
                         PlainText(text=" "),
                         PlainText(text=item.text),
                     ], time=item.pub_date))
-                elif (datetime.now(timezone(timedelta(seconds=8 * 3600))) - item.pub_date) > timedelta(days=2):
+                elif (datetime.now().astimezone() - item.pub_date) > timedelta(days=2):
                     pass
                 elif item.is_video:
                     await self.ui.add_record(Record(segments=[

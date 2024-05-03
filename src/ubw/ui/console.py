@@ -9,7 +9,7 @@ class ConsoleUI(StreamUI):
     datetime_format: str = '[%Y-%m-%d %H:%M:%S]'
 
     def format_record(self, record: Record) -> str:
-        s = [rf"{record.time.strftime(self.datetime_format)} "]
+        s = [rf"{record.time.astimezone().strftime(self.datetime_format)} "]
         for seg in record.segments:
             match seg:
                 case PlainText(text=text) | Picture(alt=text):

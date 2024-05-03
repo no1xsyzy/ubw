@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from enum import Enum
 from functools import cached_property
 from pathlib import Path
@@ -60,7 +60,7 @@ class SaverHandler(BaseHandler):
 
     @cached_property
     def shard_start(self):
-        return datetime.now(timezone(timedelta(seconds=8 * 3600)))
+        return datetime.now().astimezone()
 
     @cached_property
     def db(self):
@@ -151,11 +151,18 @@ class SaverHandler(BaseHandler):
 
     def s_shard_now(self):
         logger.info("m_shard_now()")
+        now = datetime.now()
         try:
-            self._wait_sharding.set_result(None)
+            self._wait_sharding.set_result(now)
         except asyncio.InvalidStateError:
             # ???
-            logger.exception(f"!!STRANGE!! {self._wait_sharding=} is not re-created")
+            if self._wait_sharding.done() and (now - self._wait_sharding.result()) < timedelta(seconds=1):
+                return
+            logger.exception(
+                f"!!STRANGE!! {self._wait_sharding=} is not re-created\n"
+                f"{self._sharder_task=}\n"
+                f"{self._living=}"
+            )
 
     async def _check_for_shard(self):
         logger.info("check if shard")

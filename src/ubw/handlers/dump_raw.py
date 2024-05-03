@@ -1,6 +1,6 @@
 import asyncio
 import logging
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from functools import cached_property
 
 from aiotinydb import AIOTinyDB
@@ -35,7 +35,7 @@ class DumpRawHandler(BaseHandler):
 
     @cached_property
     def shard_start(self):
-        return datetime.now(timezone(timedelta(seconds=8 * 3600)))
+        return datetime.now().astimezone()
 
     @cached_property
     def db(self):

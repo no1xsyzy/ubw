@@ -62,7 +62,7 @@ class LiveUI(StreamUI):
         self._live.stop()
 
     def format_record(self, record: Record) -> 'RichRenderable':
-        s = rf"[dim cyan]{escape(record.time.strftime(self.datetime_format))}[/] "
+        s = rf"[dim cyan]{escape(record.time.astimezone().strftime(self.datetime_format))}[/] "
         d = {}
         for seg in record.segments:
             match seg:

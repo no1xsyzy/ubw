@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 import warnings
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 from functools import cached_property
 from typing import *
 
@@ -79,7 +79,7 @@ class InfoByRoom(BaseModel):
     room_info: RoomInfo
     silent_room_info: SilentRoomInfo
     anchor_info: AnchorInfo
-    ct: datetime = Field(default_factory=lambda: datetime.now(timezone(timedelta(seconds=8 * 3600))))
+    ct: datetime = Field(default_factory=lambda: datetime.now().astimezone())
 
 
 class Host(BaseModel):

@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime, timezone, timedelta
+from datetime import datetime
 
 import aiocsv
 import aiofiles
@@ -23,7 +23,7 @@ def create_csv_writer(room_id: int) -> tuple[asyncio.Task, asyncio.Queue]:
         while True:
             dirname = f"output/bhashm/{room_id}"
             await aiofiles.os.makedirs(dirname, exist_ok=True)
-            filename = f"{dirname}/{room_id}_{datetime.now(timezone(timedelta(seconds=8 * 3600))).strftime('%Y年%m月%d日%H点%M%S')}.csv"
+            filename = f"{dirname}/{room_id}_{datetime.now().astimezone().strftime('%Y年%m月%d日%H点%M%S')}.csv"
             mode: Literal['a', 'w']
             if await aiofiles.os.path.isfile(filename):
                 mode = 'a'
@@ -90,7 +90,7 @@ class HashMarkHandler(BaseHandler):
                 f"[bright_white]{escape(msg)}[/][bright_green]{live_start_suffix}[/]")
             await self.get_csv_queue_for(room_id).put({
                 'time': (
-                    time.astimezone(timezone(timedelta(seconds=8 * 3600)))
+                    time.astimezone()
                     .replace(tzinfo=None)
                     .isoformat(sep=" ", timespec='seconds')),
                 't': t, 'marker': uname, 'symbol': msg

@@ -77,7 +77,7 @@ class Record(BaseModel):
         generally trivial=0 normal=10 notice=20 essential=30 fatal=40
     """
     segments: list[Segment]
-    time: datetime = Field(default_factory=datetime.now)
+    time: datetime = Field(default_factory=lambda: datetime.now().astimezone())
     importance: int = 10
 
 

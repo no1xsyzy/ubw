@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, timedelta, date
+from datetime import datetime, timedelta, date
 from typing import Annotated, runtime_checkable, Protocol, Union, Literal
 
 from pydantic import BaseModel as _BaseModel, Field, model_validator, field_validator, Field, RootModel, AliasChoices, \
@@ -10,7 +10,7 @@ __all__ = (
     # pydantic
     'BaseModel', 'CommandModel', 'model_validator', 'field_validator', 'Field', 'AliasChoices',
     # stdlib
-    'datetime', 'timedelta', 'timezone', 'date', 'Literal', 'Annotated', 'Union',
+    'datetime', 'timedelta', 'date', 'Literal', 'Annotated', 'Union',
     # interface
     'Summary', 'Summarizer',
     # common types
@@ -31,7 +31,7 @@ class Scatter(BaseModel):
 
 class CommandModel(BaseModel):
     cmd: str
-    ct: datetime = Field(default_factory=lambda: datetime.now(timezone(timedelta(seconds=8 * 3600))))
+    ct: datetime = Field(default_factory=lambda: datetime.now().astimezone())
 
     is_report: bool | None = None
     msg_id: str | None = None

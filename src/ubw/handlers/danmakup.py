@@ -1,5 +1,4 @@
 import re
-from datetime import timezone, timedelta
 from functools import cached_property
 
 from pydantic import field_validator, model_validator
@@ -148,7 +147,7 @@ class DanmakuPHandler(BaseHandler):
             PlainText(text=summary.msg),
             Currency(price=summary.price),
             PlainText(text=f" ({summary.raw.cmd})"),
-        ], time=summary.t.astimezone(timezone(timedelta(seconds=8 * 3600)))))
+        ], time=summary.t.astimezone()))
 
     async def on_warning(self, client, message: models.WarningCommand):
         room_id = client.room_id

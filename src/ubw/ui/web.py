@@ -93,7 +93,7 @@ class Web(StreamUI):
 
     def format_record(self, record: Record) -> lxml.html.HtmlElement:
         if self.show_date:
-            h = [SPAN({'class': 'datetime'}, record.time.strftime('[%Y-%m-%d %H:%M:%S] '))]
+            h = [SPAN({'class': 'datetime'}, record.time.astimezone().strftime('[%Y-%m-%d %H:%M:%S] '))]
         else:
             h = []
         for seg in record.segments:
