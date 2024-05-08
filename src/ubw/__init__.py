@@ -1,7 +1,9 @@
 import asyncio
 import os
 import re
+import shutil
 import sys
+from contextlib import contextmanager
 from enum import Enum
 from pathlib import Path
 from typing import Annotated, Callable, Any
@@ -350,6 +352,20 @@ async def get_play_url(room_id: int,
 
             def each(url, info):
                 print(f"#EXTINF:,[{next(s)}]{info}\n{url}\n")
+
+        case _OutputChoice.m3u_mpv:
+            from itertools import count
+            import tempfile
+            m3u8file = tempfile.NamedTemporaryFile(suffix='.m3u', mode='wt', encoding='utf-8')
+            print("#EXTM3U", file=m3u8file)
+            s = count()
+
+            def each(url, info):
+                print(f"#EXTINF:,[{next(s)}]{info}\n{url}\n", file=m3u8file, flush=True)
+
+            def after():
+                returncode = os.spawnl(os.P_WAIT, shutil.which('mpv'), 'mpv', m3u8file.name)
+                print('mpv process exited with code {}'.format(returncode))
 
         case _OutputChoice.libmpv:
             # experimental
