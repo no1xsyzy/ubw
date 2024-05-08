@@ -1,4 +1,3 @@
-import asyncio
 import json
 import logging
 
@@ -12,7 +11,6 @@ logger = logging.getLogger('edge_collect')
 class EdgeCollector(BaseHandler):
     cls: Literal['edge_collect'] = 'edge_collect'
     _living: bool = False
-    _sharder_task: asyncio.Task | None = None
 
     async def process_one(self, client, command):
         cmd = command.get('cmd', '')
