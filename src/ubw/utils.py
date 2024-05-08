@@ -20,6 +20,10 @@ async def listen_to_all(
         raise ValueError("neither handler nor handler_factory is specified, useless")
 
     async def g(b):
+        nonlocal handler
+        handlers = []
+        if handler is not None:
+            handlers.append(handler)
         clients: dict[int, WSWebCookieLiveClient] = {}
         for room_id in room_ids:
             if room_id in clients:
@@ -27,14 +31,19 @@ async def listen_to_all(
             else:
                 clients[room_id] = client = \
                     WSWebCookieLiveClient(bilibili_client=b, bilibili_client_owner=False, room_id=room_id)
-            client.add_handler(handler if handler is not None else handler_factory(room_id))
+            if handler is None:
+                handler = handler_factory(room_id)
+                handlers.append(handler)
+            client.add_handler(handler)
             await handler.start(client)
             await client.start()
 
         try:
-            await asyncio.gather(*(client.join() for client in clients.values()))
+            await asyncio.gather(*(client.join() for client in clients.values()),
+                                 *(handler.join() for handler in handlers))
         finally:
-            await asyncio.gather(*(client.stop_and_close() for client in clients.values()))
+            await asyncio.gather(*(client.stop_and_close() for client in clients.values()),
+                                 *(handler.stop_and_close() for handler in handlers))
 
     if b_client is None:
         warnings.warn('b_client should be passed')

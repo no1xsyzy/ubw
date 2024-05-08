@@ -49,11 +49,20 @@ class BaseHandler(BaseModel):
     async def start(self, client: LiveClientABC):
         pass
 
+    async def join(self):
+        pass
+
     async def stop(self):
         pass
 
     async def close(self):
         pass
+
+    async def stop_and_close(self):
+        try:
+            await self.stop()
+        finally:
+            await self.close()
 
     if DEBUGGING_TOO_LONG:
         async def handle(self, client: LiveClientABC, command: dict):
@@ -233,6 +242,9 @@ class QueuedProcessorMixin(BaseHandler):
         if self._process_task is None:
             self._process_task = asyncio.create_task(self.t_process())
         await super().start(client)
+
+    async def join(self):
+        await asyncio.gather(super().join(), self._process_task)
 
     async def stop(self):
         task = self._process_task

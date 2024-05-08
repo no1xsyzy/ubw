@@ -46,6 +46,9 @@ class LivingStatusHandler(BaseHandler):
     _ui_started: bool = False
     _refresh_task: asyncio.Task | None = None
 
+    async def join(self):
+        await asyncio.gather(super().join(), self._refresh_task)
+
     async def ensure_info(self, room_id, force_update=False):
         if not force_update and room_id in self.info_cache:
             return False

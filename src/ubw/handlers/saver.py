@@ -48,6 +48,9 @@ class SaverHandler(BaseHandler):
         self._sharder_task = asyncio.create_task(self.t_sharder())
         await super().start(client)
 
+    async def join(self):
+        await asyncio.gather(super().join(), self._sharder_task)
+
     async def stop(self):
         task = self._sharder_task
         self._sharder_task = None
