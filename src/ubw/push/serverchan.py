@@ -39,7 +39,9 @@ class ServerChanPusher(BaseModel):
 
     @cached_property
     def session(self):
-        return aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10))
+        session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=10))
+        logger.info(f'created aiohttp session by ServerChanPusher {session!r}')
+        return session
 
     async def push(self, content: ServerChanMessage):
         postdata = aiohttp.FormData(content.model_dump(mode='json', exclude_defaults=True))
