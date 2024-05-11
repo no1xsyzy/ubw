@@ -27,7 +27,7 @@ class BilibiliUnauthorizedClient(BilibiliClientABC):
         if timeout is None:
             timeout = aiohttp.ClientTimeout(total=10)
         client_session = aiohttp.ClientSession(headers=headers, cookie_jar=cookie_jar, timeout=timeout, **kwargs)
-        logger.info(f'created aiohttp session with BilibiliUnauthorizedClient {client_session!r}')
+        logger.debug(f'created aiohttp session with BilibiliUnauthorizedClient {client_session!r}')
         return client_session
 
 
@@ -92,7 +92,7 @@ class BilibiliCookieClient(BilibiliClientABC):
             timeout = aiohttp.ClientTimeout(total=10)
 
         client_session = aiohttp.ClientSession(headers=headers, cookie_jar=cookie_jar, timeout=timeout, **kwargs)
-        logger.info(f'created aiohttp session with BilibiliCookieClient {client_session!r}')
+        logger.debug(f'created aiohttp session with BilibiliCookieClient {client_session!r}')
         return client_session
 
 

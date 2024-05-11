@@ -128,7 +128,7 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
         except Exception as e:  # noqa
             logger.exception(f'room={self.room_id} WSWebClient._network_coroutine() finished with exception:')
         finally:
-            logger.info(f'room={self.room_id} WSWebClient._network_coroutine() finalized')
+            logger.debug(f'room={self.room_id} WSWebClient._network_coroutine() finalized')
 
     async def _network_coroutine(self):
         # 如果之前未初始化则初始化

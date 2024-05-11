@@ -28,7 +28,7 @@ class BaseDownloader(BaseModel):
     @cached_property
     def _session(self):
         session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(sock_connect=10))
-        logger.info(f'created aiohttp session by BaseDownloader {session!r}')
+        logger.debug(f'created aiohttp session by BaseDownloader {session!r}')
         return session
 
     async def download_file(self, url, target, *, get_kwargs=None, session=None) -> PathList:
