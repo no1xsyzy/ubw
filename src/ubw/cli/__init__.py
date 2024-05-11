@@ -257,6 +257,7 @@ async def app_run(
         await application.start()
         await application.join()
     finally:
+        await application.stop()
         await application.close()
 
 

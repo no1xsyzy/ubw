@@ -14,7 +14,14 @@ class SimpleApp(BaseApp):
         self.client.add_handler(self.handler)
         await self.handler.start(self.client)
         await self.client.start()
+
+    async def join(self):
+        await self._task
         await asyncio.gather(self.client.join(), self.handler.join())
+
+    async def stop(self):
+        await self.client.stop()
+        await self.handler.stop()
 
     async def close(self):
         await self.client.close()
