@@ -47,7 +47,8 @@ async def listen_to_all(
 
     if b_client is None:
         warnings.warn('b_client should be passed')
-        async with BilibiliCookieClient(cookie_file='cookies.txt') as b_client:
+        from pathlib import Path
+        async with BilibiliCookieClient(cookie_file=Path('cookies.txt')) as b_client:
             await g(b_client)
     else:
         await g(b_client)
