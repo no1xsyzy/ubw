@@ -39,6 +39,15 @@ class Data106Data(BaseModel):
     suffix_text: str = '人正在点赞'
 
 
+class Data103Data(BaseModel):
+    fade_duration: int = 10000
+    cnt: int
+    card_appear_interval: int = 0
+    suffix_text: str = '人关注了主播'
+    reset_cnt: int = 0
+    display_flag: int = 1
+
+
 class Data(BaseModel):
     id: int
     status: int
@@ -49,6 +58,13 @@ class Data(BaseModel):
 class Data102(Data):
     type: Literal[102]
     data: Data102Data
+
+    validate_extra = field_validator('data', mode='before')(strange_dict)
+
+
+class Data103(Data):
+    type: Literal[103]
+    data: Data103Data
 
     validate_extra = field_validator('data', mode='before')(strange_dict)
 
@@ -69,4 +85,4 @@ class Data106(Data):
 
 class DmInteractionCommand(CommandModel):
     cmd: Literal['DM_INTERACTION']
-    data: Annotated[Data102 | Data105 | Data106, Field(discriminator='type')]
+    data: Annotated[Data102 | Data103 | Data105 | Data106, Field(discriminator='type')]
