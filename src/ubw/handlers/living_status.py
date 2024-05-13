@@ -49,9 +49,9 @@ class LivingStatusHandler(BaseHandler):
     async def join(self):
         await asyncio.gather(super().join(), self._refresh_task)
 
-    async def ensure_info(self, room_id, force_update=False):
+    async def ensure_info(self, room_id, force_update=False) -> tuple[Info, bool]:
         if not force_update and room_id in self.info_cache:
-            return False
+            return self.info_cache[room_id], False
         info: models.InfoByRoom = await self.bilibili_client.get_info_by_room(room_id)
         up_id = info.room_info.uid
         up_name = info.anchor_info.base_info.uname
@@ -68,19 +68,14 @@ class LivingStatusHandler(BaseHandler):
                 updated = True
             else:
                 updated = False
-        self.info_cache[room_id] = Info(
+        self.info_cache[room_id] = i = Info(
             up_id=up_id, up_name=up_name,
             title=title,
             parent_area_name=parent_area_name, area_name=area_name,
             living=living,
             update_time=datetime.now(),
         )
-        return updated
-
-    async def get_info(self, room_id, force_update=False) -> Info:
-        if room_id not in self.info_cache:
-            await self.ensure_info(room_id, force_update)
-        return self.info_cache[room_id]
+        return i, updated
 
     async def start(self, client):
         room_id = client.room_id
@@ -89,10 +84,11 @@ class LivingStatusHandler(BaseHandler):
         if self.owned_ui and not self._ui_started:
             await self.ui.start()
         await self.refresh_record(room_id)
-        self._refresh_task = asyncio.create_task(self.t_active_refresh())
+        if self._refresh_task is None:
+            self._refresh_task = asyncio.create_task(self.t_active_refresh())
 
     async def refresh_record(self, room_id):
-        info = await self.get_info(room_id)
+        info, _ = await self.ensure_info(room_id)
         record = self.make_record(room_id, info)
         if room_id in self.ui_keys:
             await self.ui.edit_record(self.ui_keys[room_id], record=record)
@@ -104,7 +100,7 @@ class LivingStatusHandler(BaseHandler):
         return Record(time=info['update_time'], segments=[
             PlainText(text=f"[{room_id}] "),
             PlainText(text=f"\N{Ear}开始侦听，当前"),
-            (PlainText(text=f"\N{Black Right-Pointing Triangle With Double Vertical Bar}\N{VS16}直播中")
+            (PlainText(text="\N{Black Right-Pointing Triangle With Double Vertical Bar}\N{VS16}直播中")
              if info['living'] else
              PlainText(text="\N{Black Square For Stop}\N{VS16}未直播")),
             PlainText(text="，标题"),
@@ -116,7 +112,9 @@ class LivingStatusHandler(BaseHandler):
         while True:
             await asyncio.sleep(self.active_refresh_interval.total_seconds())
             to_refresh = random.choice(list(self.info_cache.keys()))
-            await self.ensure_info(to_refresh)
+            _, updated = await self.ensure_info(to_refresh, force_update=True)
+            if updated:
+                await self.refresh_record(to_refresh)
 
     async def on_room_change(self, client, message):
         room_id = client.room_id
@@ -128,10 +126,10 @@ class LivingStatusHandler(BaseHandler):
 
     async def on_live(self, client, message):
         room_id = client.room_id
-        self.info_cache[room_id]['living'] = True
+        self.info_cache[room_id].update(living=True)
         await self.refresh_record(room_id)
 
     async def on_preparing(self, client, message):
         room_id = client.room_id
-        self.info_cache[room_id]['living'] = False
+        self.info_cache[room_id].update(living=False)
         await self.refresh_record(room_id)
