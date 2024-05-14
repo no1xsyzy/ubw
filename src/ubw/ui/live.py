@@ -1,4 +1,3 @@
-import itertools
 import logging
 import threading
 from collections import OrderedDict
@@ -111,15 +110,15 @@ class LiveUI(StreamUI):
             nlines = sum(map(len, rendered.values()))
             extra_lines = nlines - height
 
-            logger.info('rendering %d lines in height %d', nlines, height)
+            logger.debug('rendering %d lines in height %d', nlines, height)
 
             if extra_lines > 0:
-                logger.info('removing %d lines', extra_lines)
+                logger.debug('removing %d lines', extra_lines)
 
                 import json
-                logger.info('renderables %s', json.dumps(
+                logger.debug('renderables %s', json.dumps(
                     {k: str(v['renderable'].renderables) for k, v in self._records.items()}, indent=2))
-                logger.info('rendered %s', rendered)
+                logger.debug('rendered %s', rendered)
 
                 # process unstick_before
                 former_k = None
@@ -132,12 +131,12 @@ class LiveUI(StreamUI):
                 def remove_rendered(k):
                     nonlocal extra_lines
                     if extra_lines >= len(rendered[k]):
-                        logger.info('removing line[%s]: %s', k, rendered[k])
+                        logger.debug('removing line[%s]: %s', k, rendered[k])
                         extra_lines -= len(rendered[k])
                         del rendered[k]
                         to_be_removed_keys.append(k)
                     else:
-                        logger.info('partially removing line[%s]: %s', k, rendered[k][:extra_lines])
+                        logger.debug('partially removing line[%s]: %s', k, rendered[k][:extra_lines])
                         rendered[k] = rendered[k][extra_lines:]
                         extra_lines = 0
 
@@ -157,11 +156,19 @@ class LiveUI(StreamUI):
                 for k in to_be_removed_keys:
                     del self._records[k]
 
+            result = []
             new_line = RichSegment.line()
             for k, v in self._records.items():
                 if k in rendered:
-                    yield from itertools.chain.from_iterable(rendered[k])
-                    yield new_line
+                    rk = [j for rk in rendered[k] for j in rk]
+                    if rk[-1].text.isspace():
+                        rk.pop(-1)
+                    # yield from itertools.chain.from_iterable(rk)
+                    # yield new_line
+                    result.extend(rk)
+                    result.append(new_line)
+            # logger.debug(f"{result!r}")
+            yield Group(*result)
 
     def _generate_key(self):
         import string
@@ -172,12 +179,14 @@ class LiveUI(StreamUI):
                 return key
 
     async def add_record(self, record: Record, sticky=False):
+        logger.debug(f'add_record()')
         with self._lock:
             key = self._generate_key()
             self._records[key] = Info(is_sticky=sticky, renderable=self.format_record(record), unstick_before=set())
             return key
 
     async def edit_record(self, key, *, record=None, sticky=None):
+        logger.debug(f'edit_record()')
         with self._lock:
             if key in self._records:
                 if record is not None:
@@ -186,15 +195,9 @@ class LiveUI(StreamUI):
                     self._records[key]['is_sticky'] = sticky
 
     async def remove(self, key: Key):
+        logger.debug(f'remove()')
         with self._lock:
             self._records.pop(key, None)
-
-    async def unstick_before(self, key, before):
-        with self._lock:
-            if before in self._records:
-                self._records[key]['unstick_before'].add(before)
-            else:
-                self._records.pop(key, None)
 
 
 if __name__ == '__main__':
