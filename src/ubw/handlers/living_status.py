@@ -83,6 +83,7 @@ class LivingStatusHandler(BaseHandler):
             await self.bilibili_client.__aenter__()
         if self.owned_ui and not self._ui_started:
             await self.ui.start()
+            self._ui_started = True
         await self.refresh_record(room_id)
         if self._refresh_task is None:
             self._refresh_task = asyncio.create_task(self.t_active_refresh())
