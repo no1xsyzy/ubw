@@ -101,6 +101,7 @@ class LivingStatusHandler(BaseHandler):
         return Record(time=info['update_time'], segments=[
             PlainText(text=f"[{room_id}] "),
             PlainText(text=f"\N{Ear}开始侦听，当前"),
+            User(name=info['up_name'], uid=info['up_id']),
             (PlainText(text="\N{Black Right-Pointing Triangle With Double Vertical Bar}\N{VS16}直播中")
              if info['living'] else
              PlainText(text="\N{Black Square For Stop}\N{VS16}未直播")),
