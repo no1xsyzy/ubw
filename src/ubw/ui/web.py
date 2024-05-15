@@ -103,21 +103,24 @@ class Web(StreamUI):
                 case Anchor(text=text, href=href):
                     h.append(A({'href': href}, text))
                 case User(name=name, uid=uid, face=face):
+                    attr = {'href': f"https://space.bilibili.com/{uid}",
+                            'class': self.color_class(str(uid)),
+                            'target': '_blank'}
                     if face == '':
                         h.append(
-                            A({'href': f"https://space.bilibili.com/{uid}", 'class': self.color_class(str(uid))},
+                            A(attr,
                               name))
                     else:
                         h.append(
-                            A({'href': f"https://space.bilibili.com/{uid}", 'class': self.color_class(str(uid))},
+                            A(attr,
                               IMG(src=face, style="height: 1em; width: 1em; border-radius: 0.5em;"),
                               name))
                 case Room(owner_name=name, room_id=room_id):
                     h.append(
-                        A(ATTR(href=f"https://live.bilibili.com/{room_id}"), f"{name}的直播间"))
+                        A(ATTR(href=f"https://live.bilibili.com/{room_id}", target='_blank'), f"{name}的直播间"))
                 case RoomTitle(title=title, room_id=room_id):
                     h.append(
-                        A(ATTR(href=f"https://live.bilibili.com/{room_id}"), f"《{title}》"))
+                        A(ATTR(href=f"https://live.bilibili.com/{room_id}", target='_blank'), f"《{title}》"))
                 case ColorSeeSee(text=text):
                     h.append(
                         SPAN(CLASS(self.color_class(text)),
