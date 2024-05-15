@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 __all__ = (
     'Segment',
-    'PlainText', 'Anchor', 'User', 'Room', 'RoomTitle', 'ColorSeeSee', 'DebugInfo', 'Currency', 'Picture',
+    'PlainText', 'Anchor', 'User', 'Room', 'RoomTitle', 'ColorSeeSee', 'DebugInfo', 'Currency', 'Picture', 'LineBreak',
     'Record',
     'StreamUI', 'Literal', 'Field',
     'demo',
@@ -69,6 +69,10 @@ class Picture(Segment):
     type: Literal['picture'] = 'picture'
     url: str
     alt: str
+
+
+class LineBreak(Segment):
+    type: Literal['line_break'] = 'line_break'
 
 
 class Record(BaseModel):

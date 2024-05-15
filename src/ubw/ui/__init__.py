@@ -11,7 +11,7 @@ __all__ = (
     'ConsoleUI', 'LiveUI', 'Richy', 'Web',
     'StreamUI',
     'Segment',
-    'PlainText', 'Anchor', 'User', 'Room', 'RoomTitle', 'ColorSeeSee', 'DebugInfo', 'Currency', 'Picture',
+    'PlainText', 'Anchor', 'User', 'Room', 'RoomTitle', 'ColorSeeSee', 'DebugInfo', 'Currency', 'Picture', 'LineBreak',
     'Record',
 )
 

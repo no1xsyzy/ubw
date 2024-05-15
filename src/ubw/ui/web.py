@@ -8,7 +8,7 @@ from typing import Union, NamedTuple
 import aiohttp
 import lxml
 from aiohttp import web
-from lxml.html.builder import HTML, BODY, HEAD, DIV, META, TITLE, SCRIPT, STYLE, SPAN, A, IMG, ATTR, CLASS
+from lxml.html.builder import HTML, BODY, HEAD, DIV, META, TITLE, SCRIPT, STYLE, SPAN, A, IMG, ATTR, CLASS, BR
 
 from ._base import *
 
@@ -117,10 +117,12 @@ class Web(StreamUI):
                               name))
                 case Room(owner_name=name, room_id=room_id):
                     h.append(
-                        A(ATTR(href=f"https://live.bilibili.com/{room_id}", target='_blank'), f"{name}的直播间"))
+                        A(ATTR(href=f"https://live.bilibili.com/{room_id}", target='_blank'),
+                          f"{name}的直播间"))
                 case RoomTitle(title=title, room_id=room_id):
                     h.append(
-                        A(ATTR(href=f"https://live.bilibili.com/{room_id}", target='_blank'), f"《{title}》"))
+                        A(ATTR(href=f"https://live.bilibili.com/{room_id}", target='_blank'), CLASS('room'),
+                          f"《{title}》"))
                 case ColorSeeSee(text=text):
                     h.append(
                         SPAN(CLASS(self.color_class(text)),
@@ -132,9 +134,12 @@ class Web(StreamUI):
                 case Currency(price=price, mark=mark):
                     if price > 0:
                         h.append(
-                            SPAN(CLASS('currency'), f" [{mark}{price}]"))
+                            SPAN(CLASS('currency'),
+                                 f" [{mark}{price}]"))
                 case Picture(url=url, alt=alt):
-                    h.append(IMG(src=url, alt=alt))
+                    h.append(IMG(CLASS('picture'), src=url, alt=alt, title=alt))
+                case LineBreak():
+                    h.append(BR())
         return SPAN(*h)
 
     def find_key(self, key):
@@ -256,8 +261,27 @@ socket.addEventListener("message", (event) => {
 """
 
         style = """
+/* reset */
+html { box-sizing: border-box; }
+*, *:before, *:after { box-sizing: inherit; }
+html { -moz-text-size-adjust: none; -webkit-text-size-adjust: none; text-size-adjust: none; }
+body, h1, h2, h3, h4, p,
+figure, blockquote, dl, dd { margin: 0; }
+ul[role='list'], ol[role='list'] { list-style: none; }
+ul[class], ol[class] { margin: 0; padding: 0; list-style: none; }
+body { min-height: 100vh; line-height: 1.5; }
+h1, h2, h3, h4, button, input, label { line-height: 1.1; }
+h1, h2, h3, h4 { text-wrap: balance; }
+a:not([class]) { text-decoration-skip-ink: auto; color: currentColor; }
+input, button, textarea, select { font: inherit; }
+textarea:not([rows]) { min-height: 10em; }
+:target { scroll-margin-block: 5ex; }
+/* end of reset */
+
 span.datetime { color: darkcyan; }
 span.debug-info { color: orange; }
+.picture { max-width: 50%; }
+@media screen and (max-width: 600px) { .picture { max-width: 100%; } }
 """
 
         body = lxml.html.tostring(
