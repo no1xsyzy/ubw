@@ -68,6 +68,7 @@ from .pk import (
 )
 from .playtogether_icon_change import PlaytogetherIconChangeCommand
 from .popular_rank_changed import PopularRankChangedCommand
+from .popular_rank_guide_card import PopularRankGuideCardCommand
 from .popularity_red_pocket_new import PopularityRedPocketNewCommand, PopularityRedPocketV2NewCommand
 from .popularity_red_pocket_start import PopularityRedPocketStartCommand, PopularityRedPocketV2StartCommand
 from .popularity_red_pocket_winner_list import (
@@ -182,6 +183,7 @@ AnnotatedCommandModel = Annotated[Union[
     PkBattlePunishBeginCommand,
     PlaytogetherIconChangeCommand,
     PopularRankChangedCommand,
+    PopularRankGuideCardCommand,
     PopularityRedPocketNewCommand, PopularityRedPocketV2NewCommand,
     PopularityRedPocketStartCommand, PopularityRedPocketV2StartCommand,
     PopularityRedPocketWinnerListCommand, PopularityRedPocketV2WinnerListCommand,
@@ -294,6 +296,8 @@ __all__ = (
     'PkBattleMultipleResCommand',
     'PkBattlePunishBeginCommand',
     'PlaytogetherIconChangeCommand',
+    'PopularRankChangedCommand',
+    'PopularRankGuideCardCommand',
     'PopularityRedPocketNewCommand', 'PopularityRedPocketV2NewCommand',
     'PopularityRedPocketStartCommand', 'PopularityRedPocketV2StartCommand',
     'PopularityRedPocketWinnerListCommand', 'PopularityRedPocketV2WinnerListCommand',

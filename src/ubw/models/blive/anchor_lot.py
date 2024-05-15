@@ -42,6 +42,7 @@ class AnchorLotStartData(BaseModel):
     time: int
     url: str
     web_url: str
+    award_price_text: str
 
 
 class AnchorLotStartCommand(CommandModel):
@@ -59,6 +60,8 @@ class AwardUser(BaseModel):
     num: int
     is_mystery: bool = False
     uinfo: Uinfo | None = None
+    bag_id: int
+    gift_id: int
 
 
 class AnchorLotAwardData(BaseModel):
@@ -68,6 +71,8 @@ class AnchorLotAwardData(BaseModel):
     award_num: int
     award_type: int
     award_users: list[AwardUser]
+    award_price_text: str
+    ruid: int
     id: int
     lot_status: int
     url: str
