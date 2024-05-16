@@ -101,12 +101,14 @@ class LivingStatusHandler(BaseHandler):
 
         await super().stop()
 
-        if self.bilibili_client_owner and self._bilibili_client_started:
-            await self.bilibili_client.stop()
-            self._bilibili_client_started = False
         if self.owned_ui and self._ui_started:
             await self.ui.stop()
             self._ui_started = False
+
+    async def close(self):
+        if self.bilibili_client_owner and self._bilibili_client_started:
+            await self.bilibili_client.close()
+            self._bilibili_client_started = False
 
     async def refresh_record(self, room_id, *, force_update=False):
         info, time = await self.ensure_info(room_id, force_update=force_update)
