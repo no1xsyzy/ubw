@@ -233,9 +233,10 @@ class BaseHandler(BaseModel):
 class QueuedProcessorMixin(BaseHandler):
     """通过添加一个队列来处理"""
     _process_task: asyncio.Task | None = None
+    _allow_put: bool = False
 
     @cached_property
-    def _queue(self) -> asyncio.Queue[tuple[LiveClientABC, dict]]:
+    def _queue(self) -> asyncio.Queue[tuple[LiveClientABC, dict] | Literal['END']]:
         return asyncio.Queue()
 
     async def start(self, client):
@@ -247,22 +248,26 @@ class QueuedProcessorMixin(BaseHandler):
         await asyncio.gather(super().join(), self._process_task)
 
     async def stop(self):
+        self._allow_put = False
         task = self._process_task
         self._process_task = None
-        task.cancel('stop')
-        try:
-            await task
-        except asyncio.CancelledError:
-            pass
+        await self._queue.put('END')
+        await task
         await super().stop()
 
     async def handle(self, client: LiveClientABC, command: dict):
+        if not self._allow_put:
+            return
         await self._queue.put((client, command))
         qsize = self._queue.qsize()
         if qsize > 20:
-            logger.warning(f'CANNOT KEEP UP queue size {qsize} > 20')
+            logger.warning(f'CANNOT KEEP UP {qsize=} > 20')
 
     async def t_process(self):
+        self._allow_put = True
         while True:
-            client, command = await self._queue.get()
+            t = await self._queue.get()
+            if t == 'END':  #
+                return
+            client, command = t
             await self.process_one(client, command)
