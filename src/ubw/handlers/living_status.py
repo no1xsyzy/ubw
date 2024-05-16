@@ -4,9 +4,9 @@ from datetime import datetime, timedelta
 
 from pydantic import Field, BaseModel
 
+from ubw.ui.stream_view import *
 from ._base import *
 from ..clients import BilibiliClient
-from ..ui import *
 
 
 class Info(BaseModel):
@@ -48,7 +48,7 @@ class LivingStatusHandler(BaseHandler):
     # DI
     bilibili_client: BilibiliClient
     bilibili_client_owner: bool = True
-    ui: UI = Richy()
+    ui: StreamView = Richy()
     owned_ui: bool = True
 
     # states

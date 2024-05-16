@@ -3,10 +3,10 @@ import asyncio
 from ._base import *
 
 
-class Multi(StreamUI):
+class Multi(BaseStreamView):
     uic: Literal['multi'] = 'multi'
 
-    uis: list[StreamUI] = []
+    uis: list[BaseStreamView] = []
 
     async def start(self):
         await asyncio.gather(*((ui.start() for ui in self.uis)))

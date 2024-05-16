@@ -118,19 +118,19 @@ async def danmakup(
         handler = DanmakuPHandler(**settings)
         await listen_to_all(rooms, handler)
     elif ui == 'live':
-        from ubw.ui import LiveUI
-        ui = LiveUI(alternate_screen=True)
+        from ubw.ui.stream_view import LiveStreamView
+        ui = LiveStreamView(alternate_screen=True)
         handler = DanmakuPHandler(**settings, ui=ui, owned_ui=False)
         async with ui:
             await listen_to_all(rooms, handler)
     elif ui == 'rich':
-        from ubw.ui import Richy
-        ui = Richy(alternate_screen=True)
+        from ubw.ui.stream_view import Richy
+        ui = Richy()
         handler = DanmakuPHandler(**settings, ui=ui, owned_ui=False)
         async with ui:
             await listen_to_all(rooms, handler)
     elif ui == 'web':
-        from ubw.ui import Web
+        from ubw.ui.stream_view import Web
         ui = Web()
         handler = DanmakuPHandler(**settings, ui=ui, owned_ui=False)
         async with ui:

@@ -9,7 +9,7 @@ from ubw.app import ObserverApp
 from ubw.clients import BilibiliApiError, BilibiliUnauthorizedClient
 from ubw.testing.asyncstory import AsyncStoryline, AsyncMock, returns
 from ubw.testing.generate import generate_type
-from ubw.ui import Richy
+from ubw.ui.stream_view import Richy
 
 
 class ASMockBC2(AsyncMock):

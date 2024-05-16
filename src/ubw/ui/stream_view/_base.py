@@ -9,7 +9,7 @@ __all__ = (
     'Segment',
     'PlainText', 'Anchor', 'User', 'Room', 'RoomTitle', 'ColorSeeSee', 'DebugInfo', 'Currency', 'Picture', 'LineBreak',
     'Record',
-    'StreamUI', 'Literal', 'Field',
+    'BaseStreamView', 'Literal', 'Field',
     'demo',
 )
 
@@ -85,7 +85,7 @@ class Record(BaseModel):
     importance: int = 10
 
 
-class StreamUI(BaseModel, abc.ABC):
+class BaseStreamView(BaseModel, abc.ABC):
     uic: str
 
     @abc.abstractmethod
@@ -109,7 +109,7 @@ class StreamUI(BaseModel, abc.ABC):
         await self.stop()
 
 
-async def ademo(ui: StreamUI, interval=0.5):  # pragma: no cover
+async def ademo(ui: BaseStreamView, interval=0.5):  # pragma: no cover
     import logging
     import random
     import string
@@ -168,7 +168,7 @@ async def ademo(ui: StreamUI, interval=0.5):  # pragma: no cover
             await asyncio.sleep(interval)
 
 
-def demo(ui: StreamUI, interval=0.5):  # pragma: no cover
+def demo(ui: BaseStreamView, interval=0.5):  # pragma: no cover
     try:
         asyncio.run(ademo(ui, interval))
     except KeyboardInterrupt:

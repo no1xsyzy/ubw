@@ -12,7 +12,7 @@ from lxml.html.builder import HTML, BODY, HEAD, DIV, META, TITLE, SCRIPT, STYLE,
 
 from ._base import *
 
-logger = logging.getLogger('ubw.ui.web')
+logger = logging.getLogger('ubw.stream_view.web')
 
 JR = Union[
     tuple[Literal['add'], str, str, str],
@@ -28,7 +28,7 @@ class Formatted(NamedTuple):
     element: lxml.html.HtmlElement
 
 
-class Web(StreamUI):
+class Web(BaseStreamView):
     uic: Literal['web'] = 'web'
     palette: list[str] = ["red", "green", "blue", "magenta"]
     title: str = 'Web Stream UI'

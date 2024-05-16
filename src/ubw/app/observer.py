@@ -4,12 +4,12 @@ from datetime import datetime, timedelta
 
 from pydantic import Field
 
+from ubw import models
 from ubw.clients import BilibiliCookieClient, BilibiliClient, WSWebCookieLiveClient
 from ubw.handlers.observe import ObserverHandler
+from ubw.push.serverchan import ServerChanPusher, ServerChanMessage
+from ubw.ui.stream_view import *
 from ._base import *
-from .. import models
-from ..push.serverchan import ServerChanPusher, ServerChanMessage
-from ..ui import *
 
 logger: logging.Logger = logging.getLogger('observer')
 
@@ -30,7 +30,7 @@ class ObserverApp(InitLoopFinalizeApp):
     # DI
     bilibili_client: BilibiliClient = Field(default_factory=BilibiliCookieClient)
     bilibili_client_owner: bool = True
-    ui: UI = Richy()
+    ui: StreamView = Richy()
     owned_ui: bool = True
     server_chan: ServerChanPusher | None = None
     owned_server_chan: bool = True

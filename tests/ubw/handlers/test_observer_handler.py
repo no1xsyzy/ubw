@@ -8,7 +8,7 @@ from ubw.handlers.observe import ObserverHandler
 from ubw.models import InfoByRoom, RoomChangeCommand, LiveCommand, PreparingCommand
 from ubw.testing.asyncstory import AsyncStoryline, AsyncMock
 from ubw.testing.generate import generate_type, generate_random_string
-from ubw.ui import RoomTitle, Richy
+from ubw.ui.stream_view import RoomTitle, Richy
 
 
 class ASMockBC(AsyncMock):

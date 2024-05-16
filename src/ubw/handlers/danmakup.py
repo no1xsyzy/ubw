@@ -3,7 +3,7 @@ from functools import cached_property
 
 from pydantic import field_validator, model_validator
 
-from ubw.ui import Record, PlainText, User, RoomTitle, UI, ColorSeeSee, Currency, Richy
+from ubw.ui.stream_view import *
 from ._base import *
 
 KAOMOJIS = [
@@ -55,7 +55,7 @@ class DanmakuPHandler(BaseHandler):
     show_interact_word: bool = False
     test_flags: list[str] = []
 
-    ui: UI = Richy()
+    ui: StreamView = Richy()
     owned_ui: bool = True
 
     _ui_started: bool = False

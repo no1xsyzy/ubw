@@ -3,7 +3,7 @@ from ._base import *
 StickyKey = str
 
 
-class ConsoleUI(StreamUI):
+class SimpleStreamView(BaseStreamView):
     uic: Literal['console'] = 'console'
     verbose: int = 0
     datetime_format: str = '[%Y-%m-%d %H:%M:%S]'
@@ -53,4 +53,4 @@ class ConsoleUI(StreamUI):
 
 
 if __name__ == '__main__':
-    demo(ConsoleUI(verbose=1))
+    demo(SimpleStreamView(verbose=1))

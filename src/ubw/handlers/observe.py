@@ -2,10 +2,10 @@ import asyncio
 from datetime import datetime, timedelta
 from functools import cached_property
 
+from ubw.clients import BilibiliClient
+from ubw.push.serverchan import ServerChanPusher, ServerChanMessage
+from ubw.ui.stream_view import *
 from ._base import *
-from ..clients import BilibiliClient
-from ..push.serverchan import ServerChanPusher, ServerChanMessage
-from ..ui import *
 
 
 class ObserverHandler(BaseHandler):
@@ -18,7 +18,7 @@ class ObserverHandler(BaseHandler):
     # DI
     bilibili_client: BilibiliClient
     bilibili_client_owner: bool = True
-    ui: UI = Richy()
+    ui: StreamView = Richy()
     owned_ui: bool = True
     server_chan: ServerChanPusher | None = None
     owned_server_chan: bool = True

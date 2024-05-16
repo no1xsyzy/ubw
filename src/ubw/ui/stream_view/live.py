@@ -27,7 +27,7 @@ class Info(TypedDict):
     renderable: RichRenderable
 
 
-class LiveUI(StreamUI):
+class LiveStreamView(BaseStreamView):
     uic: Literal['live'] = 'live'
     verbose: int = 0
     alternate_screen: bool = False
@@ -201,4 +201,4 @@ class LiveUI(StreamUI):
 
 
 if __name__ == '__main__':
-    demo(LiveUI())
+    demo(LiveStreamView())

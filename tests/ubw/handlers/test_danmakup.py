@@ -10,7 +10,7 @@ from ubw import models
 from ubw.handlers import DanmakuPHandler
 from ubw.testing.asyncstory import AsyncStoryline, AsyncMock
 from ubw.testing.generate import generate_type
-from ubw.ui import Richy, User, RoomTitle, Currency, PlainText
+from ubw.ui.stream_view import Richy, User, RoomTitle, Currency, PlainText
 
 
 class MockUI(AsyncMock):
@@ -44,7 +44,7 @@ async def test_danmakup():
             t = asyncio.create_task(handler.on_danmu_msg(client, generate_type(models.DanmakuCommand, {
                 'info': {'msg': "ignore this"}
             })))
-            # no ui.add_record call at all
+            # no stream_view.add_record call at all
             await t
 
             # trivial_rate very low for KAOMOJIS
