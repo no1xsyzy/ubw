@@ -319,7 +319,15 @@ span.debug-info { color: orange; }
         logger.info('server started at http://{}:{}'.format(self.bind_host, self.bind_port))
 
     async def stop(self):
-        self._task.cancel('stop')
+        task = self._task
+        self._task = None
+        task.cancel('stop')
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+        for ws in self.connected_ws:
+            await ws.close()
         await self._site.stop()
         await self._runner.cleanup()
 
