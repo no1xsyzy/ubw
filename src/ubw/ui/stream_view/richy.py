@@ -24,7 +24,7 @@ class Richy(BaseStreamView):
 
     def get_currency_style(self, currency):
         for c, s in self.currency_palette:
-            if currency > c:
+            if currency >= c:
                 return s
 
     def get_color_see_see(self, text):
