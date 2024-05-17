@@ -166,6 +166,7 @@ class DanmakuPHandler(BaseHandler):
         await self.ui.add_record(Record(segments=[
             ColorSeeSee(text=f"[{room_id}] "),
             User(name=uname, uid=uid, face=message.data.user_info.face),
+            PlainText(text=": "),
             PlainText(text=f"{msg}"),
             Currency(price=price),
         ], time=message.ct))
