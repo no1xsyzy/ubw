@@ -33,6 +33,7 @@ class Richy(BaseStreamView):
     def format_record(self, record: Record) -> RichRenderable:
         s = rf"[cyan dim]{escape(record.time.astimezone().strftime(self.datetime_format))}[/] "
         d = {}
+        m = count(1)
         for seg in record.segments:
             match seg:
                 case PlainText(text=text) | Picture(alt=text):
@@ -49,11 +50,9 @@ class Richy(BaseStreamView):
                     s += f"[{self.palette[hash(text) % len(self.palette)]}]{escape(text)}[/]"
                 case DebugInfo(text=text, info=info):
                     if self.verbose > 0:
-                        for i in count(1):
-                            if (k := f"{text}_{i}") not in d:
-                                s += f"\\[{k}...]"
-                                d[k] = info
-                                break
+                        k = f"{text}_{next(m)}"
+                        s += f"\\[{k}...]"
+                        d[k] = info
                     else:
                         s += f"(info...)"
                 case Currency(price=price, mark=mark):
