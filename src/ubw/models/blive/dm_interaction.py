@@ -21,6 +21,26 @@ class Data102Data(BaseModel):
     display_flag: int = 0
 
 
+class Data103Data(BaseModel):
+    fade_duration: int = 10000
+    cnt: int
+    card_appear_interval: int = 0
+    suffix_text: str = '人关注了主播'
+    reset_cnt: int = 0
+    display_flag: int = 1
+
+
+class Data104Data(BaseModel):
+    fade_duration: int = 10000
+    cnt: int
+    card_appear_interval: int
+    suffix_text: str = "人在投喂"
+    reset_cnt: int
+    display_flag: int
+    gift_id: int
+    gift_alert_message: str = "投喂一个%s支持主播"
+
+
 class Data105Data(BaseModel):
     fade_duration: int
     cnt: int
@@ -37,15 +57,6 @@ class Data106Data(BaseModel):
     cnt: int
     fade_duration: int
     suffix_text: str = '人正在点赞'
-
-
-class Data103Data(BaseModel):
-    fade_duration: int = 10000
-    cnt: int
-    card_appear_interval: int = 0
-    suffix_text: str = '人关注了主播'
-    reset_cnt: int = 0
-    display_flag: int = 1
 
 
 class Data(BaseModel):
@@ -69,6 +80,13 @@ class Data103(Data):
     validate_extra = field_validator('data', mode='before')(strange_dict)
 
 
+class Data104(Data):
+    type: Literal[104]
+    data: Data104Data
+
+    validate_extra = field_validator('data', mode='before')(strange_dict)
+
+
 class Data105(Data):
     type: Literal[105]
     data: Data105Data
@@ -85,4 +103,4 @@ class Data106(Data):
 
 class DmInteractionCommand(CommandModel):
     cmd: Literal['DM_INTERACTION']
-    data: Annotated[Data102 | Data103 | Data105 | Data106, Field(discriminator='type')]
+    data: Annotated[Data102 | Data103 | Data104 | Data105 | Data106, Field(discriminator='type')]
