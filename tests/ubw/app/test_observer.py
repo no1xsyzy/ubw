@@ -1,12 +1,15 @@
+from __future__ import annotations
+
 import asyncio
-import dataclasses
 from datetime import datetime, timedelta
 
 import pytest
+from pydantic import BaseModel
 
 from ubw import models
 from ubw.app import ObserverApp
 from ubw.clients import BilibiliApiError, BilibiliUnauthorizedClient
+from ubw.push.serverchan import ServerChanPusher
 from ubw.testing.asyncstory import AsyncStoryline, AsyncMock, returns
 from ubw.testing.generate import generate_type
 from ubw.ui.stream_view import Richy
@@ -25,27 +28,23 @@ class ASMockBC2(AsyncMock):
         return BilibiliUnauthorizedClient
 
 
-class MockUI(AsyncMock):
-    @property
-    def uic(self):
-        return 'richy'
-
-    @property
-    def __class__(self):
-        return Richy
-
-
-@dataclasses.dataclass
-class DynamicItem:
+class DynamicItem(BaseModel):
     id_str: str
     pub_date: datetime
     text: str
     jump_url: str
-    is_topped: bool
+
+    is_topped: bool = False
+    is_video: bool = False
+    is_live: bool = False
+
+    is_forward: bool = False
+    orig: DynamicItem | None = None
+
+    markdown: str = ""
 
 
-@dataclasses.dataclass
-class OffsetList:
+class OffsetList(BaseModel):
     items: list[DynamicItem]
 
 
@@ -59,7 +58,8 @@ async def test_observer():
             bilibili_client = liv.add_async_mock(mock_class=ASMockBC2)
             handler = liv.add_async_mock()
             client = liv.add_async_mock()
-            ui = liv.add_async_mock(mock_class=MockUI)
+            ui = liv.add_async_mock(attrs={'uic': 'richy'}, mimics=Richy)
+            server_chan = liv.add_async_mock(mimics=ServerChanPusher)
 
             client.add_handler = liv.add_sync_mock()(returns())
 
@@ -73,7 +73,9 @@ async def test_observer():
                 uid=uid,
                 bilibili_client=bilibili_client,
                 ui=ui,
-                dynamic_poll_interval=1)
+                server_chan=server_chan,
+                dynamic_poll_interval=1,
+            )
 
             await app.start()
 
@@ -93,7 +95,11 @@ async def test_observer():
             c.assert_match_call(room_id=room_id, bilibili_client=bilibili_client, bilibili_client_owner=False)
 
             c = await liv.get_call(target=handler_class, f='sync')
-            c.assert_match_call(room_id=room_id, ui=ui, owned_ui=False)
+            c.assert_match_call(
+                room_id=room_id, ui=ui, owned_ui=False,
+                bilibili_client=bilibili_client, bilibili_client_owner=False,
+                server_chan=server_chan, owned_server_chan=False,
+            )
 
             c = await liv.get_call(target=client.add_handler, f='sync')
             c.assert_match_call(handler)
@@ -109,25 +115,32 @@ async def test_observer():
             c = await liv.get_call(target=bilibili_client.get_user_dynamic, f='async')
             c.assert_match_call(uid)
             c.set_result(OffsetList(items=[
-                DynamicItem(id_str='1', pub_date=datetime(1999, 12, 31, 23, 59, 59),
+                DynamicItem(id_str='1', pub_date=datetime(1999, 12, 31, 23, 59, 59).astimezone(),
                             text='TEXT=1', jump_url='url://1', is_topped=True),
-                DynamicItem(id_str='2', pub_date=datetime.now() - timedelta(days=2, hours=1),
-                            text='TEXT=2', jump_url='url://2', is_topped=False),
-                DynamicItem(id_str='3', pub_date=datetime.now() - timedelta(days=2, hours=-1),
-                            text='TEXT=3', jump_url='url://3', is_topped=False),
+                DynamicItem(id_str='2', pub_date=datetime.now().astimezone() - timedelta(days=2, hours=1),
+                            text='TEXT=2', jump_url='url://2'),
+                DynamicItem(id_str='3', pub_date=datetime.now().astimezone() - timedelta(days=2, hours=-1),
+                            text='TEXT=3', jump_url='url://3'),
             ]))
 
             c = await liv.get_call(target=ui.add_record, f='async')
-            assert c.args[0].segments[0].text == "置顶动态 "
-            assert c.args[0].segments[1].text == "TEXT=1"
-            assert c.args[0].segments[2].href == "url://1"
-            assert c.args[0].time == datetime(1999, 12, 31, 23, 59, 59)
+            assert c.args[0].segments[0].text == "置顶动态"
+            assert c.args[0].segments[0].href == "url://1"
+            assert c.args[0].segments[1].text == " "
+            assert c.args[0].segments[2].text == "TEXT=1"
+            assert c.args[0].time == datetime(1999, 12, 31, 23, 59, 59).astimezone()
             c.set_result(None)
 
-            c = await liv.get_call(target=ui.add_record, f='async')
-            assert c.args[0].segments[0].text == "发布动态 "
-            assert c.args[0].segments[1].text == "TEXT=3"
-            assert c.args[0].segments[2].href == "url://3"
+            try:
+                c = await liv.get_call(target=ui.add_record, f='async')
+            except asyncio.CancelledError:
+                print(app._task.get_coro())
+                raise
+
+            assert c.args[0].segments[0].text == "发布动态"
+            assert c.args[0].segments[0].href == "url://3"
+            assert c.args[0].segments[1].text == " "
+            assert c.args[0].segments[2].text == "TEXT=3"
             c.set_result(None)
 
             c = await liv.get_call(target=ui.add_record, f='async')
@@ -141,16 +154,22 @@ async def test_observer():
             c = await liv.get_call(target=bilibili_client.get_user_dynamic, f='async')
             c.assert_match_call(uid)
             c.set_result(OffsetList(items=[
-                DynamicItem(id_str='3', pub_date=datetime.now() - timedelta(days=2, hours=-1),
-                            text='TEXT=3', jump_url='url://3', is_topped=False),
-                DynamicItem(id_str='4', pub_date=datetime.now() - timedelta(hours=1),
-                            text='TEXT=4', jump_url='url://4', is_topped=False),
+                DynamicItem(id_str='3', pub_date=datetime.now().astimezone() - timedelta(days=2, hours=-1),
+                            text='TEXT=3', jump_url='url://3'),
+                DynamicItem(id_str='4', pub_date=datetime.now().astimezone() - timedelta(hours=1),
+                            text='TEXT=4', jump_url='url://4', markdown='markdown4'),
             ]))
 
             c = await liv.get_call(target=ui.add_record, f='async')
-            assert c.args[0].segments[0].text == "发布动态 "
-            assert c.args[0].segments[1].text == "TEXT=4"
-            assert c.args[0].segments[2].href == "url://4"
+            assert c.args[0].segments[0].text == "发布动态"
+            assert c.args[0].segments[0].href == "url://4"
+            assert c.args[0].segments[1].text == " "
+            assert c.args[0].segments[2].text == "TEXT=4"
+            c.set_result(None)
+
+            c = await liv.get_call(target=server_chan.push, f='async')
+            assert c.args[0].title == '发布动态'
+            assert c.args[0].desp == 'markdown4'
             c.set_result(None)
 
             c = await liv.get_call(target=ass, f='async')
@@ -175,6 +194,10 @@ async def test_observer():
             c.assert_match_call()
             c.set_result(None)
 
+            c = await liv.get_call(target=ui.stop, f='async')
+            c.assert_match_call()
+            c.set_result(None)
+
             await t
 
             t = asyncio.create_task(app.close())
@@ -184,10 +207,6 @@ async def test_observer():
             c.set_result(None)
 
             c = await liv.get_call(target=bilibili_client.close, f='async')
-            c.assert_match_call()
-            c.set_result(None)
-
-            c = await liv.get_call(target=ui.stop, f='async')
             c.assert_match_call()
             c.set_result(None)
 
