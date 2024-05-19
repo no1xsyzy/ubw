@@ -129,7 +129,7 @@ async def test_danmakup():
 
             t = asyncio.create_task(handler.on_super_chat_message(client, generate_type(models.SuperChatCommand)))
             c = await asl.get_call(target=ui.add_record, f='async')
-            assert isinstance(c.args[0].segments[3], Currency)
+            assert isinstance(c.args[0].segments[4], Currency)
             c.set_result(None)
             await t
 
