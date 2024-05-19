@@ -6,6 +6,7 @@ from unittest.mock import patch
 from typer.testing import CliRunner
 
 import ubw
+import ubw.cli
 from ubw.testing.generate import generate_random_string
 
 runner = CliRunner()
@@ -20,14 +21,14 @@ def test_call_by_module():
 def test_init_sentry():
     s = generate_random_string()
     with patch('sentry_sdk.init') as mock:
-        ubw.init_sentry({'sentry': {'magic': 'dict', 'string': s}})
+        ubw.cli.init_sentry({'sentry': {'magic': 'dict', 'string': s}})
         mock.assert_called_once_with(magic='dict', string=s)
 
 
 def test_init_logging():
     s = generate_random_string()
     with patch('logging.config.dictConfig') as mock:
-        ubw.init_logging({'logging': {'magic': 'dict', 'string': s}})
+        ubw.cli.init_logging({'logging': {'magic': 'dict', 'string': s}})
         mock.assert_called_once_with({'magic': 'dict', 'string': s})
 
 
@@ -39,21 +40,23 @@ def test_config(tmp_path):
             '[config]\n',
             'magic="' + s + '"\n',
         ])
-    ret = ubw.load_config(config_path)
+    ret = ubw.cli.load_config(config_path)
     assert ret == {'config': {'magic': s}}
 
 
 def test_print_config():
     config_path = generate_random_string()
     config = {}
-    with patch('ubw.load_config') as p_load:
+    with (
+        patch('ubw.cli.load_config') as p_load,
+        patch('ubw.cli.init_logging') as p_log,
+        patch('ubw.cli.init_sentry') as p_sentry,
+    ):
         p_load.return_value = config
-        with patch('ubw.init_logging') as p_log:
-            with patch('ubw.init_sentry') as p_sentry:
-                result = runner.invoke(ubw.app, ['--config', config_path, 'print-config'])
-                p_load.assert_called_once_with(Path(config_path))
-                p_log.assert_called_once_with(config)
-                p_sentry.assert_called_once_with(config)
+        result = runner.invoke(ubw.cli.app, ['--config', config_path, 'print-config'])
+        p_load.assert_called_once_with(Path(config_path))
+        p_log.assert_called_once_with(config)
+        p_sentry.assert_called_once_with(config)
     assert result.exit_code == 0
     assert result.stdout.strip() == '{}'
 
@@ -65,20 +68,22 @@ def test_print_config():
         'logging': {'root': {'level': 'DEBUG', 'handlers': ["rich"]}},
         'path': {'to': {'key': s}},
     }
-    with patch('ubw.load_config') as p_load:
+    with (
+        patch('ubw.cli.load_config') as p_load,
+        patch('ubw.cli.init_logging') as p_log,
+        patch('ubw.cli.init_sentry') as p_sentry,
+        patch('pdb_attach.listen') as p_listen,
+    ):
         p_load.return_value = config
-        with patch('ubw.init_logging') as p_log:
-            with patch('ubw.init_sentry') as p_sentry:
-                with patch('pdb_attach.listen') as p_listen:
-                    result = runner.invoke(
-                        ubw.app,
-                        ['--config', config_path,
-                         '--verbose', '--verbose',  # verbose 2
-                         '--config-override', f'path.to.key="{s}"',
-                         '--remote-debug-with-port', '10203',
-                         'print-config'])
-                    p_load.assert_called_once_with(Path(config_path))
-                    p_log.assert_called_once_with(config_manipulated)
-                    p_sentry.assert_called_once_with(config_manipulated)
-                    p_listen.assert_called_once_with(10203)
+        result = runner.invoke(
+            ubw.cli.app,
+            ['--config', config_path,
+             '--verbose', '--verbose',  # verbose 2
+             '--config-override', f'path.to.key="{s}"',
+             '--remote-debug-with-port', '10203',
+             'print-config'])
+        p_load.assert_called_once_with(Path(config_path))
+        p_log.assert_called_once_with(config_manipulated)
+        p_sentry.assert_called_once_with(config_manipulated)
+        p_listen.assert_called_once_with(10203)
     assert result.exit_code == 0
