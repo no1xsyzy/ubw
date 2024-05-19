@@ -6,6 +6,7 @@ import pytest
 from ubw.clients import BilibiliUnauthorizedClient
 from ubw.handlers.observe import ObserverHandler
 from ubw.models import InfoByRoom, RoomChangeCommand, LiveCommand, PreparingCommand
+from ubw.push.serverchan import ServerChanPusher
 from ubw.testing.asyncstory import AsyncStoryline, AsyncMock
 from ubw.testing.generate import generate_type, generate_random_string
 from ubw.ui.stream_view import RoomTitle, Richy
@@ -46,8 +47,10 @@ async def test_observer_handler():
 
             ui = liv.add_async_mock(mock_class=MockUI)
             client = liv.add_async_mock()
-            client.bilibili_client = bilibili_client = liv.add_async_mock(mock_class=ASMockBC)
-            handler = ObserverHandler(room_id=room_id, ui=ui)
+            bilibili_client = liv.add_async_mock(mock_class=ASMockBC)
+            server_chan = liv.add_async_mock(mimics=ServerChanPusher)
+
+            handler = ObserverHandler(room_id=room_id, ui=ui, server_chan=server_chan, bilibili_client=bilibili_client)
 
             # start
             t = asyncio.create_task(handler.start(client))
