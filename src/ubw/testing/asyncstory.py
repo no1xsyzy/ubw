@@ -62,12 +62,16 @@ def returns(x=None):
 
 
 class AsyncPatcher:
-    def __init__(self, story: 'AsyncStoryline', target: str):
+    def __init__(self, story: 'AsyncStoryline', target: str, mimics=None, attrs: dict | None = None):
         ref_story = ref(story, self.__ref_cb)
         self.__story = ref_story
         self.__target = target
         self.__active = False
         self.__original = None
+        self.__mimics = mimics
+        if attrs is not None:
+            for k, v in attrs.items():
+                setattr(self, k, v)
 
     def __ref_cb(self, wr):
         if self.__active:
@@ -111,15 +115,25 @@ class AsyncPatcher:
             await story.put(Call(self, args, kwargs, fut))
             return await fut
 
+    @property
+    def __class__(self):
+        if self.__mimics is None:
+            return self.__original.__class__
+        return self.__mimics
+
 
 class SyncPatcher:
-    def __init__(self, story: 'AsyncStoryline', target: str, returner):
+    def __init__(self, story: 'AsyncStoryline', target: str, returner, mimics=None, attrs: dict | None = None):
         ref_story = ref(story, self.__ref_cb)
         self.__story = ref_story
         self.__target = target
         self.__active = False
         self.__original = None
         self.__returner = returner
+        self.__mimics = mimics
+        if attrs is not None:
+            for k, v in attrs.items():
+                setattr(self, k, v)
 
     def __ref_cb(self, wr):
         if self.__active:
@@ -162,15 +176,25 @@ class SyncPatcher:
             story.put_nowait(Call(self, args, kwargs, None))
             return self.__returner(*args, **kwargs)
 
+    @property
+    def __class__(self):
+        if self.__mimics is None:
+            return self.__original.__class__
+        return self.__mimics
+
 
 class SyncMock:
-    def __init__(self, story: 'AsyncStoryline', returner):
+    def __init__(self, story: 'AsyncStoryline', returner, mimics=None, attrs: dict | None = None):
         ref_story = ref(story)
         self.__story = ref_story
         self.__active = False
         self.__original = None
         self.__returner = returner
         self.__target = str(id(self))
+        self.__mimics = mimics
+        if attrs is not None:
+            for k, v in attrs.items():
+                setattr(self, k, v)
 
     def __getattr__(self, item):
         story: AsyncStoryline | None = self.__story()
@@ -191,14 +215,24 @@ class SyncMock:
             story.put_nowait(Call(self, args, kwargs, None))
             return self.__returner(*args, **kwargs)
 
+    @property
+    def __class__(self):
+        if self.__mimics is None:
+            return type(self)
+        return self.__mimics
+
 
 class AsyncMock:
-    def __init__(self, story: 'AsyncStoryline'):
+    def __init__(self, story: 'AsyncStoryline', mimics=None, attrs: dict | None = None):
         ref_story = ref(story)
         self.__story = ref_story
         self.__active = False
         self.__original = None
         self.__target = str(id(self))
+        self.__mimics = mimics
+        if attrs is not None:
+            for k, v in attrs.items():
+                setattr(self, k, v)
 
     def __getattr__(self, item):
         story: AsyncStoryline | None = self.__story()
@@ -222,6 +256,12 @@ class AsyncMock:
             fut = asyncio.Future()
             await story.put(Call(self, args, kwargs, fut))
             return await fut
+
+    @property
+    def __class__(self):
+        if self.__mimics is None:
+            return type(self)
+        return self.__mimics
 
 
 class AsyncStoryline:
@@ -269,19 +309,19 @@ class AsyncStoryline:
 
         return deco
 
-    def add_sync_mock(self, mock_class=SyncMock):
+    def add_sync_mock(self, *, mock_class=SyncMock, **kwargs):
         def deco(returner):
             if not callable(returner):
                 raise TypeError("add_sync_mock must be used as function decorator")
-            mock = mock_class(self, returner)
+            mock = mock_class(self, returner, **kwargs)
             self._patches.append(mock)
             entered = mock.__enter__()
             return entered
 
         return deco
 
-    def add_async_mock(self, mock_class=AsyncMock):
-        mock = mock_class(self)
+    def add_async_mock(self, mock_class=AsyncMock, **kwargs):
+        mock = mock_class(self, **kwargs)
         self._patches.append(mock)
         entered = mock.__enter__()
         return entered
