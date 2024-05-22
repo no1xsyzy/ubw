@@ -77,6 +77,8 @@ class ObserverApp(InitLoopFinalizeApp):
                         PlainText(text=" "),
                         PlainText(text=item.text),
                     ], time=item.pub_date))
+                    if not init:
+                        await self._deal_with_push("新置顶动态", item.markdown)
                 elif (datetime.now().astimezone() - item.pub_date) > timedelta(days=2):
                     pass
                 elif item.is_video:
