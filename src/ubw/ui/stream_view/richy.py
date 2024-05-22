@@ -41,7 +41,7 @@ class Richy(BaseStreamView):
                 case Anchor(text=text, href=href):
                     s += f"[blue u link={href}]{text}[/]"
                 case User(name=name, uid=uid):
-                    s += f"[rgb(251, 114, 153) u link=https://space.bilibili.com/{uid}]{name}[/]"
+                    s += f"[rgb(251,114,153) u link=https://space.bilibili.com/{uid}]{name}[/]"
                 case Room(owner_name=name, room_id=room_id):
                     s += f"[rgb(255,212,50) u link=https://live.bilibili.com/{room_id}]{name}的直播间[/]"
                 case RoomTitle(title=title, room_id=room_id):
