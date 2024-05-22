@@ -1,3 +1,5 @@
+from pydantic import Json
+
 from ._base import *
 
 
@@ -71,10 +73,8 @@ class DanmakuInfoModeInfoExtra(BaseModel):
 class DanmakuInfoModeInfo(BaseModel):
     mode: int | None = None
     show_player_type: int | None = None
-    extra: DanmakuInfoModeInfoExtra | None = None
+    extra: Json[DanmakuInfoModeInfoExtra] | DanmakuInfoModeInfoExtra | None = None
     user: Uinfo | None = None
-
-    validate_extra = field_validator('extra', mode='before')(strange_dict)
 
 
 class DanmakuAggre(BaseModel):
@@ -132,8 +132,8 @@ class DanmakuInfo(BaseModel):
     bubble_type: int
     bubble_color: str | None = None
     dm_type: int
-    emoticon_options: DanmakuInfoEmoticonOptions
-    voice_config: dict
+    emoticon_options: Json[DanmakuInfoEmoticonOptions] | DanmakuInfoEmoticonOptions
+    voice_config: Json[dict] | dict
     mode_info: DanmakuInfoModeInfo
     aggre: DanmakuAggre | None = None
     bubble_id: int | None = None
@@ -158,10 +158,6 @@ class DanmakuInfo(BaseModel):
     privilege_type: int
     wealth_level: int | None = None
     group_medal: GroupMedal | None = None
-
-    # validators
-    validate_emoticon_options = field_validator('emoticon_options', mode='before')(strange_dict)
-    validate_voice_config = field_validator('voice_config', mode='before')(strange_dict)
 
 
 def parse_medal_info(v3):

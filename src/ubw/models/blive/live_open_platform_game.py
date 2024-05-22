@@ -1,3 +1,5 @@
+from pydantic import Json
+
 from ._base import *
 
 
@@ -44,16 +46,13 @@ class Data(BaseModel):
     game_code: str
     game_conf: str
     game_id: str
-    game_msg: GameMsg | dict[None, None]
+    game_msg: Json[GameMsg | dict[None, None]] | GameMsg | dict[None, None]
     game_name: str
     game_status: str
-    interactive_panel_conf: InteractivePanelConf | dict[None, None]
+    interactive_panel_conf: Json[InteractivePanelConf | dict[None, None]] | InteractivePanelConf | dict[None, None]
     msg_sub_type: str
     msg_type: str
     timestamp: datetime
-
-    validate_game_msg = field_validator('game_msg', mode='before')(strange_dict)
-    validate_interactive_panel_conf = field_validator('interactive_panel_conf', mode='before')(strange_dict)
 
 
 class LiveOpenPlatformGameCommand(CommandModel):

@@ -1,3 +1,5 @@
+from pydantic import Json
+
 from ._base import *
 
 
@@ -68,37 +70,27 @@ class Data(BaseModel):
 
 class Data102(Data):
     type: Literal[102]
-    data: Data102Data
-
-    validate_extra = field_validator('data', mode='before')(strange_dict)
+    data: Json[Data102Data] | Data102Data
 
 
 class Data103(Data):
     type: Literal[103]
-    data: Data103Data
-
-    validate_extra = field_validator('data', mode='before')(strange_dict)
+    data: Json[Data103Data] | Data103Data
 
 
 class Data104(Data):
     type: Literal[104]
-    data: Data104Data
-
-    validate_extra = field_validator('data', mode='before')(strange_dict)
+    data: Json[Data104Data] | Data104Data
 
 
 class Data105(Data):
     type: Literal[105]
-    data: Data105Data
-
-    validate_extra = field_validator('data', mode='before')(strange_dict)
+    data: Json[Data105Data] | Data105Data
 
 
 class Data106(Data):
     type: Literal[106]
-    data: Data106Data
-
-    validate_extra = field_validator('data', mode='before')(strange_dict)
+    data: Json[Data106Data] | Data106Data
 
 
 class DmInteractionCommand(CommandModel):

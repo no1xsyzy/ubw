@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from functools import cached_property
 from typing import *
 
-from pydantic import BaseModel, field_validator, Field, AliasPath, TypeAdapter, AliasChoices
+from pydantic import BaseModel, field_validator, Field, AliasPath, TypeAdapter, AliasChoices, Json
 
 __all__ = (
     'Response', 'OffsetList',
@@ -15,8 +15,6 @@ __all__ = (
     'Nav',
     'VideoP', 'VideoPlayInfo',
 )
-
-from ._base import *
 
 DataV = TypeVar('DataV')
 
@@ -312,9 +310,7 @@ class LiveRcmdContent(BaseModel):
 
 
 class LiveRcmd(BaseModel):
-    content: LiveRcmdContent
-
-    validate_content = field_validator('content', mode='before')(strange_dict)
+    content: Json[LiveRcmdContent] | LiveRcmdContent
 
 
 class MajorLiveRcmd(BaseMajor):
