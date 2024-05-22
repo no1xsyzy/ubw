@@ -38,11 +38,14 @@ class _State(Enum):
 
 class SaverHandler(BaseHandler):
     cls: Literal['saver'] = 'saver'
+
     max_shard_length: timedelta = timedelta(days=1)
     room_id: int
+
     _living: _State = _State.init
-    _wait_sharding: asyncio.Future | None = None
     _sharder_task: asyncio.Task | None = None
+    _shard_timer_handle: asyncio.TimerHandle | None = None
+    _shard_event: asyncio.Event | None = None
 
     async def start(self, client):
         self._sharder_task = asyncio.create_task(self.t_sharder())
@@ -128,20 +131,17 @@ class SaverHandler(BaseHandler):
         await super().on_unknown_cmd(client, command, err)
 
     async def t_sharder(self):
-        # self._wait_sharding = asyncio.get_running_loop().create_future()
         t = 0
+        self._shard_event = asyncio.Event()
+        self._shard_event.set()
         while True:
             try:
                 t += 1
-                logger.info(f"t_sharder: calling m_new_shard()")
+                await self._shard_event.wait()
+                logger.info(f"t_sharder: calling _check_for_shard()")
                 await self._check_for_shard()
+                self._shard_event.clear()
                 t = 0
-                logger.info(f"next sharding in {self.max_shard_length}")
-                async with asyncio.timeout(self.max_shard_length.total_seconds()):
-                    self._wait_sharding = asyncio.get_running_loop().create_future()
-                    await self._wait_sharding
-                    # await asyncio.shield(self._wait_sharding)
-                    # self._wait_sharding = asyncio.get_running_loop().create_future()
             except asyncio.TimeoutError:
                 logger.info("timeout happened")
             except Exception as e:
@@ -149,23 +149,13 @@ class SaverHandler(BaseHandler):
                 if t > 5:
                     raise
             except BaseException as e:
-                logger.exception("exception in t_sharder()", exc_info=e)
+                logger.exception("base exception in t_sharder()", exc_info=e)
                 raise
 
     def s_shard_now(self):
-        logger.info("m_shard_now()")
-        now = datetime.now()
-        try:
-            self._wait_sharding.set_result(now)
-        except asyncio.InvalidStateError:
-            # ???
-            if self._wait_sharding.done() and (now - self._wait_sharding.result()) < timedelta(seconds=1):
-                return
-            logger.exception(
-                f"!!STRANGE!! {self._wait_sharding=} is not re-created\n"
-                f"{self._sharder_task=}\n"
-                f"{self._living=}"
-            )
+        logger.info("s_shard_now()")
+        self._shard_timer_handle = None
+        self._shard_event.set()
 
     async def _check_for_shard(self):
         logger.info("check if shard")
@@ -184,15 +174,20 @@ class SaverHandler(BaseHandler):
                     await self._really_make_shard(info)
                     return
             except Exception as e:
-                logger.exception("exception in checking if shard", exc_info=e)
+                logger.exception("exception in _check_for_shard()", exc_info=e)
             except BaseException as e:
-                logger.exception("exception in checking if shard", exc_info=e)
+                logger.exception("base exception in _check_for_shard()", exc_info=e)
                 raise
             await asyncio.sleep(60)
 
-    async def _really_make_shard(self, info):
+    async def _really_make_shard(self, info: models.InfoByRoom):
         logger.info("really making shard")
         self.__dict__.pop('shard_start', None)
         self.__dict__.pop('db', None)
         async with self.db as db:
             db.insert(info.model_dump(exclude_defaults=True, by_alias=True))
+        if self._shard_timer_handle is not None:
+            self._shard_timer_handle.cancel()
+        logger.info(f"next sharding in {self.max_shard_length}")
+        self._shard_timer_handle = asyncio.get_running_loop().call_later(
+            self.max_shard_length.total_seconds(), self.s_shard_now)

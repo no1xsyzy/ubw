@@ -102,7 +102,7 @@ async def test_saver():
 
             live_command = generate_type(models.LiveCommand)
             await handler.on_live(client, live_command)
-            assert handler._wait_sharding.result()
+            assert handler._shard_event.is_set()
             (a, s), = await mock_db.queue.get()
             assert bilibili_client.get_info_by_room.await_count == 2
             bilibili_client.get_info_by_room.assert_awaited_with(room_id)
@@ -110,7 +110,7 @@ async def test_saver():
 
             preparing_command = generate_type(models.PreparingCommand)
             await handler.on_preparing(client, preparing_command)
-            assert handler._wait_sharding.result()
+            assert handler._shard_event.is_set()
             (a, s), = await mock_db.queue.get()
             assert bilibili_client.get_info_by_room.await_count == 3
             bilibili_client.get_info_by_room.assert_awaited_with(room_id)
