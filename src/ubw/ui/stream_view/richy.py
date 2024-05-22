@@ -19,13 +19,16 @@ class Richy(BaseStreamView):
     datetime_format: str = '[%Y-%m-%d %H:%M:%S]'
 
     palette: list[str] = 'red,green,yellow,blue,magenta,cyan'.split(',')
-    currency_palette: list[tuple[int, str]] = [
-        (1000, 'on red'), (500, 'on orange3'), (100, 'on yellow'), (50, 'on cyan'), (30, 'on blue')]
+    currency_palette: ThresholdPalette = ThresholdPalette.model_validate([
+        (1000, 'on red'), (500, 'on orange3'), (100, 'on yellow'), (50, 'on cyan'), (30, 'on blue')])
+    importance_palette: ThresholdPalette = ThresholdPalette.model_validate([
+        (40, 'on red'), (30, 'on orange3'), (20, 'on cyan'), (10, 'white'), (0, 'dim')])
 
-    def get_currency_style(self, currency):
-        for c, s in self.currency_palette:
-            if currency >= c:
-                return s
+    def get_currency_style(self, currency) -> str:
+        return self.currency_palette.get(currency)
+
+    def get_importance_style(self, importance) -> str:
+        return self.importance_palette.get(importance)
 
     def get_color_see_see(self, text):
         return self.palette[hash(text) % len(self.palette)]
@@ -62,7 +65,7 @@ class Richy(BaseStreamView):
                             s += f" [{style}]\\[{mark}{price}][/]"
                         else:
                             s += f" \\[{mark}{price}]"
-        res = [Text.from_markup(s)]
+        res = [Text.from_markup(f"[{self.get_importance_style(record.importance)}]{s}")]
         for k, v in d.items():
             res.append(Panel.fit(JSON.from_data(v), title=f'[{k}]'))
         group = Group(*res, fit=True)

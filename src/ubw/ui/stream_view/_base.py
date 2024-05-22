@@ -1,15 +1,16 @@
 import abc
 import asyncio
 from datetime import datetime
+from operator import itemgetter
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, RootModel, model_validator
 
 __all__ = (
     'Segment',
     'PlainText', 'Anchor', 'User', 'Room', 'RoomTitle', 'ColorSeeSee', 'DebugInfo', 'Currency', 'Picture', 'LineBreak',
     'Record',
-    'BaseStreamView', 'Literal', 'Field',
+    'BaseStreamView', 'Literal', 'Field', 'ThresholdPalette',
     'demo',
 )
 
@@ -166,6 +167,20 @@ async def ademo(ui: BaseStreamView, interval=0.5):  # pragma: no cover
                         PlainText(text="dummy text"),
                     ]))
             await asyncio.sleep(interval)
+
+
+class ThresholdPalette(RootModel[list[tuple[int, str]]]):
+    root: list[tuple[int, str]]
+
+    @model_validator(mode='after')
+    def sort(self):
+        self.root.sort(key=itemgetter(0), reverse=True)
+        return self
+
+    def get(self, val: int) -> str:
+        for i, s in self.root:
+            if val >= i:
+                return s
 
 
 def demo(ui: BaseStreamView, interval=0.5):  # pragma: no cover

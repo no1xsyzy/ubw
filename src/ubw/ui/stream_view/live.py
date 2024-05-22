@@ -34,13 +34,19 @@ class LiveStreamView(BaseStreamView):
     datetime_format: str = '[%Y-%m-%d %H:%M:%S]'
 
     palette: list[str] = 'red,green,yellow,blue,magenta,cyan'.split(',')
-    currency_palette: list[tuple[int, str]] = [
-        (1000, 'on red'), (500, 'on orange3'), (100, 'on yellow'), (50, 'on cyan'), (30, 'on blue')]
+    currency_palette: ThresholdPalette = ThresholdPalette.model_validate([
+        (1000, 'on red'), (500, 'on orange3'), (100, 'on yellow'), (50, 'on cyan'), (30, 'on blue')])
+    importance_palette: ThresholdPalette = ThresholdPalette.model_validate([
+        (40, 'on red'), (30, 'on orange3'), (20, 'on cyan'), (10, 'white'), (0, 'dim')])
 
-    def get_currency_style(self, currency):
-        for c, s in self.currency_palette:
-            if currency > c:
-                return s
+    def get_currency_style(self, currency) -> str:
+        return self.currency_palette.get(currency)
+
+    def get_importance_style(self, importance) -> str:
+        return self.importance_palette.get(importance)
+
+    def get_color_see_see(self, text):
+        return self.palette[hash(text) % len(self.palette)]
 
     @cached_property
     def _records(self):
@@ -70,13 +76,13 @@ class LiveStreamView(BaseStreamView):
                 case Anchor(text=text, href=href):
                     s += f"[blue u link={href}]{escape(text)}[/]"
                 case User(name=name, uid=uid):
-                    s += f"[{self.color_of(str(uid))} u link=https://space.bilibili.com/{uid}]{escape(name)}[/]"
+                    s += f"[{self.get_color_see_see(str(uid))} u link=https://space.bilibili.com/{uid}]{escape(name)}[/]"
                 case Room(owner_name=name, room_id=room_id):
                     s += f"[rgb(255,212,50) u link=https://live.bilibili.com/{room_id}]{escape(name)}的直播间[/]"
                 case RoomTitle(title=title, room_id=room_id):
                     s += f"[u link=https://live.bilibili.com/{room_id}]《[rgb(255,212,50)]{escape(title)}[/]》[/]"
                 case ColorSeeSee(text=text):
-                    s += f"[{self.color_of(text)}]{escape(text)}[/]"
+                    s += f"[{self.get_color_see_see(text)}]{escape(text)}[/]"
                 case DebugInfo(text=text, info=info):
                     if self.verbose > 0:
                         for i in count(1):
@@ -93,7 +99,7 @@ class LiveStreamView(BaseStreamView):
                             s += f" [{style}]\\[{mark}{price}][/]"
                         else:
                             s += f" \\[{mark}{price}]"
-        res = [Text.from_markup(s)]
+        res = [Text.from_markup(f"[{self.get_importance_style(record.importance)}]{s}")]
         for k, v in d.items():
             res.append(Panel.fit(JSON.from_data(v), title=f'[{k}]'))
         group = Group(*res, fit=True)
