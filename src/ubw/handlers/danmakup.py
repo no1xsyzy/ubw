@@ -123,7 +123,7 @@ class DanmakuPHandler(BaseHandler):
             await self.ui.add_record(Record(segments=[
                 ColorSeeSee(text=f"[{room_id}] "),
                 User(name=uname, uid=uid, face=face),
-                PlainText(text=f"说: "),
+                PlainText(text=f": "),
                 PlainText(text=msg),
             ], time=message.ct))
 
@@ -138,7 +138,7 @@ class DanmakuPHandler(BaseHandler):
             PlainText(text=f"直播间信息变更"),
             RoomTitle(title=title, room_id=room_id),
             PlainText(text=f"，分区：{parent_area_name}/{area_name}"),
-        ], time=message.ct))
+        ], time=message.ct, importance=20))
 
     async def on_summary(self, client, summary):
         room_id = client.room_id
@@ -154,7 +154,7 @@ class DanmakuPHandler(BaseHandler):
         await self.ui.add_record(Record(segments=[
             ColorSeeSee(text=f"[{room_id}] "),
             PlainText(text=f"受到警告 {message.msg}"),
-        ], time=message.ct))
+        ], time=message.ct, importance=40))
 
     async def on_super_chat_message(self, client, message):
         uname = message.data.user_info.uname
@@ -178,21 +178,21 @@ class DanmakuPHandler(BaseHandler):
             ColorSeeSee(text=f"[{room_id}] "),
             PlainText(text="用户被封禁"),
             User(name=message.data.uname, uid=uid),
-        ], time=message.ct))
+        ], time=message.ct, importance=30))
 
     async def on_live(self, client, message):
         room_id = client.room_id
         await self.ui.add_record(Record(segments=[
             ColorSeeSee(text=f"[{room_id}] "),
             PlainText(text="\N{Black Right-Pointing Triangle With Double Vertical Bar}\N{VS16}直播开始"),
-        ], time=message.ct))
+        ], time=message.ct, importance=20))
 
     async def on_preparing(self, client, message):
         room_id = client.room_id
         await self.ui.add_record(Record(segments=[
             ColorSeeSee(text=f"[{room_id}] "),
             PlainText(text="\N{Black Square For Stop}\N{VS16}直播结束"),
-        ], time=message.ct))
+        ], time=message.ct, importance=20))
 
     async def on_interact_word(self, client, model):
         if not self.show_interact_word:
@@ -204,7 +204,7 @@ class DanmakuPHandler(BaseHandler):
             User(name=model.data.uname, uid=uid, face=model.data.uinfo.base.face),
             PlainText(text=model.MSG_NAME[model.data.msg_type]),
             PlainText(text="了直播间"),
-        ], time=model.ct))
+        ], time=model.ct, importance=0))
 
     async def on_x_ubw_heartbeat(self, client, message):
         pass
