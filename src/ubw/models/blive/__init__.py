@@ -18,7 +18,7 @@ from .common_notice_danmaku import CommonNoticeDanmakuCommand
 from .confirm_auto_follow import ConfirmAutoFollowCommand
 from .cut_off import CutOffCommand
 from .danmu_aggregation import DanmuAggregationCommand
-from .danmu_msg import DanmakuCommand, Danmaku371111Command
+from .danmu_msg import DanmakuCommand, Danmaku371111Command, Danmaku402220Command
 from .dm_interaction import DmInteractionCommand
 from .entry_effect import EntryEffectCommand, EntryEffectMustReceiveCommand
 from .full_screen_special_effect import FullScreenSpecialEffectCommand
@@ -135,7 +135,7 @@ AnnotatedCommandModel = Annotated[Union[
     ConfirmAutoFollowCommand,
     CutOffCommand,
     DanmuAggregationCommand,
-    DanmakuCommand, Danmaku371111Command,
+    DanmakuCommand, Danmaku371111Command, Danmaku402220Command,
     DmInteractionCommand,
     EntryEffectCommand, EntryEffectMustReceiveCommand,
     FullScreenSpecialEffectCommand,
@@ -248,7 +248,7 @@ __all__ = (
     'ConfirmAutoFollowCommand',
     'CutOffCommand',
     'DanmuAggregationCommand',
-    'DanmakuCommand', 'Danmaku371111Command',
+    'DanmakuCommand', 'Danmaku371111Command', 'Danmaku402220Command',
     'DmInteractionCommand',
     'EntryEffectCommand', 'EntryEffectMustReceiveCommand',
     'FullScreenSpecialEffectCommand',
