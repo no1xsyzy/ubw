@@ -101,18 +101,19 @@ class Web(BaseStreamView):
                 case PlainText(text=text):
                     h.append(text)
                 case Anchor(text=text, href=href):
-                    h.append(A({'href': href}, text))
+                    h.append(
+                        A(ATTR(href=href),
+                          text))
                 case User(name=name, uid=uid, face=face):
-                    attr = {'href': f"https://space.bilibili.com/{uid}",
-                            'class': self.color_class(str(uid)),
-                            'target': '_blank'}
                     if face == '':
                         h.append(
-                            A(attr,
+                            A(ATTR(href=f"https://space.bilibili.com/{uid}", target='_blank'),
+                              CLASS(self.color_class(str(uid))),
                               name))
                     else:
                         h.append(
-                            A(attr,
+                            A(ATTR(href=f"https://space.bilibili.com/{uid}", target='_blank'),
+                              CLASS(self.color_class(str(uid))),
                               IMG(src=face, style="height: 1em; width: 1em; border-radius: 0.5em;"),
                               name))
                 case Room(owner_name=name, room_id=room_id):
