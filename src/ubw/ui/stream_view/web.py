@@ -141,6 +141,10 @@ class Web(BaseStreamView):
                     h.append(IMG(CLASS('picture'), src=url, alt=alt, title=alt))
                 case LineBreak():
                     h.append(BR())
+                case Emoji(codepoint=cp):
+                    h.append(
+                        SPAN(CLASS('emoji'),
+                             f"{cp}\N{VS16}"))
         return SPAN(*h)
 
     def find_key(self, key):

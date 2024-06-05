@@ -99,6 +99,8 @@ class LiveStreamView(BaseStreamView):
                             s += f" [{style}]\\[{mark}{price}][/]"
                         else:
                             s += f" \\[{mark}{price}]"
+                case Emoji(codepoint=cp):
+                    s += f"{cp}\N{VS16}"
         res = [Text.from_markup(f"[{self.get_importance_style(record.importance)}]{s}")]
         for k, v in d.items():
             res.append(Panel.fit(JSON.from_data(v), title=f'[{k}]'))

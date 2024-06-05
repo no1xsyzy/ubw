@@ -12,6 +12,7 @@ __all__ = (
     'BaseStreamView',
     'Segment',
     'PlainText', 'Anchor', 'User', 'Room', 'RoomTitle', 'ColorSeeSee', 'DebugInfo', 'Currency', 'Picture', 'LineBreak',
+    'Emoji',
     'Record',
 )
 

@@ -39,6 +39,8 @@ class SimpleStreamView(BaseStreamView):
                 case Currency(price=price, mark=mark):
                     if price > 0:
                         s[0] += f" [{mark}{price}]"
+                case Emoji(codepoint=cp):
+                    s[0] += f"{cp}\N{VS16}"
         return '\n'.join(s)
 
     async def add_record(self, record: Record, sticky=False):

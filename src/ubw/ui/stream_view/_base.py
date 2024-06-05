@@ -4,11 +4,13 @@ from datetime import datetime
 from operator import itemgetter
 from typing import Literal
 
+import unicodedata
 from pydantic import BaseModel, Field, RootModel, model_validator
 
 __all__ = (
     'Segment',
     'PlainText', 'Anchor', 'User', 'Room', 'RoomTitle', 'ColorSeeSee', 'DebugInfo', 'Currency', 'Picture', 'LineBreak',
+    'Emoji',
     'Record',
     'BaseStreamView', 'Literal', 'Field', 'ThresholdPalette',
     'demo',
@@ -70,6 +72,25 @@ class Picture(Segment):
     type: Literal['picture'] = 'picture'
     url: str
     alt: str
+
+
+class Emoji(Segment):
+    type: Literal['emoji'] = 'emoji'
+    name: str
+    codepoint: str
+
+    @model_validator(mode='before')
+    @classmethod
+    def validates(cls, data):
+        if 'name' in data and 'codepoint' in data:
+            assert unicodedata.lookup(data['name']) == data['codepoint'], 'name and codepoint does not match'
+        elif 'name' in data:
+            data['codepoint'] = unicodedata.lookup(data['name'])
+        elif 'codepoint' in data:
+            data['name'] = unicodedata.name(data['codepoint'])
+        else:
+            raise ValueError('any of name and codepoint should be specified')
+        return data
 
 
 class LineBreak(Segment):
