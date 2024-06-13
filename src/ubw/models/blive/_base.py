@@ -176,6 +176,12 @@ class UinfoMedal(BaseModel):
     ruid: int
     score: int
     typ: int
+    user_receive_count: int = 0
+    v2_medal_color_border: str = ''
+    v2_medal_color_end: str = ''
+    v2_medal_color_level: str = ''
+    v2_medal_color_start: str = ''
+    v2_medal_color_text: str = ''
 
 
 class UinfoWealth(BaseModel):
@@ -206,12 +212,6 @@ class Uinfo(BaseModel):
     guard: GuardInfo | None = None
     uhead_frame: UheadFrame | None = None
     guard_leader: UinfoGuardLeader | None = None
-    user_receive_count: int = 0
-    v2_medal_color_border: str = ''
-    v2_medal_color_end: str = ''
-    v2_medal_color_level: str = ''
-    v2_medal_color_start: str = ''
-    v2_medal_color_text: str = ''
 
 
 class UinfoLowBase(BaseModel):
