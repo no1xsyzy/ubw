@@ -5,6 +5,8 @@ from contextvars import ContextVar
 from typing import Literal, TypeVar
 
 import aiohttp
+import pydantic
+import sentry_sdk
 from pydantic import BaseModel
 
 from ubw.models.bilibili import *
@@ -78,13 +80,24 @@ class BilibiliClientABC(BaseModel, abc.ABC):
     async def _get_model(self, data_model: type[_T], url, **kwargs) -> _T:
         try:
             async with self.session.get(url, **kwargs) as res:
-                data = Response[data_model].model_validate((await res.json()))
+                j = await res.json()
+                try:  # process ValidationError here to tell linter that j is created
+                    data = Response[data_model].model_validate(j)
+                except pydantic.ValidationError as e:
+                    sentry_sdk.capture_event(
+                        event={'level': 'warning', 'message': f'error parsing model {data_model.__name__}'},
+                        contexts={'ValidationError': {'data': j, 'error': e.errors(include_url=False)}},
+                        tags={'model': data_model.__name__, 'type': 'get-model-parsing'},
+                    )
+                    raise
                 if data.code == 0:
                     logger.debug(f"successfully get {url!r} {kwargs!r}")
                     return data.data
                 else:
                     raise BilibiliApiError(data.message)
-        except Exception as e:
+        except Exception as e:  # TODO: only capture retry-able exceptions
+            if isinstance(e, pydantic.ValidationError):  # this cannot be solved by retry
+                raise
             if (try_count := _try_count.get()) < self.try_limit:
                 _try_count.set(try_count + 1)
                 return await self._get_model(data_model, url, **kwargs)
@@ -100,7 +113,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
                     return data['data']
                 else:
                     raise BilibiliApiError(data['message'])
-        except Exception as e:
+        except Exception as e:  # TODO: only capture retry-able exceptions
             if (try_count := _try_count.get()) < self.try_limit:
                 _try_count.set(try_count + 1)
                 return await self._get_raw(url, **kwargs)
