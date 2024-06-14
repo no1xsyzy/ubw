@@ -7,6 +7,11 @@ class PopularRankChangedData(BaseModel):
     rank: int
     timestamp: datetime
     uid: int
+    on_rank_name_by_type: str
+    rank_name_by_type: str
+    url_by_type: str
+    rank_by_type: str
+    default_url: str
 
 
 class PopularRankChangedCommand(CommandModel):
