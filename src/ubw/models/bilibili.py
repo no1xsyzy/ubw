@@ -251,8 +251,14 @@ class RichTextNodeTypeWeb(RichTextNodeBase):
     jump_url: str
 
 
+class RichTextNodeTypeBv(RichTextNodeBase):
+    type: Literal['RICH_TEXT_NODE_TYPE_BV']
+    jump_url: str
+    rid: str
+
+
 RichTextNode = Annotated[
-    Union[RichTextNodeTypeText, RichTextNodeTypeAt, RichTextNodeTypeEmoji, RichTextNodeTypeWeb],
+    Union[RichTextNodeTypeText, RichTextNodeTypeAt, RichTextNodeTypeEmoji, RichTextNodeTypeWeb, RichTextNodeTypeBv],
     Field(discriminator='type')
 ]
 
