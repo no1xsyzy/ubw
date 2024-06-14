@@ -43,6 +43,7 @@ class ObserverApp(InitLoopFinalizeApp):
     _live_handler: ObserverHandler | None = None
     _live_client: WSWebCookieLiveClient | None = None
     _task: asyncio.Task | None = None
+    _fail_count: int = 0
 
     async def _init(self):
         if self.bilibili_client_owner:
@@ -130,8 +131,12 @@ class ObserverApp(InitLoopFinalizeApp):
         await asyncio.sleep(self.dynamic_poll_interval)
         try:
             await self._fetch_print_update(False)
+            self._fail_count = 0
         except Exception as e:
             logger.exception("exception in _fetch_print_update", exc_info=e)
+            self._fail_count += 1
+            if self._fail_count > 5:
+                raise
 
     async def _finalize(self):
         if self._live_client is not None:
