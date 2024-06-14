@@ -10,7 +10,7 @@ class PopularRankChangedData(BaseModel):
     on_rank_name_by_type: str
     rank_name_by_type: str
     url_by_type: str
-    rank_by_type: str
+    rank_by_type: int
     default_url: str
 
 
