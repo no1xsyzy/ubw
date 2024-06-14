@@ -227,3 +227,6 @@ class DanmakuPHandler(BaseHandler):
         if isgold:
             segments.append(Currency(price=gold))
         await self.ui.add_record(Record(segments=segments, time=model.ct))
+
+    async def on_notice_msg(self, client, model: models.NoticeMsgCommand):
+        pass
