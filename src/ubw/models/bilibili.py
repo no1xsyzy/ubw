@@ -447,6 +447,8 @@ class DynamicItem(BaseModel):
                     s = f"{s}[{markdown_escape(text)}]({jump_url})"
                 case RichTextNodeTypeText(text=text):
                     s = f"{s}{markdown_escape(text)}"
+                case RichTextNodeTypeBv(text=text, rid=rid):
+                    s = f"{s}[{markdown_escape(text)}](https://www.bilibili.com/video/{rid})"
         return s
 
     @cached_property
