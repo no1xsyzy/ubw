@@ -44,6 +44,7 @@ from .live_multi_view_new_info import LiveMultiViewNewInfo
 from .live_open_platform_game import LiveOpenPlatformGameCommand
 from .live_panel_change import LivePanelChangeCommand
 from .live_panel_change_content import LivePanelChangeContentCommand
+from .live_room_toast_message import LiveRoomToastMessageCommand
 from .log_in_notice import LogInNoticeCommand
 from .messagebox_user_gain_medal import MessageboxUserGainMedalCommand
 from .messagebox_user_medal_change import MessageboxUserMedalChangeCommand
@@ -70,6 +71,7 @@ from .pk import (
 from .playtogether_icon_change import PlaytogetherIconChangeCommand
 from .popular_rank_changed import PopularRankChangedCommand
 from .popular_rank_guide_card import PopularRankGuideCardCommand
+from .popularity_rank_tab_chg import PopularityRankTabChgCommand
 from .popularity_red_pocket_new import PopularityRedPocketNewCommand, PopularityRedPocketV2NewCommand
 from .popularity_red_pocket_start import PopularityRedPocketStartCommand, PopularityRedPocketV2StartCommand
 from .popularity_red_pocket_winner_list import (
@@ -104,6 +106,7 @@ from .super_chat_message_delete import SuperChatDeleteCommand
 from .super_chat_message_jpn import SuperChatMessageJpnCommand
 from .sys_msg import SysMsgCommand
 from .trading_score import TradingScoreCommand
+from .universal_event_gift import UniversalEventGiftCommand
 from .user_info_update import UserInfoUpdateCommand
 from .user_panel_red_alarm import UserPanelRedAlarmCommand
 from .user_task_progress import UserTaskProgressCommand
@@ -162,6 +165,7 @@ AnnotatedCommandModel = Annotated[Union[
     LiveOpenPlatformGameCommand,
     LivePanelChangeCommand,
     LivePanelChangeContentCommand,
+    LiveRoomToastMessageCommand,
     LogInNoticeCommand,
     MessageboxUserGainMedalCommand,
     MessageboxUserMedalChangeCommand,
@@ -186,6 +190,7 @@ AnnotatedCommandModel = Annotated[Union[
     PlaytogetherIconChangeCommand,
     PopularRankChangedCommand,
     PopularRankGuideCardCommand,
+    PopularityRankTabChgCommand,
     PopularityRedPocketNewCommand, PopularityRedPocketV2NewCommand,
     PopularityRedPocketStartCommand, PopularityRedPocketV2StartCommand,
     PopularityRedPocketWinnerListCommand, PopularityRedPocketV2WinnerListCommand,
@@ -217,6 +222,7 @@ AnnotatedCommandModel = Annotated[Union[
     SuperChatMessageJpnCommand,
     SysMsgCommand,
     TradingScoreCommand,
+    UniversalEventGiftCommand,
     UserInfoUpdateCommand,
     UserPanelRedAlarmCommand,
     UserTaskProgressCommand,
@@ -276,6 +282,7 @@ __all__ = (
     'LiveOpenPlatformGameCommand',
     'LivePanelChangeCommand',
     'LivePanelChangeContentCommand',
+    'LiveRoomToastMessageCommand',
     'LogInNoticeCommand',
     'MessageboxUserGainMedalCommand',
     'MessageboxUserMedalChangeCommand',
@@ -301,6 +308,7 @@ __all__ = (
     'PlaytogetherIconChangeCommand',
     'PopularRankChangedCommand',
     'PopularRankGuideCardCommand',
+    'PopularityRankTabChgCommand',
     'PopularityRedPocketNewCommand', 'PopularityRedPocketV2NewCommand',
     'PopularityRedPocketStartCommand', 'PopularityRedPocketV2StartCommand',
     'PopularityRedPocketWinnerListCommand', 'PopularityRedPocketV2WinnerListCommand',
@@ -331,6 +339,7 @@ __all__ = (
     'SuperChatMessageJpnCommand',
     'SysMsgCommand',
     'TradingScoreCommand',
+    'UniversalEventGiftCommand',
     'UserInfoUpdateCommand',
     'UserPanelRedAlarmCommand',
     'UserTaskProgressCommand',
