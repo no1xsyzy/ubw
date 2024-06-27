@@ -98,6 +98,9 @@ class BilibiliClientABC(BaseModel, abc.ABC):
         except Exception as e:  # TODO: only capture retry-able exceptions
             if isinstance(e, pydantic.ValidationError):  # this cannot be solved by retry
                 raise
+            if isinstance(e, BilibiliApiError):  # this cannot be solved by retry
+                if e.args == ("房间已加密",):
+                    raise
             if (try_count := _try_count.get()) < self.try_limit:
                 _try_count.set(try_count + 1)
                 return await self._get_model(data_model, url, **kwargs)
