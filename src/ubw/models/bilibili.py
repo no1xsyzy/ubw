@@ -257,8 +257,31 @@ class RichTextNodeTypeBv(RichTextNodeBase):
     rid: str
 
 
+class RichTextNodeTypeLottery(RichTextNodeBase):
+    """可能是互动抽奖"""
+    type: Literal['RICH_TEXT_NODE_TYPE_LOTTERY']
+    rid: str
+
+
+class Goods(BaseModel):
+    jump_url: str
+    type: int
+
+
+class RichTextNodeTypeGoods(RichTextNodeBase):
+    """可能是UP主的推荐"""
+    type: Literal['RICH_TEXT_NODE_TYPE_GOODS']
+    rid: str
+    jump_url: str
+    icon_name: str
+    goods: Goods
+
+
 RichTextNode = Annotated[
-    Union[RichTextNodeTypeText, RichTextNodeTypeAt, RichTextNodeTypeEmoji, RichTextNodeTypeWeb, RichTextNodeTypeBv],
+    Union[
+        RichTextNodeTypeText, RichTextNodeTypeAt, RichTextNodeTypeEmoji, RichTextNodeTypeWeb, RichTextNodeTypeBv,
+        RichTextNodeTypeLottery, RichTextNodeTypeGoods,
+    ],
     Field(discriminator='type')
 ]
 
@@ -449,6 +472,10 @@ class DynamicItem(BaseModel):
                     s = f"{s}{markdown_escape(text)}"
                 case RichTextNodeTypeBv(text=text, rid=rid):
                     s = f"{s}[{markdown_escape(text)}](https://www.bilibili.com/video/{rid})"
+                case RichTextNodeTypeLottery(text=text):
+                    s = f"{s}{markdown_escape(text)}"
+                case RichTextNodeTypeGoods(text=text, jump_url=jump_url):
+                    s = f"{s}[{markdown_escape(text)}]({jump_url})"
         return s
 
     @cached_property
