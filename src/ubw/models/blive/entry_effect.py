@@ -45,6 +45,9 @@ class EntryEffectData(BaseModel):
     is_mystery: bool = False
     uinfo: Uinfo
 
+    full_cartoon_id: int = 0
+    priority_level: int = 0
+
     trigger_time_ns = field_validator('trigger_time', mode='before')(convert_ns)
 
 
