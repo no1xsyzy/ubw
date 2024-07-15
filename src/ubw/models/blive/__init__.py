@@ -67,6 +67,8 @@ from .pk import (
     PkBattleMultipleDrawResCommand,
     PkBattleMultipleResCommand,
     PkBattlePunishBeginCommand,
+    PkBattleVideoPunishEndCommand,
+    PkInfoCommand,
 )
 from .playtogether_icon_change import PlaytogetherIconChangeCommand
 from .popular_rank_changed import PopularRankChangedCommand
@@ -187,6 +189,8 @@ AnnotatedCommandModel = Annotated[Union[
     PkBattleMultipleDrawResCommand,
     PkBattleMultipleResCommand,
     PkBattlePunishBeginCommand,
+    PkBattleVideoPunishEndCommand,
+    PkInfoCommand,
     PlaytogetherIconChangeCommand,
     PopularRankChangedCommand,
     PopularRankGuideCardCommand,
@@ -305,6 +309,8 @@ __all__ = (
     'PkBattleMultipleDrawResCommand',
     'PkBattleMultipleResCommand',
     'PkBattlePunishBeginCommand',
+    'PkBattleVideoPunishEndCommand',
+    'PkInfoCommand',
     'PlaytogetherIconChangeCommand',
     'PopularRankChangedCommand',
     'PopularRankGuideCardCommand',

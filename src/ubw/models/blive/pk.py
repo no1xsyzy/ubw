@@ -367,7 +367,7 @@ class PkBattlePunishBeginCommand(CommandModel):
     data: PkBattlePunishBeginData
 
 
-class PkBattlePunishEndCommand(CommandModel):
+class PkBattleVideoPunishEndCommand(CommandModel):
     cmd: Literal['PK_BATTLE_VIDEO_PUNISH_END']
 
     battle_sub_type: int = 0
@@ -375,3 +375,48 @@ class PkBattlePunishEndCommand(CommandModel):
     timestamp: datetime
     pk_id: str
     pk_status: int
+
+
+class PkMember(BaseModel):
+    assist_info: None
+    face: str
+    group_id: int
+    is_follow: int
+    is_winner: int
+    rank: int
+    room_id: int
+    status: int
+    uid: int
+    uname: str
+    votes: int
+    votes_text: str
+
+
+class PkBasic(BaseModel):
+    biz_session_id: str
+    end_time: datetime
+    init_id: int
+    init_uid: int
+    main_page: str
+    pk_id: int
+    punish_end_time: int
+    punish_text: str
+    sprint_duration: int
+    start_time: datetime
+    status: int
+    sub_type: int
+    template_id: str
+    type: int
+
+
+class PkInfoData(BaseModel):
+    members: list[PkMember]
+    mill_timestamp: datetime
+    pk_basic: PkBasic
+    pk_group: None
+    timestamp: datetime
+
+
+class PkInfoCommand(CommandModel):
+    cmd: Literal['PK_INFO']
+    data: PkInfoData
