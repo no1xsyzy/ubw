@@ -277,10 +277,15 @@ class RichTextNodeTypeGoods(RichTextNodeBase):
     goods: Goods
 
 
+class RichTextNodeTypeTopic(RichTextNodeBase):
+    type: Literal['RICH_TEXT_NODE_TYPE_TOPIC']
+    jump_url: str
+
+
 RichTextNode = Annotated[
     Union[
         RichTextNodeTypeText, RichTextNodeTypeAt, RichTextNodeTypeEmoji, RichTextNodeTypeWeb, RichTextNodeTypeBv,
-        RichTextNodeTypeLottery, RichTextNodeTypeGoods,
+        RichTextNodeTypeLottery, RichTextNodeTypeGoods, RichTextNodeTypeTopic,
     ],
     Field(discriminator='type')
 ]
