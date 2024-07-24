@@ -41,6 +41,11 @@ class BagGift(BaseModel):
     show_price: int  # maybe actually bool
 
 
+class FaceEffectV2(BaseModel):
+    id: int
+    type: int
+
+
 class GiftData(BaseModel):
     """礼物消息
     :var giftName: 礼物名
@@ -122,6 +127,9 @@ class GiftData(BaseModel):
     tag_image: str = ''
     top_list: None = None
     wealth_level: int = 0
+
+    # 2024年7月24日更新
+    face_effect_v2: FaceEffectV2 | None = None
 
 
 class GiftCommand(CommandModel):
