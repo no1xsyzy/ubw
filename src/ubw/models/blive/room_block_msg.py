@@ -7,11 +7,14 @@ class RoomBlockMsg(BaseModel):
     uid: int
     uname: str
 
+    block_expired: datetime | None = None
+    vaild_period: str | None = None
+
 
 class RoomBlockCommand(CommandModel):
     cmd: Literal['ROOM_BLOCK_MSG']
     data: RoomBlockMsg
-    uid: str
+    uid: str | int
     uname: str
 
     def summarize(self) -> Summary:
