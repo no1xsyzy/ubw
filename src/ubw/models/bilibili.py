@@ -361,7 +361,7 @@ class MajorDraw(BaseMajor):
     draw: Draw
 
 
-class MajorNone(BaseMajor):
+class MajorNull(BaseMajor):
     type: Literal[None]
 
 
@@ -374,8 +374,17 @@ class MajorCommon(BaseMajor):
     common: Common
 
 
+class MajorNoneInfo(BaseModel):
+    tips: str
+
+
+class MajorNone(BaseMajor):
+    type: Literal['MAJOR_TYPE_NONE']
+    none: MajorNoneInfo
+
+
 Major = Annotated[Union[
-    MajorOpus, MajorArchive, MajorLiveRcmd, MajorDraw, MajorNone, MajorCommon,
+    MajorOpus, MajorArchive, MajorLiveRcmd, MajorDraw, MajorNull, MajorCommon, MajorNone,
 ], Field(discriminator='type')]
 
 
@@ -452,7 +461,7 @@ class DynamicItem(BaseModel):
     @cached_property
     def rich_text_nodes(self) -> list[RichTextNode]:
         match self.modules.module_dynamic.major:
-            case MajorNone() | MajorDraw() | MajorCommon():
+            case MajorNull() | MajorDraw() | MajorCommon():
                 return self.modules.module_dynamic.desc.rich_text_nodes
             case MajorOpus(opus=opus):
                 opus: Opus
@@ -486,7 +495,7 @@ class DynamicItem(BaseModel):
     @cached_property
     def text(self) -> str:
         match self.modules.module_dynamic.major:
-            case MajorNone() | MajorDraw() | MajorCommon():
+            case MajorNull() | MajorDraw() | MajorCommon():
                 return self.modules.module_dynamic.desc.text
             case MajorOpus(opus=opus):
                 opus: Opus
