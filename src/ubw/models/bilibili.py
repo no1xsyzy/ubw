@@ -421,7 +421,7 @@ class DynamicItem(BaseModel):
     DYNAMIC_TYPE_WORD=纯文字
     """
     basic: DynamicBasic
-    id_str: str
+    id_str: str | None
     modules: ModuleCollection
     type: str
     visible: bool
