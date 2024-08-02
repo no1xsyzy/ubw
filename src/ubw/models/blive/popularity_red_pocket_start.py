@@ -34,6 +34,7 @@ class PopularityRedPocketStartData(BaseModel):
     sender_uinfo: Uinfo | None = None
     icon_url: str = ''
     animation_icon_url: str = ''
+    rp_guard_info: None = None
 
 
 class PopularityRedPocketStartCommand(CommandModel):
