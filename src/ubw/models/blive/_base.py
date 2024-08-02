@@ -147,8 +147,8 @@ class OfficialInfo(BaseModel):
 
 class UinfoBase(BaseModel):
     name: str
-    name_color: Color
     face: str = ''
+    name_color: Color | None = None
     is_mystery: bool = False
     risk_ctrl_info: RiskCtrlInfo | None = None
     origin_info: OriginInfo | None = None
