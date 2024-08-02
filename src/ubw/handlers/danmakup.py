@@ -1,3 +1,4 @@
+import importlib
 import re
 from functools import cached_property
 
@@ -6,41 +7,10 @@ from pydantic import field_validator, model_validator
 from ubw.ui.stream_view import *
 from ._base import *
 
-KAOMOJIS = [
-    "(⌒▽⌒)",
-    "（￣▽￣）",
-    "(=・ω・=)",
-    "(｀・ω・´)",
-    "(〜￣△￣)〜",
-    "(･∀･)",
-    "(°∀°)ﾉ",
-    "(￣3￣)",
-    "╮(￣▽￣)╭",
-    "_(:3」∠)_",
-    "_(:3ゝ∠)_",  # slightly different :-(
-    "(^・ω・^ )",
-    "(●￣(ｴ)￣●)",
-    "ε=ε=(ノ≧∇≦)ノ",
-    "⁄(⁄ ⁄•⁄ω⁄•⁄ ⁄)⁄",
-    "←◡←",
-    "^v^",
-    "OvO",
-    "( ☉д⊙)",
-    "(╯°口°)╯",
-    "o(￣ヘ￣o＃)",
-    "|•'▿'•)✧",
-    "( TロT)σ",
-    "ᕕ( ´Д` )ᕗ",
-    "(●'◡'●)ﾉ♥",
-    "|ω・）",
-    "੭ ᐕ)੭*⁾⁾",
-    "( ｣ﾟДﾟ)｣＜",
-    "(⁠｡⁠•̀⁠ᴗ⁠-⁠)⁠✧",
-    "վ'ᴗ' ի",
-    "QAQ",
-    "( ◡‿◡)",
-    "( *・ω・)✄",
-]
+check_in_words_txt = importlib.resources.files('ubw.handlers') / 'check_in_words.txt'
+
+KAOMOJIS = [kmj for kmj in (check_in_words_txt.read_text(encoding='utf-8')).splitlines()
+            if kmj and not (kmj.startswith('<comment>') and kmj.endswith('</comment>'))]
 
 
 class DanmakuPHandler(BaseHandler):
