@@ -52,14 +52,12 @@ class DanmakuPHandler(BaseHandler):
         return re.compile('|'.join(re.escape(kaomoji) for kaomoji in self.kaomojis))
 
     def trivial_rate(self, info: models.blive.danmu_msg.DanmakuInfo) -> float:
-        if self.ignore_danmaku is not None and self.ignore_danmaku.match(info.msg):
+        msg = info.msg
+        if self.ignore_danmaku is not None and self.ignore_danmaku.match(msg):
             return -1
         if info.mode_info.extra.emoticon_unique:  # 单一表情
             return 0.1
-        msg = info.msg
-        msg = self.kaomoji_regex.sub("\ue000\ue000", msg)  # U+E000 is in private use area
-        msg = msg.replace("打卡", "\ue000")
-        msg = msg.replace(".", "\ue000", 1)
+        msg = self.kaomoji_regex.sub("\ue000" * 10, msg)  # U+E000 is in private use area
         if info.mode_info.extra.emots is not None:
             for emot in info.mode_info.extra.emots.keys():
                 msg = msg.replace(emot, "\ue000")
