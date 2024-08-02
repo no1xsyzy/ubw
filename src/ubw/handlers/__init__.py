@@ -11,6 +11,7 @@ from .living_status import LivingStatusHandler
 from .saver import SaverHandler
 from .strange_stalker import StrangeStalkerHandler
 from .testing import MockHandler
+from .warn_nebd import WarnNoEntranceButDanmakuHandler
 from .wocpian import PianHandler
 
 Handler = Annotated[
@@ -23,6 +24,7 @@ Handler = Annotated[
         StrangeStalkerHandler,
         PianHandler,
         LivingStatusHandler,
-        MockHandler
+        WarnNoEntranceButDanmakuHandler,
+        MockHandler,
     ],
     Field(discriminator='cls')]
