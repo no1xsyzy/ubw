@@ -85,6 +85,7 @@ from .preparing import PreparingCommand
 from .rank_changed import RankChangedCommand
 from .recommend_card import RecommendCardCommand
 from .reenter_live_room import ReenterLiveRoomCommand
+from .revenue_rank_changed import RevenueRankChangedCommand
 from .ring_status_change import RingStatusChangeCommand, RingStatusChangeCommandV2
 from .room_admin import RoomAdminsCommand, RoomAdminEntranceCommand, RoomAdminRevokeCommand
 from .room_block_msg import RoomBlockCommand
@@ -206,6 +207,7 @@ AnnotatedCommandModel = Annotated[Union[
     RankChangedCommand,
     RecommendCardCommand,
     ReenterLiveRoomCommand,
+    RevenueRankChangedCommand,
     RingStatusChangeCommand, RingStatusChangeCommandV2,
     RoomAdminsCommand, RoomAdminEntranceCommand, RoomAdminRevokeCommand,
     RoomBlockCommand,
@@ -328,6 +330,7 @@ __all__ = (
     'RankChangedCommand',
     'RecommendCardCommand',
     'ReenterLiveRoomCommand',
+    'RevenueRankChangedCommand',
     'RingStatusChangeCommand', 'RingStatusChangeCommandV2',
     'RoomAdminsCommand', 'RoomAdminEntranceCommand', 'RoomAdminRevokeCommand',
     'RoomBlockCommand',
