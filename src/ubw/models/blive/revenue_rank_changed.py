@@ -13,6 +13,9 @@ class Data(BaseModel):
     timestamp: datetime
     msg_id: str
     jump_url_link: str
+    jump_url_pc: str
+    jump_url_pink: str
+    jump_url_web: str
 
 
 class RevenueRankChangedCommand(CommandModel):
