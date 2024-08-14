@@ -46,6 +46,13 @@ class FaceEffectV2(BaseModel):
     type: int
 
 
+class GiftInfo(BaseModel):
+    effect_id: int
+    has_imaged_gift: int
+    img_basic: str
+    webp: str
+
+
 class GiftData(BaseModel):
     """礼物消息
     :var giftName: 礼物名
@@ -130,6 +137,8 @@ class GiftData(BaseModel):
 
     # 2024年7月24日更新
     face_effect_v2: FaceEffectV2 | None = None
+
+    gift_info: GiftInfo
 
 
 class GiftCommand(CommandModel):
