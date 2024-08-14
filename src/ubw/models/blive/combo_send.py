@@ -1,5 +1,7 @@
 from ._base import *
 
+from .send_gift import GiftInfo
+
 
 class ComboSendData(BaseModel):
     action: str
@@ -30,6 +32,7 @@ class ComboSendData(BaseModel):
     receiver_uinfo: Uinfo
     sender_uinfo: Uinfo
     wealth_level: int
+    gift_info: GiftInfo | None = None
 
 
 class ComboSendCommand(CommandModel):
