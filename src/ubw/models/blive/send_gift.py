@@ -138,7 +138,7 @@ class GiftData(BaseModel):
     # 2024年7月24日更新
     face_effect_v2: FaceEffectV2 | None = None
 
-    gift_info: GiftInfo
+    gift_info: GiftInfo | None = None
 
 
 class GiftCommand(CommandModel):
