@@ -1,6 +1,9 @@
 from ._base import *
 
-from .send_gift import GiftInfo
+
+class GiftInfo(BaseModel):
+    img_basic: str
+    webp: str
 
 
 class ComboSendData(BaseModel):
