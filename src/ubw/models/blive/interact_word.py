@@ -29,6 +29,12 @@ class ContributionV2(BaseModel):
     text: str
 
 
+class RelationTail(BaseModel):
+    tail_guide_text: str
+    tail_icon: str
+    tail_type: int
+
+
 class InteractWordData(BaseModel):
     contribution: Contribution | None = None
     contribution_v2: ContributionV2 | None = None
@@ -54,6 +60,8 @@ class InteractWordData(BaseModel):
     is_mystery: bool = False
     tail_text: str = ''
     uinfo: Uinfo
+
+    relation_tail: RelationTail | None = None
 
     trigger_time_ns = field_validator('trigger_time', mode='before')(convert_ns)
 
