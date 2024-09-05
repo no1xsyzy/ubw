@@ -59,7 +59,7 @@ class InteractWordData(BaseModel):
     group_medal: GroupMedal | None = None
     is_mystery: bool = False
     tail_text: str = ''
-    uinfo: Uinfo
+    uinfo: Uinfo | None = None
 
     relation_tail: RelationTail | None = None
 
