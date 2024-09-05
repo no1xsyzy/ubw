@@ -69,6 +69,9 @@ class DanmakuInfoModeInfoExtra(BaseModel):
     reply_is_mystery: bool = False
     hit_combo: int = 0
 
+    reply_type_enum: int = 0
+    esports_jump_url: str = ''
+
 
 class DanmakuInfoModeInfo(BaseModel):
     mode: int | None = None
