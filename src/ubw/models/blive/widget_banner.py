@@ -20,6 +20,8 @@ class Widget(BaseModel):
     url: str
     web_cover: str
 
+    position: int | None = None
+
 
 class Data(BaseModel):
     timestamp: datetime
