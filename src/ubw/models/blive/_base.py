@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, date
 from typing import Annotated, runtime_checkable, Protocol, Union, Literal
 
 from pydantic import BaseModel as _BaseModel, Field, model_validator, field_validator, Field, RootModel, AliasChoices, \
-    ConfigDict
+    ConfigDict, ValidationInfo
 
 from .._base import *
 
@@ -21,7 +21,17 @@ __all__ = (
 
 
 class BaseModel(_BaseModel):
-    model_config = ConfigDict(extra='forbid')
+    # model_config = ConfigDict(extra='forbid')
+    model_config = ConfigDict(extra='allow')
+
+    @model_validator(mode='after')
+    def warn_extra(self, info: ValidationInfo):
+        if self.__pydantic_extra__:
+            if (context := info.context) is not None:
+                if callable(collect_extra := context.get('collect_extra')):
+                    collect_extra(
+                        (f"{self.__class__.__module__}.{self.__class__.__qualname__}", self.__pydantic_extra__))
+        return self
 
 
 class Scatter(BaseModel):
