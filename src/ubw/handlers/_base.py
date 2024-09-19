@@ -89,16 +89,21 @@ class BaseHandler(BaseModel):
                 return
 
             try:
-                model: models.CommandModel = ANNOTATED_COMMAND_ADAPTER.validate_python(command)
+                extras = []
+                model: models.CommandModel = ANNOTATED_COMMAND_ADAPTER.validate_python(command, context={
+                    'collect_extra': extras.append})
+                for extra in extras:
+                    await self.on_xx_extra_field(client, command, extra)
             except ValidationError as e:
                 logger.info('error validating {}\ndoc={!r}\nerror={}'.format(cmd, command, e))
                 logger.debug(f"got a {cmd}, processed with {_func_info(self.on_unknown_cmd)}")
                 return await self.on_unknown_cmd(client, command, e)
             else:
                 return await self.on_known_cmd(client, model)
-        except Exception:
+
+        except Exception as e:
             logger.debug(f"got a {command.get('cmd', '')}, and error in processing")
-            logger.exception(f"Error command: {command!r}")
+            logger.exception(f"Error command: {command!r}", exc_info=e)
 
     async def on_known_cmd(self, client: LiveClientABC, model: models.CommandModel):
         """默认的 dispatcher，自省寻找 on_{model.cmd}"""
@@ -114,6 +119,37 @@ class BaseHandler(BaseModel):
             logger.debug(f"got a {cmd}, processing with {_func_info(self.on_else)})")
             return await self.on_else(client, model)
 
+    @cached_property
+    def logged_extra(self):
+        return set()
+
+    @staticmethod
+    def frozen_extra(model_name: str, extra: dict):
+        return model_name, frozenset(extra.items())
+
+    async def on_xx_extra_field(self, client: LiveClientABC, command: dict, model_name: str, extra: dict):
+        # aggregate model_name and extra(frozen) log only once for one instance
+        frozen = self.frozen_extra(model_name, extra)
+        if frozen in self.logged_extra:
+            return
+
+        self.logged_extra.add(frozen)
+
+        import json
+        import aiofiles.os
+        cmd = command.get('cmd', None)
+        await aiofiles.os.makedirs("output/unknown_cmd", exist_ok=True)
+        async with aiofiles.open(f"output/unknown_cmd/XX_EXTRA_{model_name}.json", mode='a', encoding='utf-8') as afp:
+            afp.write(json.dumps(extra, indent=2))
+            afp.write("\n")
+        sentry_sdk.capture_event(
+            event={'level': 'warning', 'message': f'extra fields in command {model_name}'},
+            user={'id': client.user_ident},
+            contexts={'extra': extra, 'command': command},
+            tags={'handler': self.cls, 'type': 'command-parsing',
+                  'cmd': cmd, 'room_id': client.room_id},
+        )
+
     async def on_unknown_cmd(self, client: LiveClientABC, command: dict, err: ValidationError):
         import json
         import aiofiles.os
@@ -121,6 +157,7 @@ class BaseHandler(BaseModel):
         await aiofiles.os.makedirs("output/unknown_cmd", exist_ok=True)
         async with aiofiles.open(f"output/unknown_cmd/{cmd}.json", mode='a', encoding='utf-8') as afp:
             await afp.write(json.dumps(command, indent=2, ensure_ascii=False))
+            afp.write("\n")
         error_details = err.errors(include_url=False)
         sentry_sdk.capture_event(
             event={'level': 'warning', 'message': f'error parsing command {cmd}'},
