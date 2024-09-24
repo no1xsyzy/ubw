@@ -15,6 +15,7 @@ from .change_room_info import ChangeRoomInfoCommand
 from .chg_rank_refresh import ChgRankRefreshCommand
 from .combo_end import ComboEndCommand
 from .combo_send import ComboSendCommand
+from .common_animation import CommonAnimationCommand
 from .common_notice_danmaku import CommonNoticeDanmakuCommand
 from .confirm_auto_follow import ConfirmAutoFollowCommand
 from .cut_off import CutOffCommand
@@ -39,6 +40,7 @@ from .like_guide_user import LikeGuideUserCommand
 from .like_info import LikeInfoV3UpdateCommand, LikeInfoV3ClickCommand, LikeInfoV3NoticeCommand
 from .little_message_box import LittleMessageBoxCommand
 from .live import LiveCommand
+from .live_ani_res_update import LiveAniResUpdateCommand
 from .live_interactive_game import LiveInteractiveGameCommand
 from .live_multi_view_change import LiveMultiViewChangeCommand
 from .live_multi_view_new_info import LiveMultiViewNewInfo
@@ -143,6 +145,7 @@ AnnotatedCommandModel = Annotated[Union[
     ChgRankRefreshCommand,
     ComboEndCommand,
     ComboSendCommand,
+    CommonAnimationCommand,
     CommonNoticeDanmakuCommand,
     ConfirmAutoFollowCommand,
     CutOffCommand,
@@ -167,6 +170,7 @@ AnnotatedCommandModel = Annotated[Union[
     LikeInfoV3UpdateCommand, LikeInfoV3ClickCommand, LikeInfoV3NoticeCommand,
     LittleMessageBoxCommand,
     LiveCommand,
+    LiveAniResUpdateCommand,
     LiveInteractiveGameCommand,
     LiveMultiViewChangeCommand,
     LiveMultiViewNewInfo,
@@ -267,6 +271,7 @@ __all__ = (
     'ChgRankRefreshCommand',
     'ComboEndCommand',
     'ComboSendCommand',
+    'CommonAnimationCommand',
     'CommonNoticeDanmakuCommand',
     'ConfirmAutoFollowCommand',
     'CutOffCommand',
@@ -291,6 +296,7 @@ __all__ = (
     'LikeInfoV3UpdateCommand', 'LikeInfoV3ClickCommand', 'LikeInfoV3NoticeCommand',
     'LittleMessageBoxCommand',
     'LiveCommand',
+    'LiveAniResUpdateCommand',
     'LiveInteractiveGameCommand',
     'LiveMultiViewChangeCommand',
     'LiveMultiViewNewInfo',
