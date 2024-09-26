@@ -51,6 +51,7 @@ class GiftInfo(BaseModel):
     has_imaged_gift: int
     img_basic: str
     webp: str
+    gif: str | None = None
 
 
 class GiftData(BaseModel):
