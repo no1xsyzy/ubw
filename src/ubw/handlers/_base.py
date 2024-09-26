@@ -92,8 +92,8 @@ class BaseHandler(BaseModel):
                 extras = []
                 model: models.CommandModel = ANNOTATED_COMMAND_ADAPTER.validate_python(command, context={
                     'collect_extra': extras.append})
-                for extra in extras:
-                    await self.on_xx_extra_field(client, command, extra)
+                for model_name, extra_dict in extras:
+                    await self.on_xx_extra_field(client, command, model_name, extra_dict)
             except ValidationError as e:
                 logger.info('error validating {}\ndoc={!r}\nerror={}'.format(cmd, command, e))
                 logger.debug(f"got a {cmd}, processed with {_func_info(self.on_unknown_cmd)}")
@@ -127,9 +127,9 @@ class BaseHandler(BaseModel):
     def frozen_extra(model_name: str, extra: dict):
         return model_name, frozenset(extra.items())
 
-    async def on_xx_extra_field(self, client: LiveClientABC, command: dict, model_name: str, extra: dict):
+    async def on_xx_extra_field(self, client: LiveClientABC, command: dict, model_name: str, extra_dict: dict):
         # aggregate model_name and extra(frozen) log only once for one instance
-        frozen = self.frozen_extra(model_name, extra)
+        frozen = self.frozen_extra(model_name, extra_dict)
         if frozen in self.logged_extra:
             return
 
@@ -140,12 +140,12 @@ class BaseHandler(BaseModel):
         cmd = command.get('cmd', None)
         await aiofiles.os.makedirs("output/unknown_cmd", exist_ok=True)
         async with aiofiles.open(f"output/unknown_cmd/XX_EXTRA_{model_name}.json", mode='a', encoding='utf-8') as afp:
-            afp.write(json.dumps(extra, indent=2))
+            afp.write(json.dumps(extra_dict, indent=2))
             afp.write("\n")
         sentry_sdk.capture_event(
             event={'level': 'warning', 'message': f'extra fields in command {model_name}'},
             user={'id': client.user_ident},
-            contexts={'extra': extra, 'command': command},
+            contexts={'extra': extra_dict, 'command': command},
             tags={'handler': self.cls, 'type': 'command-parsing',
                   'cmd': cmd, 'room_id': client.room_id},
         )
