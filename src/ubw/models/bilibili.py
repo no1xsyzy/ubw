@@ -316,7 +316,8 @@ class Archive(BaseModel):
     cover: str
     title: str
     desc: str
-    duration_text: timedelta
+    duration_text: str
+    # duration_text: timedelta
 
 
 class BaseMajor(BaseModel):
