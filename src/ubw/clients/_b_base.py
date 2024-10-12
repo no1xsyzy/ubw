@@ -193,14 +193,21 @@ class BilibiliClientABC(BaseModel, abc.ABC):
                 request_info = res.request_info
                 raise BilibiliApiError(data.message)
 
-    async def get_account_info(self, uid: int) -> AccountInfo:
+    async def get_account_info(self, uid: int, *, retry_limit_for_wbi=10) -> AccountInfo:
         async with self.session.get('https://api.bilibili.com/x/space/wbi/acc/info',
                                     params=await self.enclose_wbi({'mid': uid})) as res:
-            data = Response[AccountInfo].model_validate(await res.json())
-            if data.code == 0:
-                return data.data
-            else:
-                raise BilibiliApiError(data.message)
+            while True:
+                data = ResponseF[AccountInfo, dict].model_validate(await res.json())
+                if data.code == 0:
+                    return data.data
+                else:
+                    if data.code == -352:  # WBI wrong
+                        if retry_limit_for_wbi > 0:
+                            retry_limit_for_wbi -= 1
+                            continue
+                        else:
+                            raise BilibiliApiError(data.message)
+                    raise BilibiliApiError(data.message)
 
     async def enclose_wbi(self, params):
         import time
@@ -220,7 +227,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
 
         params.pop("w_rid", None)
         params["wts"] = int(time.time())
-        params["web_location"] = 1550101
+        params.setdefault("web_location", 1550101)
         ek = urlencode(sorted(params.items())) + mixin_key
         params["w_rid"] = hashlib.md5(ek.encode(encoding="utf-8")).hexdigest()
         return params

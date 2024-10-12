@@ -9,7 +9,7 @@ from typing import *
 from pydantic import BaseModel, field_validator, Field, AliasPath, TypeAdapter, AliasChoices, Json
 
 __all__ = (
-    'Response', 'OffsetList',
+    'Response', 'ResponseF', 'OffsetList',
     'RoomInfo', 'InfoByRoom', 'DanmuInfo', 'RoomEmoticons', 'FingerSPI', 'RoomPlayInfo',
     'Dynamic', 'DynamicItem', 'AccountInfo',
     'Nav',
@@ -17,6 +17,7 @@ __all__ = (
 )
 
 DataV = TypeVar('DataV')
+DataF = TypeVar('DataF')
 
 
 class Response(BaseModel, Generic[DataV]):
@@ -24,6 +25,13 @@ class Response(BaseModel, Generic[DataV]):
     message: str
     ttl: int = -1
     data: DataV | None = None
+
+
+class ResponseF(BaseModel, Generic[DataV, DataF]):
+    code: int
+    message: str
+    ttl: int = -1
+    data: DataV | DataF
 
 
 class OffsetList(BaseModel, Generic[DataV]):
