@@ -185,7 +185,7 @@ class PlayUrl(BaseModel):
 
 class PlayUrlInfo(BaseModel):
     conf_json: str
-    playurl: PlayUrl
+    playurl: PlayUrl | None
 
 
 class RoomPlayInfo(BaseModel):

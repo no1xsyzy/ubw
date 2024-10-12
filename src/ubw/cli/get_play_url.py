@@ -24,12 +24,14 @@ class _OutputChoice(str, Enum):
 @asynccontextmanager
 async def raw(play_info):
     print(play_info.model_dump_json())
+    yield None
 
 
 @asynccontextmanager
 async def raw_pretty(play_info):
     from rich.pretty import pprint
     pprint(play_info)
+    yield None
 
 
 @asynccontextmanager
@@ -204,6 +206,8 @@ async def get_play_url(room_id: int,
         if not callable(each):
             return
         if play_info.playurl_info is None:
+            return
+        if play_info.playurl_info.playurl is None:
             return
         for stream in play_info.playurl_info.playurl.stream:
             if filter_protocol != '' and stream.protocol_name not in filter_protocol:

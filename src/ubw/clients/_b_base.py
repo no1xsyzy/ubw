@@ -161,13 +161,21 @@ class BilibiliClientABC(BaseModel, abc.ABC):
     async def get_room_play_info(self, room_id: int, quality: int = 10000) -> RoomPlayInfo:
         async with self.session.get(ROOM_PLAY_INFO_URL, params={
             'build': 6215200,
-            'codec': "0,1",
             'device_name': "VTR-AL00",
-            'format': "0,1,2,3,4,5,6,7",
             'platform': 'android',
-            'protocol': "0,1,2,3,4,5,6,7",
+
+            'protocol': "0,1",
+            'format': "0,1,2",
+            'codec': "0,1,2",
+
             'qn': quality,
             'room_id': room_id,
+
+            "no_playurl": "0",
+            "mask": "1",
+            "dolby": "5",
+            "panorama": "1",
+            "hdr_type": "0,1",
         }) as res:
             data = Response[RoomPlayInfo].model_validate(await res.json())
             if data.code == 0:
