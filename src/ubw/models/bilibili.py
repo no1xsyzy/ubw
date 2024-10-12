@@ -282,10 +282,15 @@ class RichTextNodeTypeTopic(RichTextNodeBase):
     jump_url: str
 
 
+class RichTextNodeTypeVote(RichTextNodeBase):
+    type: Literal['RICH_TEXT_NODE_TYPE_VOTE']
+    rid: str
+
+
 RichTextNode = Annotated[
     Union[
         RichTextNodeTypeText, RichTextNodeTypeAt, RichTextNodeTypeEmoji, RichTextNodeTypeWeb, RichTextNodeTypeBv,
-        RichTextNodeTypeLottery, RichTextNodeTypeGoods, RichTextNodeTypeTopic,
+        RichTextNodeTypeLottery, RichTextNodeTypeGoods, RichTextNodeTypeTopic, RichTextNodeTypeVote,
     ],
     Field(discriminator='type')
 ]
@@ -491,6 +496,8 @@ class DynamicItem(BaseModel):
                     s = f"{s}{markdown_escape(text)}"
                 case RichTextNodeTypeGoods(text=text, jump_url=jump_url):
                     s = f"{s}[{markdown_escape(text)}]({jump_url})"
+                case RichTextNodeTypeVote(text=text):
+                    s = f"{s}[投票：{markdown_escape(text)}]"
         return s
 
     @cached_property
