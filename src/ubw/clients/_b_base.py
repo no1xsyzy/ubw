@@ -1,4 +1,5 @@
 import abc
+import asyncio
 import logging
 import re
 from contextvars import ContextVar
@@ -214,6 +215,8 @@ class BilibiliClientABC(BaseModel, abc.ABC):
                 else:
                     if data.code == -352:  # WBI wrong
                         if retry_limit_for_wbi > 0:
+                            logger.info(f'error={data.message!r} {retry_limit_for_wbi=}')
+                            await asyncio.sleep(10)
                             retry_limit_for_wbi -= 1
                             continue
                         else:
