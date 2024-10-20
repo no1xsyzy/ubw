@@ -194,8 +194,19 @@ class BilibiliClientABC(BaseModel, abc.ABC):
                 raise BilibiliApiError(data.message)
 
     async def get_account_info(self, uid: int, *, retry_limit_for_wbi=10) -> AccountInfo:
+        async with self.session.get(f'https://space.bilibili.com/{uid}/dynamic') as res_d_page:
+            page = await res_d_page.text()
+            import lxml.html
+            from urllib.parse import unquote
+            import json
+            doc = lxml.html.document_fromstring(page)
+            rd_el = doc.get_element_by_id('__RENDER_DATA__')
+            if rd_el is None:
+                raise BilibiliApiError('No __RENDER_DATA__ found')
+            rdata = rd_el.text_content()
+            w_webid = json.loads(unquote(rdata))["access_id"]
         async with self.session.get('https://api.bilibili.com/x/space/wbi/acc/info',
-                                    params=await self.enclose_wbi({'mid': uid})) as res:
+                                    params=await self.enclose_wbi({'mid': uid, 'w_webid': w_webid})) as res:
             while True:
                 data = ResponseF[AccountInfo, dict].model_validate(await res.json())
                 if data.code == 0:
