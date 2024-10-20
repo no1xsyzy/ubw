@@ -229,12 +229,9 @@ class BilibiliClientABC(BaseModel, abc.ABC):
         import hashlib
 
         if self._mixin_key is None:
-            data = await self.get_nav()
-            j = RE_FN.match(data.wbi_img_url).group(1) + RE_FN.match(data.wbi_img_sub_url).group(1)
-            s = ""
-            for i in MAGIC:
-                if i < len(j):
-                    s += j[i]
+            nav = await self.get_nav()
+            j = RE_FN.match(nav.wbi_img_url).group(1) + RE_FN.match(nav.wbi_img_sub_url).group(1)
+            s = ''.join(j[i] for i in MAGIC if i < len(j))
             mixin_key = self._mixin_key = s[:32]
         else:
             mixin_key = self._mixin_key
