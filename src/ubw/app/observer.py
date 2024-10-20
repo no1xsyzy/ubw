@@ -50,7 +50,8 @@ class ObserverApp(InitLoopFinalizeApp):
             await self.bilibili_client.read_cookie()  # checkpoint1
         if self.owned_ui:
             await self.ui.start()
-        self.room_id = (await self.bilibili_client.get_account_info(self.uid)).live_room_id
+        if self.room_id == 0:
+            self.room_id = (await self.bilibili_client.get_account_info(self.uid)).live_room_id
         self._live_client = WSWebCookieLiveClient(
             room_id=self.room_id,
             bilibili_client=self.bilibili_client, bilibili_client_owner=False,
