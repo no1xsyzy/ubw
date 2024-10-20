@@ -128,6 +128,7 @@ from .watched_change import WatchedChangeCommand
 from .wealth_notify import WealthNotifyCommand
 from .widget_banner import WidgetBannerCommand
 from .widget_gift_star_process import WidgetGiftStarProcessCommand
+from .widget_wish_info import WidgetWishInfoCommand
 from .widget_wish_list import WidgetWishListCommand
 from .x import XHeartbeatCommand, XStartCommand, XStopCommand
 
@@ -253,6 +254,7 @@ AnnotatedCommandModel = Annotated[Union[
     WealthNotifyCommand,
     WidgetBannerCommand,
     WidgetGiftStarProcessCommand,
+    WidgetWishInfoCommand,
     WidgetWishListCommand,
     XHeartbeatCommand, XStartCommand, XStopCommand,
 ], Field(discriminator='cmd')]
@@ -379,6 +381,7 @@ __all__ = (
     'WealthNotifyCommand',
     'WidgetBannerCommand',
     'WidgetGiftStarProcessCommand',
+    'WidgetWishInfoCommand',
     'WidgetWishListCommand',
     'XHeartbeatCommand', 'XStartCommand', 'XStopCommand',
     'AnnotatedCommandModel', 'Summary', 'Summarizer', 'CommandModel',
