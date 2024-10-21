@@ -223,6 +223,15 @@ class BilibiliClientABC(BaseModel, abc.ABC):
                             raise BilibiliApiError(data.message)
                     raise BilibiliApiError(data.message)
 
+    async def get_account_info_legacy(self, uid: int) -> AccountInfo:
+        async with self.session.get('https://api.bilibili.com/x/space/acc/info',
+                                    params=({'mid': uid})) as res:
+            data = ResponseF[AccountInfo, dict].model_validate(await res.json())
+            if data.code == 0:
+                return data.data
+            else:
+                raise BilibiliApiError(data.message)
+
     async def enclose_wbi(self, params):
         import time
         from urllib.parse import urlencode
