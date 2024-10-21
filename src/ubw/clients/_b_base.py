@@ -1,9 +1,12 @@
 import abc
 import asyncio
+import hashlib
 import logging
 import re
+import time
 from contextvars import ContextVar
 from typing import Literal, TypeVar
+from urllib.parse import urlencode, quote
 
 import aiohttp
 import pydantic
@@ -233,10 +236,6 @@ class BilibiliClientABC(BaseModel, abc.ABC):
                 raise BilibiliApiError(data.message)
 
     async def enclose_wbi(self, params):
-        import time
-        from urllib.parse import urlencode
-        import hashlib
-
         if self._mixin_key is None:
             nav = await self.get_nav()
             j = RE_FN.match(nav.wbi_img_url).group(1) + RE_FN.match(nav.wbi_img_sub_url).group(1)
@@ -248,7 +247,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
         params.pop("w_rid", None)
         params["wts"] = int(time.time())
         params.setdefault("web_location", 1550101)
-        ek = urlencode(sorted(params.items())) + mixin_key
+        ek = urlencode(sorted(params.items()), quote_via=quote) + mixin_key
         params["w_rid"] = hashlib.md5(ek.encode(encoding="utf-8")).hexdigest()
         return params
 
