@@ -11,6 +11,10 @@ class WealthyInfo(BaseModel):
     dm_icon_key: str
 
 
+class WealthStyleInfo(BaseModel):
+    url: str
+
+
 class EntryEffectData(BaseModel):
     id: int
     uid: int
@@ -47,6 +51,8 @@ class EntryEffectData(BaseModel):
 
     full_cartoon_id: int = 0
     priority_level: int = 0
+
+    wealth_style_info: WealthStyleInfo | None = None
 
     trigger_time_ns = field_validator('trigger_time', mode='before')(convert_ns)
 
