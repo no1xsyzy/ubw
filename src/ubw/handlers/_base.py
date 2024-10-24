@@ -140,8 +140,8 @@ class BaseHandler(BaseModel):
         cmd = command.get('cmd', None)
         await aiofiles.os.makedirs("output/unknown_cmd", exist_ok=True)
         async with aiofiles.open(f"output/unknown_cmd/XX_EXTRA_{model_name}.json", mode='a', encoding='utf-8') as afp:
-            afp.write(json.dumps(extra_dict, indent=2))
-            afp.write("\n")
+            await afp.write(json.dumps(extra_dict, indent=2))
+            await afp.write("\n")
         sentry_sdk.capture_event(
             event={'level': 'warning', 'message': f'extra fields in command {model_name}'},
             user={'id': client.user_ident},
@@ -157,7 +157,7 @@ class BaseHandler(BaseModel):
         await aiofiles.os.makedirs("output/unknown_cmd", exist_ok=True)
         async with aiofiles.open(f"output/unknown_cmd/{cmd}.json", mode='a', encoding='utf-8') as afp:
             await afp.write(json.dumps(command, indent=2, ensure_ascii=False))
-            afp.write("\n")
+            await afp.write("\n")
         error_details = err.errors(include_url=False)
         sentry_sdk.capture_event(
             event={'level': 'warning', 'message': f'error parsing command {cmd}'},
