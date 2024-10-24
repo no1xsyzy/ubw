@@ -125,7 +125,7 @@ class BaseHandler(BaseModel):
 
     @staticmethod
     def frozen_extra(model_name: str, extra: dict):
-        return model_name, frozenset(extra.items())
+        return model_name, frozenset(extra.keys())
 
     async def on_xx_extra_field(self, client: LiveClientABC, command: dict, model_name: str, extra_dict: dict):
         # aggregate model_name and extra(frozen) log only once for one instance
