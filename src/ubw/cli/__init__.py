@@ -168,6 +168,16 @@ async def saver(rooms: list[int]):
     await listen_to_all(rooms, handler_factory=lambda r: SaverHandler(room_id=r))
 
 
+@app.command('test_account')
+@app.command('t')
+@sync
+async def test_account(account_file: Path = 'cookies.txt'):
+    from rich import print
+    from ubw.clients.bilibili import BilibiliCookieClient
+    async with BilibiliCookieClient(cookie_file=account_file) as c:
+        print(await c.get_nav())
+
+
 @app.command('living_status')
 @app.command('w')
 @sync
