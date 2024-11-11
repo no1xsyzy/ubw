@@ -22,6 +22,13 @@ class Widget(BaseModel):
 
     position: int | None = None
 
+    target_url: str = ""
+    url_type: int = 0
+    android_jumpurl: str = ""
+    ios_jumpurl: str = ""
+    android_schameurl: str = ""
+    ios_schemaurl: str = ""
+
 
 class Data(BaseModel):
     timestamp: datetime

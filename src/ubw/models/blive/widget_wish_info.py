@@ -8,6 +8,7 @@ class WishItem(BaseModel):
     gift_price: int
     gift_name: str
     wish_status: int
+    current_num: int | None = None
 
 
 class WishStatusInfoItem(BaseModel):
@@ -28,6 +29,9 @@ class Data(BaseModel):
     ts: datetime
     tid: int
     wish_status_info: list[WishStatusInfoItem]
+
+    # updated 2024-11-11
+    daily_default: bool = True
 
 
 class WidgetWishInfoCommand(CommandModel):

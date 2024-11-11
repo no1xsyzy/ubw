@@ -54,7 +54,7 @@ class NoticeMsgCommand1(NoticeMsgCommandBase):
     id: int
     name: str
     business_id: str
-    marquee_id: Literal['']
+    marquee_id: str
     link_url: str
 
     full: FullNotice
