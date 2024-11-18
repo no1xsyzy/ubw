@@ -137,6 +137,8 @@ class PkBattleProcessCommand(CommandModel):
     pk_status: int
     data: PkBattleProcessData
     timestamp: datetime
+    template_id: str = ""
+    trace_id: str = ""
 
 
 class PkBattleProcessNewCommand(CommandModel):
@@ -145,6 +147,8 @@ class PkBattleProcessNewCommand(CommandModel):
     pk_status: int
     data: PkBattleProcessData
     timestamp: datetime
+    template_id: str = ""
+    trace_id: str = ""
 
 
 class DmConf(BaseModel):
