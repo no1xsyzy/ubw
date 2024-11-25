@@ -10,4 +10,4 @@ class Data(BaseModel):
 class SuperChatMessageDeleteCommand(CommandModel):
     cmd: Literal['SUPER_CHAT_MESSAGE_DELETE']
     data: Data
-    roomid: int
+    roomid: int | None = None
