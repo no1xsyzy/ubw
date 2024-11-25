@@ -163,10 +163,7 @@ class SaverHandler(BaseHandler):
             try:
                 async with BilibiliUnauthorizedClient() as client:
                     info = await client.get_info_by_room(self.room_id)
-                if info.room_info.live_start_time is not None:
-                    living = _State.living
-                else:
-                    living = _State.preparing
+                living = _State.preparing if info.room_info.live_start_time is None else _State.living
                 logger.info(f"get_info_by_room({self.room_id}) returns {info.room_info.live_start_time=}" "\n"
                             f"causing maybe transact from {self._living} to {living}")
                 if self._living != living:
