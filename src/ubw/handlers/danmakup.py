@@ -72,9 +72,9 @@ class DanmakuPHandler(BaseHandler):
         msg = message.info.msg
         uid = message.info.uid
         room_id = client.room_id
-        if message.info.mode_info.user is not None:
+        try:
             face = message.info.mode_info.user.base.face
-        else:
+        except AttributeError:
             face = ''
         trivial_rate = self.trivial_rate(message.info)
 
