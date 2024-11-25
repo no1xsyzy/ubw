@@ -149,7 +149,7 @@ class GiftDanmu(BaseModel):
 class GiftCommand(CommandModel):
     cmd: Literal['SEND_GIFT']
     data: GiftData
-    danmu: GiftDanmu
+    danmu: GiftDanmu | None = None
 
     def summarize(self) -> Summary:
         return Summary(
