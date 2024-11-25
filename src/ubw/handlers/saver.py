@@ -159,7 +159,7 @@ class SaverHandler(BaseHandler):
 
     async def _check_for_shard(self):
         logger.info("check if shard")
-        for _ in range(10):
+        for i in range(3):
             try:
                 async with BilibiliUnauthorizedClient() as client:
                     info = await client.get_info_by_room(self.room_id)
@@ -175,7 +175,7 @@ class SaverHandler(BaseHandler):
             except BaseException as e:
                 logger.exception("base exception in _check_for_shard()", exc_info=e)
                 raise
-            await asyncio.sleep(60)
+            await asyncio.sleep(60 * (2 ** i))
 
     async def _really_make_shard(self, info: models.InfoByRoom):
         logger.info("really making shard")
