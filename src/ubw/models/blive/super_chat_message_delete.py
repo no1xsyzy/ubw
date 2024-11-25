@@ -1,13 +1,13 @@
 from ._base import *
 
 
-class SuperChatDeleteMessage(BaseModel):
+class Data(BaseModel):
     """删除醒目留言消息"""
     ids: list[int]
     """醒目留言ID数组"""
 
 
-class SuperChatDeleteCommand(CommandModel):
+class SuperChatMessageDeleteCommand(CommandModel):
     cmd: Literal['SUPER_CHAT_MESSAGE_DELETE']
-    data: SuperChatDeleteMessage
+    data: Data
     roomid: int

@@ -110,7 +110,7 @@ from .stop_live_room_list import StopLiveRoomListCommand
 from .studio_room_close import StudioRoomCloseCommand
 from .super_chat_entrance import SuperChatEntranceCommand
 from .super_chat_message import SuperChatCommand
-from .super_chat_message_delete import SuperChatDeleteCommand
+from .super_chat_message_delete import SuperChatMessageDeleteCommand
 from .super_chat_message_jpn import SuperChatMessageJpnCommand
 from .sys_msg import SysMsgCommand
 from .trading_score import TradingScoreCommand
@@ -236,7 +236,7 @@ AnnotatedCommandModel = Annotated[Union[
     StudioRoomCloseCommand,
     SuperChatEntranceCommand,
     SuperChatCommand,
-    SuperChatDeleteCommand,
+    SuperChatMessageDeleteCommand,
     SuperChatMessageJpnCommand,
     SysMsgCommand,
     TradingScoreCommand,
@@ -363,7 +363,7 @@ __all__ = (
     'StudioRoomCloseCommand',
     'SuperChatEntranceCommand',
     'SuperChatCommand',
-    'SuperChatDeleteCommand',
+    'SuperChatMessageDeleteCommand',
     'SuperChatMessageJpnCommand',
     'SysMsgCommand',
     'TradingScoreCommand',

@@ -200,7 +200,7 @@ class BaseHandler(BaseModel):
         """醒目留言"""
         await self.on_maybe_summarizer(client, message)
 
-    async def on_super_chat_message_delete(self, client: LiveClientABC, message: models.SuperChatDeleteCommand):
+    async def on_super_chat_message_delete(self, client: LiveClientABC, message: models.SuperChatMessageDeleteCommand):
         """删除醒目留言"""
         await self.on_maybe_summarizer(client, message)
 
