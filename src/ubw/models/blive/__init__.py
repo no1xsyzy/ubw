@@ -8,6 +8,7 @@ from .anchor_broadcast import AnchorBroadcastCommand
 from .anchor_ecommerce_status import AnchorEcommerceStatusCommand
 from .anchor_helper_danmu import AnchorHelperDanmuCommand
 from .anchor_lot import AnchorLotStartCommand, AnchorLotCheckStatusCommand, AnchorLotEndCommand, AnchorLotAwardCommand
+from .anchor_lot_notice import AnchorLotNoticeCommand
 from .area_rank_changed import AreaRankChangedCommand
 from .benefit_status import BenefitStatusCommand
 from .card_msg import CardMsgCommand
@@ -85,6 +86,7 @@ from .popularity_red_pocket_winner_list import (
 )
 from .preparing import PreparingCommand
 from .rank_changed import RankChangedCommand
+from .rank_rem import RankRemCommand
 from .recommend_card import RecommendCardCommand
 from .reenter_live_room import ReenterLiveRoomCommand
 from .revenue_rank_changed import RevenueRankChangedCommand
@@ -139,6 +141,7 @@ AnnotatedCommandModel = Annotated[Union[
     AnchorEcommerceStatusCommand,
     AnchorHelperDanmuCommand,
     AnchorLotStartCommand, AnchorLotCheckStatusCommand, AnchorLotEndCommand, AnchorLotAwardCommand,
+    AnchorLotNoticeCommand,
     AreaRankChangedCommand,
     BenefitStatusCommand,
     CardMsgCommand,
@@ -211,6 +214,7 @@ AnnotatedCommandModel = Annotated[Union[
     PopularityRedPocketWinnerListCommand, PopularityRedPocketV2WinnerListCommand,
     PreparingCommand,
     RankChangedCommand,
+    RankRemCommand,
     RecommendCardCommand,
     ReenterLiveRoomCommand,
     RevenueRankChangedCommand,
@@ -266,6 +270,7 @@ __all__ = (
     'AnchorEcommerceStatusCommand',
     'AnchorHelperDanmuCommand',
     'AnchorLotStartCommand', 'AnchorLotCheckStatusCommand', 'AnchorLotEndCommand', 'AnchorLotAwardCommand',
+    'AnchorLotNoticeCommand',
     'AreaRankChangedCommand',
     'BenefitStatusCommand',
     'CardMsgCommand',
@@ -339,6 +344,7 @@ __all__ = (
     'PopularityRedPocketWinnerListCommand', 'PopularityRedPocketV2WinnerListCommand',
     'RankChangedCommand',
     'RecommendCardCommand',
+    'RankRemCommand',
     'ReenterLiveRoomCommand',
     'RevenueRankChangedCommand',
     'RingStatusChangeCommand', 'RingStatusChangeCommandV2',
