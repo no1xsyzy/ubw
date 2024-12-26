@@ -5,6 +5,7 @@ class RoomSilentData(BaseModel):
     level: int
     second: int
     type: str
+    msg: str = ''
 
 
 class RoomSilentOnCommand(CommandModel):

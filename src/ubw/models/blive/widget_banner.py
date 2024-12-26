@@ -29,6 +29,8 @@ class Widget(BaseModel):
     android_schameurl: str = ""
     ios_schemaurl: str = ""
 
+    biz_time: datetime | None = None
+
 
 class Data(BaseModel):
     timestamp: datetime

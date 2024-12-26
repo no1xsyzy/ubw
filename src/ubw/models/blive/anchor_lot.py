@@ -42,7 +42,7 @@ class AnchorLotStartData(BaseModel):
     time: int
     url: str
     web_url: str
-    award_price_text: str
+    award_price_text: str | None = None
 
 
 class AnchorLotStartCommand(CommandModel):
@@ -60,8 +60,8 @@ class AwardUser(BaseModel):
     num: int
     is_mystery: bool = False
     uinfo: Uinfo | None = None
-    bag_id: int
-    gift_id: int
+    bag_id: int | None = None
+    gift_id: int | None = None
 
 
 class AnchorLotAwardData(BaseModel):
@@ -71,8 +71,8 @@ class AnchorLotAwardData(BaseModel):
     award_num: int
     award_type: int
     award_users: list[AwardUser]
-    award_price_text: str
-    ruid: int
+    award_price_text: str | None = None
+    ruid: int | None = None
     id: int
     lot_status: int
     url: str
@@ -104,6 +104,7 @@ class AnchorLotCheckStatusData(BaseModel):
     uid: int
     reject_danmu: None = None
     reject_reason: str = ''
+    award_name_reject: str = ''
 
 
 class AnchorLotCheckStatusCommand(CommandModel):
