@@ -57,6 +57,8 @@ from .official_room_event import OfficialRoomEventCommand
 from .online_rank_count import OnlineRankCountCommand
 from .online_rank_top3 import OnlineRankTop3Command
 from .online_rank_v2 import OnlineRankV2Command
+from .other_slice_loading_result import OtherSliceLoadingResultCommand
+from .other_slice_setting_changed import OtherSliceSettingChangedCommand
 from .pk import (
     PkBattleRankChangeCommand,
     PkBattlePreCommand, PkBattlePreNewCommand,
@@ -190,6 +192,8 @@ AnnotatedCommandModel = Annotated[Union[
     OnlineRankCountCommand,
     OnlineRankTop3Command,
     OnlineRankV2Command,
+    OtherSliceLoadingResultCommand,
+    OtherSliceSettingChangedCommand,
     PkBattleRankChangeCommand,
     PkBattlePreCommand, PkBattlePreNewCommand,
     PkBattleStartCommand, PkBattleStartNewCommand,
@@ -319,6 +323,8 @@ __all__ = (
     'OnlineRankCountCommand',
     'OnlineRankTop3Command',
     'OnlineRankV2Command',
+    'OtherSliceLoadingResultCommand',
+    'OtherSliceSettingChangedCommand',
     'PreparingCommand',
     'PkBattleRankChangeCommand',
     'PkBattlePreCommand', 'PkBattlePreNewCommand',
