@@ -72,7 +72,7 @@ class DanmakuInfoModeInfoExtra(BaseModel):
     reply_type_enum: int = 0
     esports_jump_url: str = ''
 
-    master_player_hidden: False = False
+    master_player_hidden: Literal[False] = False
 
 
 class DanmakuInfoModeInfo(BaseModel):
