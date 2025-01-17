@@ -106,8 +106,12 @@ class BilibiliClientABC(BaseModel, abc.ABC):
                 if e.args == ("房间已加密",):
                     raise
             if (try_count := _try_count.get()) < self.try_limit:
-                _try_count.set(try_count + 1)
-                return await self._get_model(data_model, url, **kwargs)
+                tok = _try_count.set(try_count + 1)
+                try:
+                    logger.warning(f"get {url!r} {kwargs!r} (try {try_count + 1}/{self.try_limit})")
+                    return await self._get_model(data_model, url, **kwargs)
+                finally:
+                    _try_count.reset(tok)
             logger.exception(f"Bilibili API Error on get {url!r} {kwargs!r}", exc_info=e)
             raise
 
