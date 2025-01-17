@@ -1,8 +1,10 @@
 import asyncio
 import logging
 from datetime import datetime, timedelta
+from typing import Annotated
 
 from pydantic import Field
+from typing_extensions import Doc
 
 from ubw import models
 from ubw.clients import BilibiliCookieClient, BilibiliClient, WSWebCookieLiveClient
@@ -26,6 +28,7 @@ class ObserverApp(InitLoopFinalizeApp):
 
     # low config
     dynamic_poll_interval: float = 60
+    exponential_delay_base: Annotated[float, Doc('use exponential delay with this base')] = 2.0
 
     # DI
     bilibili_client: BilibiliClient = Field(default_factory=BilibiliCookieClient)
@@ -129,7 +132,7 @@ class ObserverApp(InitLoopFinalizeApp):
         await self.server_chan.push(ServerChanMessage(title=title, desp=desp))
 
     async def _loop(self):
-        await asyncio.sleep(self.dynamic_poll_interval)
+        await asyncio.sleep(self.dynamic_poll_interval * (self.exponential_delay_base ** self._fail_count))
         try:
             await self._fetch_print_update(False)
             self._fail_count = 0
