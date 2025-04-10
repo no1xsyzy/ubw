@@ -50,6 +50,7 @@ from .live_panel_change import LivePanelChangeCommand
 from .live_panel_change_content import LivePanelChangeContentCommand
 from .live_room_toast_message import LiveRoomToastMessageCommand
 from .log_in_notice import LogInNoticeCommand
+from .master_qn_strategy_chg import MasterQnStrategyChgCommand
 from .messagebox_user_gain_medal import MessageboxUserGainMedalCommand
 from .messagebox_user_medal_change import MessageboxUserMedalChangeCommand
 from .notice_msg import NoticeMsgCommand
@@ -185,6 +186,7 @@ AnnotatedCommandModel = Annotated[Union[
     LivePanelChangeContentCommand,
     LiveRoomToastMessageCommand,
     LogInNoticeCommand,
+    MasterQnStrategyChgCommand,
     MessageboxUserGainMedalCommand,
     MessageboxUserMedalChangeCommand,
     NoticeMsgCommand,
@@ -316,6 +318,7 @@ __all__ = (
     'LivePanelChangeContentCommand',
     'LiveRoomToastMessageCommand',
     'LogInNoticeCommand',
+    'MasterQnStrategyChgCommand',
     'MessageboxUserGainMedalCommand',
     'MessageboxUserMedalChangeCommand',
     'NoticeMsgCommand',
