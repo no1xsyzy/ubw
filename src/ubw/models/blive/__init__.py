@@ -90,6 +90,7 @@ from .popularity_red_pocket_winner_list import (
 from .preparing import PreparingCommand
 from .rank_changed import RankChangedCommand
 from .rank_rem import RankRemCommand
+from .recall_danmu_msg import RecallDanmuMsgCommand
 from .recommend_card import RecommendCardCommand
 from .reenter_live_room import ReenterLiveRoomCommand
 from .revenue_rank_changed import RevenueRankChangedCommand
@@ -221,6 +222,7 @@ AnnotatedCommandModel = Annotated[Union[
     PreparingCommand,
     RankChangedCommand,
     RankRemCommand,
+    RecallDanmuMsgCommand,
     RecommendCardCommand,
     ReenterLiveRoomCommand,
     RevenueRankChangedCommand,
@@ -354,6 +356,7 @@ __all__ = (
     'RankChangedCommand',
     'RecommendCardCommand',
     'RankRemCommand',
+    'RecallDanmuMsgCommand',
     'ReenterLiveRoomCommand',
     'RevenueRankChangedCommand',
     'RingStatusChangeCommand', 'RingStatusChangeCommandV2',
