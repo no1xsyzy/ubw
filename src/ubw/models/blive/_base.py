@@ -1,8 +1,18 @@
 from datetime import datetime, timedelta, date
 from typing import Annotated, runtime_checkable, Protocol, Union, Literal
 
-from pydantic import BaseModel as _BaseModel, Field, model_validator, field_validator, Field, RootModel, AliasChoices, \
-    ConfigDict, ValidationInfo
+from pydantic import (
+    BaseModel as _BaseModel,
+    Field,
+    model_validator,
+    field_validator,
+    Field,
+    RootModel,
+    AliasChoices,
+    ConfigDict,
+    ValidationInfo,
+    Json,
+)
 
 from .._base import *
 
@@ -16,7 +26,7 @@ __all__ = (
     # common types
     'Scatter', 'MedalInfo', 'Color', 'Uinfo', 'UinfoLow', 'UserInfo', 'GroupMedal',
     # common validator
-    'strange_dict', 'convert_ns',
+    'strange_dict', 'convert_ns', 'Json',
 )
 
 

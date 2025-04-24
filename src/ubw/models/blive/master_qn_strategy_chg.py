@@ -1,5 +1,3 @@
-from pydantic import Json
-
 from ._base import *
 
 
