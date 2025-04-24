@@ -8,4 +8,6 @@ class Data(BaseModel):
 
 class MasterQnStrategyChgCommand(CommandModel):
     cmd: Literal['master_qn_strategy_chg']
-    data: Json[Data]
+    data: Json[Data] | None = None
+    mtime: datetime | None = None
+    scatter: tuple[int, int] | None = None

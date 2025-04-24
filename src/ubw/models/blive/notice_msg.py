@@ -59,7 +59,7 @@ class NoticeMsgCommand1(NoticeMsgCommandBase):
 
     full: FullNotice
     half: HalfNotice
-    side: SideNotice
+    side: SideNotice | None
 
     scatter: Scatter
 
@@ -123,7 +123,7 @@ class NoticeMsgCommand4(NoticeMsgCommandBase):
     notice_type: int
     shield_uid: int
 
-    side: SideNotice
+    side: SideNotice | None
     full: FullNotice
     half: HalfNotice
 
