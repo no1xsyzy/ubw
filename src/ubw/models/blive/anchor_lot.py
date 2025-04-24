@@ -44,6 +44,10 @@ class AnchorLotStartData(BaseModel):
     web_url: str
     award_price_text: str | None = None
 
+    award_content: str = ""
+    join_type_text: str = ""
+    sponsor_title: str = ""
+
 
 class AnchorLotStartCommand(CommandModel):
     """天选时刻开始"""
@@ -77,6 +81,7 @@ class AnchorLotAwardData(BaseModel):
     lot_status: int
     url: str
     web_url: str
+    sponsor_title: str = ""
 
 
 class AnchorLotAwardCommand(CommandModel):
