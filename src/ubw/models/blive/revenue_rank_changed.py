@@ -16,6 +16,8 @@ class Data(BaseModel):
     jump_url_pc: str
     jump_url_pink: str
     jump_url_web: str
+    charm_chat_new_name: str = ""
+    charm_chat_new_icon: str = ""
 
 
 class RevenueRankChangedCommand(CommandModel):

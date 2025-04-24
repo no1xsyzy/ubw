@@ -31,6 +31,8 @@ class Widget(BaseModel):
 
     biz_time: datetime | None = None
 
+    not_merge_tab: int = 0
+
 
 class Data(BaseModel):
     timestamp: datetime

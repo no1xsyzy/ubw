@@ -79,7 +79,7 @@ class NoticeMsgCommand2(NoticeMsgCommandBase):
     marquee_id: Literal['']
     link_url: str
 
-    side: SideNotice
+    side: SideNotice | None
     full: FullNotice
     half: HalfNotice
 

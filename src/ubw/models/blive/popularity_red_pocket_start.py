@@ -35,6 +35,7 @@ class PopularityRedPocketStartData(BaseModel):
     icon_url: str = ''
     animation_icon_url: str = ''
     rp_guard_info: None = None
+    anchor_h5_url: str = ''
 
 
 class PopularityRedPocketStartCommand(CommandModel):
