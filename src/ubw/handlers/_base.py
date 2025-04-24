@@ -142,6 +142,10 @@ class BaseHandler(BaseModel):
         async with aiofiles.open(f"output/unknown_cmd/XX_EXTRA_{model_name}.json", mode='a', encoding='utf-8') as afp:
             await afp.write(json.dumps(extra_dict, indent=2))
             await afp.write("\n")
+        # also writes the full command for checking
+        async with aiofiles.open(f"output/unknown_cmd/{cmd}.json", mode='a', encoding='utf-8') as afp:
+            await afp.write(json.dumps(command, indent=2, ensure_ascii=False))
+            await afp.write("\n")
         sentry_sdk.capture_event(
             event={'level': 'warning', 'message': f'extra fields in command {model_name}'},
             user={'id': client.user_ident},
