@@ -11,6 +11,7 @@ from urllib.parse import urlencode, quote
 import aiohttp
 import pydantic
 import sentry_sdk
+from bilibili_api import user, Credential
 from pydantic import BaseModel
 
 from ubw.models.bilibili import *
@@ -59,6 +60,9 @@ class BilibiliClientABC(BaseModel, abc.ABC):
     @abc.abstractmethod
     def make_session(self):
         ...
+
+    def get_sessdata(self) -> str:
+        return ""
 
     @property
     def session(self):
@@ -201,6 +205,11 @@ class BilibiliClientABC(BaseModel, abc.ABC):
                 request_info = res.request_info
                 raise BilibiliApiError(data.message)
 
+    async def get_account_info_2(self, uid: int, ) -> AccountInfo:
+        credential = Credential(sessdata=self.get_sessdata())
+        u = user.User(uid=uid, credential=credential)
+        return AccountInfo.model_validate(await u.get_live_info())
+
     async def get_account_info(self, uid: int, *, retry_limit_for_wbi=10) -> AccountInfo:
         async with self.session.get(f'https://space.bilibili.com/{uid}/dynamic') as res_d_page:
             page = await res_d_page.text()
@@ -229,6 +238,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
                         else:
                             raise BilibiliApiError(data.message)
                     raise BilibiliApiError(data.message)
+            raise BilibiliApiError("WBI is still wrong after tries")
 
     async def get_account_info_legacy(self, uid: int) -> AccountInfo:
         async with self.session.get('https://api.bilibili.com/x/space/acc/info',

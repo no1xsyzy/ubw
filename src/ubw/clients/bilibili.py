@@ -39,6 +39,9 @@ class BilibiliCookieClient(BilibiliClientABC):
     def _cookies(self):
         return http.cookies.SimpleCookie()
 
+    def get_sessdata(self) -> str:
+        return self._cookies.get('SESSDATA').value
+
     async def read_cookie(self, use: Literal['env', 'config', 'default'] = 'default'):
         match use:
             case 'env':
