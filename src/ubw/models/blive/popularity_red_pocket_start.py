@@ -8,6 +8,13 @@ class Award(BaseModel):
     num: int
 
 
+class RpGuardInfo(BaseModel):
+    rp_guard_icon: str
+    rp_guard_text_icon: str
+    rp_guard_flag_icon: str
+    discount_rent: float  # maybe percentage
+
+
 class PopularityRedPocketStartData(BaseModel):
     awards: list[Award]
     current_time: datetime
@@ -34,7 +41,7 @@ class PopularityRedPocketStartData(BaseModel):
     sender_uinfo: Uinfo | None = None
     icon_url: str = ''
     animation_icon_url: str = ''
-    rp_guard_info: None = None
+    rp_guard_info: RpGuardInfo | None = None
     anchor_h5_url: str = ''
 
 
