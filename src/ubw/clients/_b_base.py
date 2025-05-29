@@ -153,6 +153,12 @@ class BilibiliClientABC(BaseModel, abc.ABC):
             else:
                 raise BilibiliApiError(data.message)
 
+    async def get_danmaku_server_2(self, room_id: int) -> DanmuInfo:
+        credential = Credential(sessdata=self.get_sessdata())
+        from bilibili_api import live
+        r = live.LiveRoom(room_display_id=room_id, credential=credential)
+        return DanmuInfo.model_validate(await r.get_danmu_info())
+
     async def get_emoticons(self, room_id: int, platform: str = 'pc') -> RoomEmoticons:
         async with self.session.get(EMOTICON_URL,
                                     params={'platform': platform, 'id': room_id}) as res:

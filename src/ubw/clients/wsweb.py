@@ -42,32 +42,37 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
 
     async def start(self):
         if self.is_running:
-            return warnings.warn(f'room={self.room_id} client is running, cannot start() again')
+            warnings.warn(f'room={self.room_id} client is running, cannot start() again')
+            return
 
         self._task = asyncio.create_task(self.main())
 
     async def stop(self):
         if not self.is_running:
-            return warnings.warn(f'room={self.room_id} client is stopped, cannot stop() again')
+            warnings.warn(f'room={self.room_id} client is stopped, cannot stop() again')
+            return
 
         task = self._task
         self._task = None
-        if task.cancel('stop'):
-            try:
-                await task
-            except asyncio.CancelledError:
-                return
+        task.cancel('stop')
+        try:
+            await task
+        except asyncio.CancelledError:
+            return
+        return
 
     async def join(self):
         if not self.is_running:
-            return warnings.warn(f'room={self.room_id} client is stopped, cannot join()')
+            warnings.warn(f'room={self.room_id} client is stopped, cannot join()')
+            return
 
         logger.debug('room=%s joining', self.room_id)
         await asyncio.shield(self._task)
 
     async def close(self):
         if self.is_running:
-            return warnings.warn(f'room={self.room_id} is calling close(), but client is running')
+            warnings.warn(f'room={self.room_id} is calling close(), but client is running')
+            return
         if self._session is not None:
             await self._session.close()
         if self.bilibili_client_owner:
@@ -85,8 +90,7 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
     async def _init_host_server(self):
         logger.debug('room=%d _init_host_server() invoked', self.room_id)
         try:
-            server = await self.bilibili_client.get_danmaku_server(self.room_id)
-            # server: bilibili.DanmuInfo = await bilibili.get_danmaku_server(self.room_id, session=self._session)
+            server = await self.bilibili_client.get_danmaku_server_2(self.room_id)
             self._host_server_list = server.host_list
             self._host_server_token = server.token
         except (aiohttp.ClientConnectionError, asyncio.TimeoutError, BilibiliApiError):  # pragma: no cover
