@@ -90,7 +90,7 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
     async def _init_host_server(self):
         logger.debug('room=%d _init_host_server() invoked', self.room_id)
         try:
-            server = await self.bilibili_client.get_danmaku_server_2(self.room_id)
+            server = await self.bilibili_client.get_danmaku_server(self.room_id)
             self._host_server_list = server.host_list
             self._host_server_token = server.token
         except (aiohttp.ClientConnectionError, asyncio.TimeoutError, BilibiliApiError):  # pragma: no cover

@@ -1,5 +1,4 @@
 import abc
-import asyncio
 import hashlib
 import logging
 import re
@@ -12,7 +11,7 @@ import aiohttp
 import pydantic
 import sentry_sdk
 from bilibili_api import user, Credential
-from pydantic import BaseModel
+from pydantic import BaseModel, TypeAdapter
 
 from ubw.models.bilibili import *
 
@@ -136,24 +135,18 @@ class BilibiliClientABC(BaseModel, abc.ABC):
             raise
 
     async def get_info_by_room(self, room_id: int) -> InfoByRoom:
-        return await self._get_model(InfoByRoom,
-                                     'https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom',
-                                     params={'room_id': room_id})
+        credential = Credential(sessdata=self.get_sessdata())
+        from bilibili_api import live
+        r = live.LiveRoom(room_display_id=room_id, credential=credential)
+        return InfoByRoom.model_validate(await r.get_room_info())
 
     async def get_info_by_room_raw(self, room_id: int):
-        return await self._get_raw('https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom',
-                                   params={'room_id': room_id})
+        credential = Credential(sessdata=self.get_sessdata())
+        from bilibili_api import live
+        r = live.LiveRoom(room_display_id=room_id, credential=credential)
+        return await r.get_room_info()
 
     async def get_danmaku_server(self, room_id: int) -> DanmuInfo:
-        async with self.session.get(DANMAKU_SERVER_CONF_URL,
-                                    params={'id': room_id, 'type': 0}) as res:
-            data = Response[DanmuInfo].model_validate(await res.json())
-            if data.code == 0:
-                return data.data
-            else:
-                raise BilibiliApiError(data.message)
-
-    async def get_danmaku_server_2(self, room_id: int) -> DanmuInfo:
         credential = Credential(sessdata=self.get_sessdata())
         from bilibili_api import live
         r = live.LiveRoom(room_display_id=room_id, credential=credential)
@@ -211,49 +204,10 @@ class BilibiliClientABC(BaseModel, abc.ABC):
                 request_info = res.request_info
                 raise BilibiliApiError(data.message)
 
-    async def get_account_info_2(self, uid: int, ) -> AccountInfo:
+    async def get_account_info(self, uid: int, ) -> AccountInfo:
         credential = Credential(sessdata=self.get_sessdata())
         u = user.User(uid=uid, credential=credential)
         return AccountInfo.model_validate(await u.get_live_info())
-
-    async def get_account_info(self, uid: int, *, retry_limit_for_wbi=10) -> AccountInfo:
-        async with self.session.get(f'https://space.bilibili.com/{uid}/dynamic') as res_d_page:
-            page = await res_d_page.text()
-            import lxml.html
-            from urllib.parse import unquote
-            import json
-            doc = lxml.html.document_fromstring(page)
-            rd_el = doc.get_element_by_id('__RENDER_DATA__')
-            if rd_el is None:
-                raise BilibiliApiError('No __RENDER_DATA__ found')
-            rdata = rd_el.text_content()
-            w_webid = json.loads(unquote(rdata))["access_id"]
-        async with self.session.get('https://api.bilibili.com/x/space/wbi/acc/info',
-                                    params=await self.enclose_wbi({'mid': uid, 'w_webid': w_webid})) as res:
-            while True:
-                data = ResponseF[AccountInfo, dict].model_validate(await res.json())
-                if data.code == 0:
-                    return data.data
-                else:
-                    if data.code == -352:  # WBI wrong
-                        if retry_limit_for_wbi > 0:
-                            logger.info(f'error={data.message!r} {retry_limit_for_wbi=}')
-                            await asyncio.sleep(10)
-                            retry_limit_for_wbi -= 1
-                            continue
-                        else:
-                            raise BilibiliApiError(data.message)
-                    raise BilibiliApiError(data.message)
-            raise BilibiliApiError("WBI is still wrong after tries")
-
-    async def get_account_info_legacy(self, uid: int) -> AccountInfo:
-        async with self.session.get('https://api.bilibili.com/x/space/acc/info',
-                                    params=({'mid': uid})) as res:
-            data = ResponseF[AccountInfo, dict].model_validate(await res.json())
-            if data.code == 0:
-                return data.data
-            else:
-                raise BilibiliApiError(data.message)
 
     async def enclose_wbi(self, params):
         if self._mixin_key is None:
@@ -279,18 +233,14 @@ class BilibiliClientABC(BaseModel, abc.ABC):
             else:
                 raise BilibiliApiError(data.message)
 
-    async def get_user_dynamic(self, uid, offset=0) -> OffsetList[DynamicItem]:
-        params = {'host_mid': uid, 'features': 'itemOpusStyle'}
-        if offset != 0:
-            params['offset'] = offset
-
-        return await self._get_model(
-            OffsetList[DynamicItem],
-            "https://api.bilibili.com/x/polymer/web-dynamic/v1/feed/space", params=params)
+    async def get_user_dynamic(self, uid, offset="") -> OffsetList[DynamicItem]:
+        credential = Credential(sessdata=self.get_sessdata())
+        u = user.User(uid=uid, credential=credential)
+        return TypeAdapter(OffsetList[DynamicItem]).validate_python(await u.get_dynamics_new(offset=offset))
 
     async def iter_user_dynamic(self, uid):
         has_more = True
-        offset = 0
+        offset = ""
         while has_more:
             d = await self.get_user_dynamic(uid, offset)
             has_more = d.has_more
@@ -299,17 +249,19 @@ class BilibiliClientABC(BaseModel, abc.ABC):
                 yield item
 
     async def get_video_pagelist(self, bvid):
-        return await self._get_model(list[VideoP], 'https://api.bilibili.com/x/player/pagelist',
-                                     params={'bvid': bvid})
+        from bilibili_api import video
+        credential = Credential(sessdata=self.get_sessdata())
+        v = video.Video(bvid=bvid, credential=credential)
+        return TypeAdapter(list[VideoP]).validate_python(await v.get_pages())
 
     async def get_video_download(self, bvid, cid):
-        return await self._get_model(VideoPlayInfo, 'https://api.bilibili.com/x/player/playurl',
-                                     params={'bvid': bvid, 'cid': cid, 'qn': 127, 'otype': 'json', 'fnval': 4048,
-                                             'fourk': 1},
-                                     headers={'referer': 'https://www.bilibili.com/video/' + bvid})
+        from bilibili_api import video
+        credential = Credential(sessdata=self.get_sessdata())
+        v = video.Video(bvid=bvid, credential=credential)
+        return VideoPlayInfo.model_validate(await v.get_download_url(cid=cid))
 
     async def get_video_download_raw(self, bvid, cid):
-        return await self._get_raw('https://api.bilibili.com/x/player/playurl',
-                                   params={'bvid': bvid, 'cid': cid, 'qn': 127, 'otype': 'json', 'fnval': 4048,
-                                           'fourk': 1},
-                                   headers={'referer': 'https://www.bilibili.com/video/' + bvid})
+        from bilibili_api import video
+        credential = Credential(sessdata=self.get_sessdata())
+        v = video.Video(bvid=bvid, credential=credential)
+        return await v.get_download_url(cid=cid)
