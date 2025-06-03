@@ -3,6 +3,7 @@ __pycache__
 .idea
 output/
 /*.toml
+!/pyproject.toml
 !/config.example.toml
 dist/
 *.log
