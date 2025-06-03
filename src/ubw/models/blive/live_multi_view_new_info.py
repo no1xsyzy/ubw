@@ -30,6 +30,7 @@ class RelationView(BaseModel):
     up_name: str
     pub_date: str
     gather_id: int
+    sub_name: str = ""
 
 
 class Data(BaseModel):

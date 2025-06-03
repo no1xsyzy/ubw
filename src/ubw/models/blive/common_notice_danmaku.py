@@ -49,6 +49,7 @@ class CommonNoticeDanmakuData(BaseModel):
     danmaku_uri: str | None = None
     dmscore: int = 0
     terminals: list[int]
+    room_id: int = 0
 
 
 class CommonNoticeDanmakuCommand(CommandModel):

@@ -72,6 +72,7 @@ class Score(BaseModel):
 class MultiConnInfo(BaseModel):
     room_owner: int
     scores: list[Score]
+    show_score: int = 1
 
 
 class Info(BaseModel):
