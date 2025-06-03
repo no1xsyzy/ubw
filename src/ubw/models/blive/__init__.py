@@ -122,6 +122,7 @@ from .super_chat_message_jpn import SuperChatMessageJpnCommand
 from .sys_msg import SysMsgCommand
 from .trading_score import TradingScoreCommand
 from .universal_event_gift import UniversalEventGiftCommand
+from .universal_event_gift_v2 import UniversalEventGiftV2Command
 from .user_info_update import UserInfoUpdateCommand
 from .user_panel_red_alarm import UserPanelRedAlarmCommand
 from .user_task_progress import UserTaskProgressCommand
@@ -255,6 +256,7 @@ AnnotatedCommandModel = Annotated[Union[
     SysMsgCommand,
     TradingScoreCommand,
     UniversalEventGiftCommand,
+    UniversalEventGiftV2Command,
     UserInfoUpdateCommand,
     UserPanelRedAlarmCommand,
     UserTaskProgressCommand,
@@ -389,6 +391,7 @@ __all__ = (
     'SysMsgCommand',
     'TradingScoreCommand',
     'UniversalEventGiftCommand',
+    'UniversalEventGiftV2Command',
     'UserInfoUpdateCommand',
     'UserPanelRedAlarmCommand',
     'UserTaskProgressCommand',
