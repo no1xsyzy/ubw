@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, timedelta, date
 from typing import Annotated, runtime_checkable, Protocol, Union, Literal
 
@@ -66,6 +67,10 @@ class Color(RootModel):
     @model_validator(mode='before')
     def parse_color(cls, data):
         if isinstance(data, str):
+            if match := re.match(r'rgba\((\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?)\)',
+                                 data):
+                r, g, b, a = match.groups()
+                return int(r), int(g), int(b), int(float(a) * 255)
             s = data.lstrip("#")
             if len(s) == 3:
                 r, g, b = s
