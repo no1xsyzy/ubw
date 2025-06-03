@@ -33,6 +33,7 @@ from .guard_achievement_room import GuardAchievementRoomCommand
 from .guard_benefit_receive import GuardBenefitReceiveCommand
 from .guard_buy import GuardBuyCommand
 from .guard_honor_thousand import GuardHonorThousandCommand
+from .guard_leader_notice import GuardLeaderNoticeCommand
 from .hot_buy_num import HotBuyNumCommand
 from .hot_rank_settlement import HotRankSettlementCommand, HotRankSettlementV2Command
 from .hot_room_notify import HotRoomNotifyCommand
@@ -170,6 +171,7 @@ AnnotatedCommandModel = Annotated[Union[
     GuardBenefitReceiveCommand,
     GuardBuyCommand,
     GuardHonorThousandCommand,
+    GuardLeaderNoticeCommand,
     HotBuyNumCommand,
     HotRankSettlementCommand, HotRankSettlementV2Command,
     HotRoomNotifyCommand,
@@ -303,6 +305,7 @@ __all__ = (
     'GuardBenefitReceiveCommand',
     'GuardBuyCommand',
     'GuardHonorThousandCommand',
+    'GuardLeaderNoticeCommand',
     'HotBuyNumCommand',
     'HotRankSettlementCommand', 'HotRankSettlementV2Command',
     'HotRoomNotifyCommand',
