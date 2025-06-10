@@ -1,3 +1,3 @@
-from ubw import app
+from ubw.cli import app
 
 app()
