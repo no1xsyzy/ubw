@@ -207,7 +207,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
     async def get_account_info(self, uid: int, ) -> AccountInfo:
         credential = Credential(sessdata=self.get_sessdata())
         u = user.User(uid=uid, credential=credential)
-        return AccountInfo.model_validate(await u.get_live_info())
+        return AccountInfo.model_validate(await u.get_user_info())
 
     async def enclose_wbi(self, params):
         if self._mixin_key is None:
