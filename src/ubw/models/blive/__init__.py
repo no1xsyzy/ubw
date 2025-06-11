@@ -79,6 +79,7 @@ from .pk import (
     PkInfoCommand,
 )
 from .playtogether_icon_change import PlaytogetherIconChangeCommand
+from .playurl_reload import PlayurlReloadCommand
 from .popular_rank_changed import PopularRankChangedCommand
 from .popular_rank_guide_card import PopularRankGuideCardCommand
 from .popularity_rank_tab_chg import PopularityRankTabChgCommand
@@ -216,6 +217,7 @@ AnnotatedCommandModel = Annotated[Union[
     PkBattleVideoPunishEndCommand,
     PkInfoCommand,
     PlaytogetherIconChangeCommand,
+    PlayurlReloadCommand,
     PopularRankChangedCommand,
     PopularRankGuideCardCommand,
     PopularityRankTabChgCommand,
@@ -352,6 +354,7 @@ __all__ = (
     'PkBattleVideoPunishEndCommand',
     'PkInfoCommand',
     'PlaytogetherIconChangeCommand',
+    'PlayurlReloadCommand',
     'PopularRankChangedCommand',
     'PopularRankGuideCardCommand',
     'PopularityRankTabChgCommand',

@@ -42,6 +42,8 @@ class VoiceJoinRoomCountInfoData(BaseModel):
     root_status: int
     room_status: int
     apply_count: int
+    notify_count: int = 0
+    red_point: int = 0
 
 
 class VoiceJoinRoomCountInfoCommand(CommandModel):
