@@ -36,6 +36,8 @@ class BilibiliCookieClient(BilibiliClientABC):
     auth_type: Literal['cookie'] = 'cookie'
     cookie_file: Path | None = None
 
+    _cookie_read: bool = False
+
     @functools.cached_property
     def _cookies(self):
         return http.cookies.SimpleCookie()
@@ -79,12 +81,16 @@ class BilibiliCookieClient(BilibiliClientABC):
                 self._cookies[name]['expires'] = expires
                 self._cookies[name]['path'] = path
                 self._cookies[name]['httponly'] = httponly
+        self._cookie_read = True
 
     async def __aenter__(self):
         await self.read_cookie()
         return await super().__aenter__()
 
-    def make_session(self, default_cookies=True, timeout=None, **kwargs):
+    def make_session(self, *, default_cookies=True, timeout=None, warn_unread_cookie=True, **kwargs):
+        if not self._cookie_read and warn_unread_cookie:
+            warnings.warn("read_cookie() is not called, there might be no cookies and not authenticated, "
+                          "consider call read_cookie() before using or specify warn_unread_cookie=False")
         headers = CIMultiDict(self.headers)
         headers.setdefault('User-Agent', self.user_agent)
 
