@@ -9,6 +9,7 @@ from typing_extensions import Doc
 from ubw import models
 from ubw.clients import BilibiliCookieClient, BilibiliClient, WSWebCookieLiveClient
 from ubw.handlers.observe import ObserverHandler
+from ubw.push.qmsg import QMsgPusher
 from ubw.push.serverchan import ServerChanPusher, ServerChanMessage
 from ubw.ui.stream_view import *
 from ._base import *
@@ -37,10 +38,13 @@ class ObserverApp(InitLoopFinalizeApp):
     owned_ui: bool = True
     server_chan: ServerChanPusher | None = None
     owned_server_chan: bool = True
+    qmsg: QMsgPusher | None = None
+    owned_qmsg: bool = True
 
     # states
     last_got: set = Field(default_factory=set)
     room_id: int = 0
+    name: str = ""
 
     # runtime
     _live_handler: ObserverHandler | None = None
@@ -49,12 +53,16 @@ class ObserverApp(InitLoopFinalizeApp):
     _fail_count: int = 0
 
     async def _init(self):
+        acc_info = None
         if self.bilibili_client_owner:
             await self.bilibili_client.read_cookie()  # checkpoint1
         if self.owned_ui:
             await self.ui.start()
         if self.room_id == 0:
-            self.room_id = (await self.bilibili_client.get_account_info(self.uid)).live_room_id
+            self.room_id = (
+                    acc_info or (acc_info := await self.bilibili_client.get_account_info(self.uid))).live_room_id
+        if self.name == "":
+            self.name = (acc_info or (acc_info := await self.bilibili_client.get_account_info(self.uid))).name
         self._live_client = WSWebCookieLiveClient(
             room_id=self.room_id,
             bilibili_client=self.bilibili_client, bilibili_client_owner=False,
@@ -64,6 +72,7 @@ class ObserverApp(InitLoopFinalizeApp):
             ui=self.ui, owned_ui=False,
             bilibili_client=self.bilibili_client, bilibili_client_owner=False,
             server_chan=self.server_chan, owned_server_chan=False,
+            qmsg=self.qmsg, owned_qmsg=False,
         )
         self._live_client.add_handler(self._live_handler)
         await self._live_handler.start(self._live_client)
@@ -83,7 +92,7 @@ class ObserverApp(InitLoopFinalizeApp):
                         PlainText(text=item.text),
                     ], time=item.pub_date))
                     if not init:
-                        await self._deal_with_push("新置顶动态", item.markdown)
+                        await self._deal_with_push(f"{self.name} 有新置顶动态", item.markdown)
                 elif (datetime.now().astimezone() - item.pub_date) > timedelta(days=2):
                     pass
                 elif item.is_video:
@@ -93,7 +102,7 @@ class ObserverApp(InitLoopFinalizeApp):
                         PlainText(text=item.text),
                     ], time=item.pub_date))
                     if not init:
-                        await self._deal_with_push("发布视频", item.markdown)
+                        await self._deal_with_push(f"{self.name} 发布视频", item.markdown)
                 elif item.is_live:
                     await self.ui.add_record(Record(segments=[
                         Anchor(text="直播动态", href=item.jump_url),
@@ -115,7 +124,7 @@ class ObserverApp(InitLoopFinalizeApp):
                         segments.append(PlainText(text=item.orig.text))
                     await self.ui.add_record(Record(segments=segments, time=item.pub_date))
                     if not init:
-                        await self._deal_with_push("转发动态", item.markdown)
+                        await self._deal_with_push(f"{self.name} 转发动态", item.markdown)
                 else:
                     await self.ui.add_record(Record(segments=[
                         Anchor(text="发布动态", href=item.jump_url),
@@ -123,13 +132,14 @@ class ObserverApp(InitLoopFinalizeApp):
                         PlainText(text=item.text),
                     ], time=item.pub_date))
                     if not init:
-                        await self._deal_with_push("发布动态", item.markdown)
+                        await self._deal_with_push(f"{self.name} 发布动态", item.markdown)
         self.last_got = this_got
 
     async def _deal_with_push(self, title, desp):
-        if self.server_chan is None:
-            return
-        await self.server_chan.push(ServerChanMessage(title=title, desp=desp))
+        if self.server_chan is not None:
+            await self.server_chan.push(ServerChanMessage(title=title, desp=desp))
+        if self.qmsg is not None:
+            await self.qmsg.push(title)
 
     async def _loop(self):
         await asyncio.sleep(self.dynamic_poll_interval * (self.exponential_delay_base ** self._fail_count))
@@ -155,3 +165,7 @@ class ObserverApp(InitLoopFinalizeApp):
             await self._live_client.close()
         if self.bilibili_client_owner:
             await self.bilibili_client.close()
+        if self.server_chan is not None and self.owned_server_chan:
+            await self.server_chan.close()
+        if self.qmsg is not None and self.owned_qmsg:
+            await self.qmsg.close()

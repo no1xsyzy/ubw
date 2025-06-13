@@ -53,3 +53,6 @@ class ServerChanPusher(BaseModel):
                     logger.info("server chan response %s", await resp.text())
         except Exception as e:
             logger.exception('server chan error', exc_info=e)
+
+    async def close(self):
+        await self.session.close()

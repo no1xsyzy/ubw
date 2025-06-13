@@ -571,6 +571,7 @@ class Dynamic(BaseModel):
 
 class AccountInfo(BaseModel):
     mid: int
+    name: str
     live_room_id: int = Field(
         alias='live_room_id',
         validation_alias=AliasChoices('live_room_id',

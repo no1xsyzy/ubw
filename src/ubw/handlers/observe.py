@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from functools import cached_property
 
 from ubw.clients import BilibiliClient
+from ubw.push.qmsg import QMsgPusher
 from ubw.push.serverchan import ServerChanPusher, ServerChanMessage
 from ubw.ui.stream_view import *
 from ._base import *
@@ -22,6 +23,8 @@ class ObserverHandler(BaseHandler):
     owned_ui: bool = True
     server_chan: ServerChanPusher | None = None
     owned_server_chan: bool = True
+    qmsg: QMsgPusher | None = None
+    owned_qmsg: bool = True
 
     # states
     up_id: int | None = None
@@ -97,19 +100,20 @@ class ObserverHandler(BaseHandler):
         await self.deal_with_push(push_marks)
 
     async def deal_with_push(self, push_marks):
-        if self.server_chan is None:
-            return
         if '直播开始' in push_marks:
             if self.last_live_change is not None and datetime.now() - self.last_live_change <= self.live_push_throttle:
                 return
             self.last_live_change = datetime.now()
-            await self.server_chan.push(ServerChanMessage(
-                title='直播开始',
-                desp=f"{self.up_name}开始直播了！"
-                     "\n\n"
-                     f"[点击观看《{self.title}》](bilibili://live/{self.room_id})"
-                ,
-            ))
+            if self.server_chan is not None:
+                await self.server_chan.push(ServerChanMessage(
+                    title='直播开始',
+                    desp=f"{self.up_name}开始直播了！"
+                         "\n\n"
+                         f"[点击观看《{self.title}》](bilibili://live/{self.room_id})"
+                    ,
+                ))
+            if self.qmsg is not None:
+                await self.qmsg.push(f"{self.up_name} 开始直播")
         elif '直播情况变更但不是开始' in push_marks:
             self.last_live_change = datetime.now()
 
@@ -136,3 +140,9 @@ class ObserverHandler(BaseHandler):
             PlainText(text="\N{Black Square For Stop}\N{VS16}直播结束"),
         ], time=message.ct))
         await self.change_state(update_time=message.ct, living=False)
+
+    async def close(self):
+        if self.server_chan is not None and self.owned_server_chan:
+            await self.server_chan.close()
+        if self.qmsg is not None and self.owned_qmsg:
+            await self.qmsg.close()
