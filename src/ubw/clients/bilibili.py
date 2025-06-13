@@ -2,8 +2,9 @@ import functools
 import http.cookies
 import logging
 import os
+import warnings
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, assert_never
 
 import aiofiles
 import aiohttp
@@ -53,7 +54,7 @@ class BilibiliCookieClient(BilibiliClientABC):
                 if s is None:
                     s = self.cookie_file
             case _:
-                raise NotImplementedError(f"{use=}, expected 'env', 'config' or 'default'")
+                assert_never(f"{use=}, expected 'env', 'config' or 'default'")
 
         if s is None:
             raise ValueError('no cookie file provided, use UBW_COOKIE_FILE or config.toml to specify')
