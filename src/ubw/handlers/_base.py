@@ -86,7 +86,7 @@ class BaseHandler(BaseModel):
             # 强硬忽略
             if cmd in self.ignored_cmd:
                 logger.debug(f"got a {cmd}, processed with ignore")
-                return
+                return None
 
             try:
                 extras = []
@@ -95,8 +95,15 @@ class BaseHandler(BaseModel):
                 for model_name, extra_dict in extras:
                     await self.on_xx_extra_field(client, command, model_name, extra_dict)
             except ValidationError as e:
-                logger.info('error validating {}\ndoc={!r}\nerror={}'.format(cmd, command, e))
-                logger.debug(f"got a {cmd}, processed with {_func_info(self.on_unknown_cmd)}")
+                ee = e.errors()
+                from pydantic_core import ErrorDetails
+                ee: list[ErrorDetails]
+
+                if ee[0]['type'] == 'union_tag_invalid' and ee[0]['loc'] == ():
+                    logger.info(f'new model {cmd}')
+                else:
+                    logger.info('error validating {}\ndoc={!r}\nerror={}'.format(cmd, command, e))
+                    logger.debug(f"got a {cmd}, processed with {_func_info(self.on_unknown_cmd)}")
                 return await self.on_unknown_cmd(client, command, e)
             else:
                 return await self.on_known_cmd(client, model)
@@ -104,6 +111,7 @@ class BaseHandler(BaseModel):
         except Exception as e:
             logger.debug(f"got a {command.get('cmd', '')}, and error in processing")
             logger.exception(f"Error command: {command!r}", exc_info=e)
+            return None
 
     async def on_known_cmd(self, client: LiveClientABC, model: models.CommandModel):
         """默认的 dispatcher，自省寻找 on_{model.cmd}"""
