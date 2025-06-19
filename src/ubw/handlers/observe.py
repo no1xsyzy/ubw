@@ -113,7 +113,7 @@ class ObserverHandler(BaseHandler):
                     ,
                 ))
             if self.qmsg is not None:
-                await self.qmsg.push(f"{self.up_name} 开始直播")
+                await self.qmsg.push(f"{self.up_name} 开始直播《{self.title}》")
         elif '直播情况变更但不是开始' in push_marks:
             self.last_live_change = datetime.now()
 

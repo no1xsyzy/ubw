@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import re
 from datetime import datetime, timedelta
 from typing import Annotated
 
@@ -92,7 +93,7 @@ class ObserverApp(InitLoopFinalizeApp):
                         PlainText(text=item.text),
                     ], time=item.pub_date))
                     if not init:
-                        await self._deal_with_push(f"{self.name} 有新置顶动态", item.markdown)
+                        await self._deal_with_push(f"{self.name} 有新置顶动态", item)
                 elif (datetime.now().astimezone() - item.pub_date) > timedelta(days=2):
                     pass
                 elif item.is_video:
@@ -102,7 +103,7 @@ class ObserverApp(InitLoopFinalizeApp):
                         PlainText(text=item.text),
                     ], time=item.pub_date))
                     if not init:
-                        await self._deal_with_push(f"{self.name} 发布视频", item.markdown)
+                        await self._deal_with_push(f"{self.name} 发布视频", item)
                 elif item.is_live:
                     await self.ui.add_record(Record(segments=[
                         Anchor(text="直播动态", href=item.jump_url),
@@ -124,7 +125,7 @@ class ObserverApp(InitLoopFinalizeApp):
                         segments.append(PlainText(text=item.orig.text))
                     await self.ui.add_record(Record(segments=segments, time=item.pub_date))
                     if not init:
-                        await self._deal_with_push(f"{self.name} 转发动态", item.markdown)
+                        await self._deal_with_push(f"{self.name} 转发动态", item)
                 else:
                     await self.ui.add_record(Record(segments=[
                         Anchor(text="发布动态", href=item.jump_url),
@@ -132,14 +133,14 @@ class ObserverApp(InitLoopFinalizeApp):
                         PlainText(text=item.text),
                     ], time=item.pub_date))
                     if not init:
-                        await self._deal_with_push(f"{self.name} 发布动态", item.markdown)
+                        await self._deal_with_push(f"{self.name} 发布动态", item)
         self.last_got = this_got
 
-    async def _deal_with_push(self, title, desp):
+    async def _deal_with_push(self, title, item: models.DynamicItem):
         if self.server_chan is not None:
-            await self.server_chan.push(ServerChanMessage(title=title, desp=desp))
+            await self.server_chan.push(ServerChanMessage(title=title, desp=item.markdown))
         if self.qmsg is not None:
-            await self.qmsg.push(title)
+            await self.qmsg.push(title + "\n" + re.sub(r"https?://[\w\-.]+/[^\s()\[\]{}]+", "<URL>", item.text))
 
     async def _loop(self):
         await asyncio.sleep(self.dynamic_poll_interval * (self.exponential_delay_base ** self._fail_count))
