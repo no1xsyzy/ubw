@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from functools import cached_property
 from typing import *
 
-from pydantic import BaseModel, field_validator, Field, AliasPath, TypeAdapter, AliasChoices, Json
+from pydantic import BaseModel, Field, AliasPath, TypeAdapter, AliasChoices, Json, BeforeValidator, RootModel
 
 __all__ = (
     'Response', 'ResponseF', 'OffsetList',
@@ -57,7 +57,7 @@ class RoomInfo(BaseModel):
     room_id: int
     short_id: int
     uid: int
-    live_start_time: datetime | None
+    live_start_time: Annotated[datetime | None, BeforeValidator(lambda v: None if v == 0 else v)]
     title: str
     cover: str
     area_id: int
@@ -66,12 +66,6 @@ class RoomInfo(BaseModel):
     parent_area_name: str
     keyframe: str
     """关键帧URL"""
-
-    @field_validator('live_start_time', mode='before')
-    def live_start_time_zero_means_none(cls, v):
-        if v == 0:
-            return None
-        return v
 
 
 class SilentRoomInfo(BaseModel):
