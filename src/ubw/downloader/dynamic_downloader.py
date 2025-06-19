@@ -53,7 +53,7 @@ class DynamicDownloader(BaseDownloader):
     async def download_dynamic_video(self, dynamic_item: models.DynamicItem) -> PathList:
         if not dynamic_item.is_video:
             return []
-        return await self.video_downloader.download_bvid(dynamic_item.modules.module_dynamic.major.archive.bvid)
+        return await self.video_downloader.download_bvid(dynamic_item.modules.module_dynamic.major.root.archive.bvid)
 
     async def download_assets(self, dynamic_item: models.DynamicItem):
         pics, videos = await asyncio.gather(self.download_dynamic_pics(dynamic_item),

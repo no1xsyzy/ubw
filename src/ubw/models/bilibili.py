@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import re
-import warnings
 from datetime import datetime, timedelta
 from functools import cached_property
 from typing import *
@@ -217,12 +216,6 @@ class DynamicBasic(BaseModel):
     jump_url: str = ""
 
 
-class ModuleAuthor(BaseModel):
-    mid: int
-    name: str
-    pub_ts: datetime
-
-
 class RichTextNodeBase(BaseModel):
     type: str
     orig_text: str
@@ -238,13 +231,12 @@ class RichTextNodeTypeAt(RichTextNodeBase):
     rid: int
 
 
-class Emoji(BaseModel):
-    icon_url: str
-
-
 class RichTextNodeTypeEmoji(RichTextNodeBase):
     type: Literal['RICH_TEXT_NODE_TYPE_EMOJI']
     emoji: Emoji
+
+    class Emoji(BaseModel):
+        icon_url: str
 
 
 class RichTextNodeTypeWeb(RichTextNodeBase):
@@ -287,10 +279,50 @@ class RichTextNodeTypeVote(RichTextNodeBase):
     rid: str
 
 
+class RichTextNodeTypeAv(RichTextNodeBase):
+    type: Literal['RICH_TEXT_NODE_TYPE_AV']
+
+
+class RichTextNodeTypeCv(RichTextNodeBase):
+    type: Literal['RICH_TEXT_NODE_TYPE_CV']
+
+
+class RichTextNodeTypeMail(RichTextNodeBase):
+    type: Literal['RICH_TEXT_NODE_TYPE_MAIL']
+
+
+class RichTextNodeTypeNone(RichTextNodeBase):
+    type: Literal['RICH_TEXT_NODE_TYPE_NONE']
+
+
+class RichTextNodeTypeOgvEp(RichTextNodeBase):
+    type: Literal['RICH_TEXT_NODE_TYPE_OGV_EP']
+
+
+class RichTextNodeTypeOgvSeason(RichTextNodeBase):
+    type: Literal['RICH_TEXT_NODE_TYPE_OGV_SEASON']
+
+
+class RichTextNodeTypeTaobao(RichTextNodeBase):
+    type: Literal['RICH_TEXT_NODE_TYPE_TAOBAO']
+
+
+class RichTextNodeTypeViewPicture(RichTextNodeBase):
+    type: Literal['RICH_TEXT_NODE_TYPE_VIEW_PICTURE']
+
+
 RichTextNode = Annotated[
     Union[
         RichTextNodeTypeText, RichTextNodeTypeAt, RichTextNodeTypeEmoji, RichTextNodeTypeWeb, RichTextNodeTypeBv,
         RichTextNodeTypeLottery, RichTextNodeTypeGoods, RichTextNodeTypeTopic, RichTextNodeTypeVote,
+        RichTextNodeTypeAv,
+        RichTextNodeTypeCv,
+        RichTextNodeTypeMail,
+        RichTextNodeTypeNone,
+        RichTextNodeTypeOgvEp,
+        RichTextNodeTypeOgvSeason,
+        RichTextNodeTypeTaobao,
+        RichTextNodeTypeViewPicture,
     ],
     Field(discriminator='type')
 ]
@@ -303,112 +335,125 @@ class RichText(BaseModel):
     text: str
 
 
-class Pic(BaseModel):
-    url: str
+class Major(RootModel):
+    root: Annotated[Union[*(BaseMajor.__subclasses__()),], Field(discriminator='type')]
 
+    class BaseMajor(BaseModel):
+        type: str | None
 
-class Opus(BaseModel):
-    jump_url: str
-    summary: RichText
-    pics: list[Pic]
+    class Opus(BaseMajor):
+        type: Literal['MAJOR_TYPE_OPUS']
+        opus: Info
 
+        class Info(BaseModel):
+            jump_url: str
+            summary: RichText
+            pics: list[Pic]
 
-class Archive(BaseModel):
-    aid: str
-    jump_url: str
-    bvid: str
+            class Pic(BaseModel):
+                url: str
 
-    cover: str
-    title: str
-    desc: str
-    duration_text: str
-    # duration_text: timedelta
+    class Archive(BaseMajor):
+        type: Literal['MAJOR_TYPE_ARCHIVE']
+        archive: Info
 
+        class Info(BaseModel):
+            aid: str
+            jump_url: str
+            bvid: str
 
-class BaseMajor(BaseModel):
-    type: str | None
+            cover: str
+            title: str
+            desc: str
+            duration_text: str
+            # duration_text: timedelta
 
+    class LiveRcmd(BaseMajor):
+        type: Literal['MAJOR_TYPE_LIVE_RCMD']
+        live_rcmd: Info
 
-class MajorOpus(BaseMajor):
-    type: Literal['MAJOR_TYPE_OPUS']
-    opus: Opus
+        class Info(BaseModel):
+            content: Json[Content] | Content
 
+            class Content(BaseModel):
+                live_play_info: LivePlayInfo
 
-class MajorArchive(BaseMajor):
-    type: Literal['MAJOR_TYPE_ARCHIVE']
-    archive: Archive
+                class LivePlayInfo(BaseModel):
+                    title: str
+                    room_id: int
+                    live_start_time: datetime
 
+    class Draw(BaseMajor):
+        type: Literal['MAJOR_TYPE_DRAW']
+        draw: Info
 
-class LivePlayInfo(BaseModel):
-    title: str
-    room_id: int
-    live_start_time: datetime
+        class Info(BaseModel):
+            id: int
 
+    class Null(BaseMajor):
+        type: Literal[None]
 
-class LiveRcmdContent(BaseModel):
-    live_play_info: LivePlayInfo
+    class Common(BaseMajor):
+        type: Literal['MAJOR_TYPE_COMMON']
+        common: Info
 
+        class Info(BaseModel):
+            jump_url: str
 
-class LiveRcmd(BaseModel):
-    content: Json[LiveRcmdContent] | LiveRcmdContent
+    class NoneM(BaseMajor):
+        type: Literal['MAJOR_TYPE_NONE']
+        none: Info
 
+        class Info(BaseModel):
+            tips: str
 
-class MajorLiveRcmd(BaseMajor):
-    type: Literal['MAJOR_TYPE_LIVE_RCMD']
-    live_rcmd: LiveRcmd
+    class Applet(BaseMajor):
+        type: Literal['MAJOR_TYPE_APPLET']
 
+    class Article(BaseMajor):
+        type: Literal['MAJOR_TYPE_ARTICLE']
 
-class Draw(BaseModel):
-    id: int
+    class Blocked(BaseMajor):
+        type: Literal['MAJOR_TYPE_BLOCKED']
 
+    class Courses(BaseMajor):
+        type: Literal['MAJOR_TYPE_COURSES']
 
-class MajorDraw(BaseMajor):
-    type: Literal['MAJOR_TYPE_DRAW']
-    draw: Draw
+    class CourBatch(BaseMajor):
+        type: Literal['MAJOR_TYPE_COUR_BATCH']
 
+    class Live(BaseMajor):
+        type: Literal['MAJOR_TYPE_LIVE']
 
-class MajorNull(BaseMajor):
-    type: Literal[None]
+    class Medialist(BaseMajor):
+        type: Literal['MAJOR_TYPE_MEDIALIST']
 
+    class Music(BaseMajor):
+        type: Literal['MAJOR_TYPE_MUSIC']
 
-class Common(BaseModel):
-    jump_url: str
+    class Pgc(BaseMajor):
+        type: Literal['MAJOR_TYPE_PGC']
 
+    class Subscription(BaseMajor):
+        type: Literal['MAJOR_TYPE_SUBSCRIPTION']
 
-class MajorCommon(BaseMajor):
-    type: Literal['MAJOR_TYPE_COMMON']
-    common: Common
+    class SubscriptionNew(BaseMajor):
+        type: Literal['MAJOR_TYPE_SUBSCRIPTION_NEW']
 
+    class UgcSeason(BaseMajor):
+        type: Literal['MAJOR_TYPE_UGC_SEASON']
 
-class MajorNoneInfo(BaseModel):
-    tips: str
-
-
-class MajorNone(BaseMajor):
-    type: Literal['MAJOR_TYPE_NONE']
-    none: MajorNoneInfo
-
-
-Major = Annotated[Union[
-    MajorOpus, MajorArchive, MajorLiveRcmd, MajorDraw, MajorNull, MajorCommon, MajorNone,
-], Field(discriminator='type')]
+    class UpowerCommon(BaseMajor):
+        type: Literal['MAJOR_TYPE_UPOWER_COMMON']
 
 
 class Additional(RootModel):
-    root: Annotated[Union[
-        AdditionalTypeReserve,
-        AdditionalTypeGoods,
-        AdditionalTypeCommon,
-        AdditionalTypeVote,
-        AdditionalTypeMatch,
-        AdditionalTypeUgc,
-        AdditionalTypeUpowerLottery,
-    ], Field(discriminator='type')]
+    root: Annotated[Union[*(BaseAdditional.__subclasses__())], Field(discriminator='type')]
 
     class BaseAdditional(BaseModel):
         type: str
 
-    class AdditionalTypeReserve(BaseAdditional):
+    class Reserve(BaseAdditional):
         """视频预约"""
         type: Literal['ADDITIONAL_TYPE_RESERVE']
         reserve: Reserve
@@ -417,49 +462,52 @@ class Additional(RootModel):
             jump_url: str
             title: str
 
-    class AdditionalTypeGoods(BaseAdditional):
+    class Goods(BaseAdditional):
         type: Literal['ADDITIONAL_TYPE_GOODS']
-        goods: GoodsAdditional
+        goods: Goods
 
-        class GoodsItem(BaseModel):
-            cover: str
-            id: int
-            jump_url: str
-            name: str
+        class Goods(BaseModel):
+            items: list[GoodsItem]
 
-        class GoodsAdditional(BaseModel):
-            items: list[Additional.AdditionalTypeGoods.GoodsItem]
+            class GoodsItem(BaseModel):
+                cover: str
+                id: int
+                jump_url: str
+                name: str
 
-    class AdditionalTypeCommon(BaseAdditional):
+    class Common(BaseAdditional):
         type: Literal['ADDITIONAL_TYPE_COMMON']
 
-    class AdditionalTypeVote(BaseAdditional):
+    class Vote(BaseAdditional):
         type: Literal['ADDITIONAL_TYPE_VOTE']
 
-    class AdditionalTypeMatch(BaseAdditional):
+    class Match(BaseAdditional):
         type: Literal['ADDITIONAL_TYPE_MATCH']
 
-    class AdditionalTypeUgc(BaseAdditional):
+    class Ugc(BaseAdditional):
         type: Literal['ADDITIONAL_TYPE_UGC']
 
-    class AdditionalTypeUpowerLottery(BaseAdditional):
+    class UpowerLottery(BaseAdditional):
         type: Literal['ADDITIONAL_TYPE_UPOWER_LOTTERY']
 
 
-class ModuleDynamic(BaseModel):
-    major: Major | None = None
-    desc: RichText | None = None
-    additional: Additional | None = None
+class Module(BaseModel):
+    module_author: Author | None = None
+    module_dynamic: Dynamic | None = None
+    module_tag: Tag | None = None
 
+    class Author(BaseModel):
+        mid: int
+        name: str
+        pub_ts: datetime
 
-class ModuleTag(BaseModel):
-    text: str
+    class Dynamic(BaseModel):
+        major: Major | None = None
+        desc: RichText | None = None
+        additional: Additional | None = None
 
-
-class ModuleCollection(BaseModel):
-    module_author: ModuleAuthor | None = None
-    module_dynamic: ModuleDynamic | None = None
-    module_tag: ModuleTag | None = None
+    class Tag(BaseModel):
+        text: str
 
 
 def markdown_escape(x):
@@ -481,7 +529,7 @@ class DynamicItem(BaseModel):
     """
     basic: DynamicBasic
     id_str: str | None
-    modules: ModuleCollection
+    modules: Module
     type: str
     visible: bool
     orig: DynamicItem | None = None
@@ -508,24 +556,17 @@ class DynamicItem(BaseModel):
 
     @property
     def major_type(self):
-        try:
-            major = self.modules.module_dynamic.major
-            if major is None:
-                return None
-            return major.type
-        except KeyError as e:
-            warnings.warn(f"err in major_type {e=} {self.id_str=}")
-            return None
+        return self.modules.module_dynamic.major and self.modules.module_dynamic.major.root.type
 
     @cached_property
     def rich_text_nodes(self) -> list[RichTextNode]:
-        match self.modules.module_dynamic.major:
-            case MajorNull() | MajorDraw() | MajorCommon():
+        match self.modules.module_dynamic.major and self.modules.module_dynamic.major.root:
+            case Major.Null() | Major.Draw() | Major.Common():
                 return self.modules.module_dynamic.desc.rich_text_nodes
-            case MajorOpus(opus=opus):
-                opus: Opus
+            case Major.Opus(opus=opus):
+                opus: Major.Opus.Info
                 return opus.summary.rich_text_nodes
-            case MajorArchive(archive=archive):
+            case Major.Archive(archive=archive):
                 return [  # reconstruct
                     RichTextNodeTypeBv(type='RICH_TEXT_NODE_TYPE_BV', orig_text=archive.title, text=archive.title,
                                        jump_url="https:" + archive.jump_url, rid=archive.bvid),
@@ -544,7 +585,7 @@ class DynamicItem(BaseModel):
             match n:
                 case RichTextNodeTypeAt(text=text, rid=rid):
                     s = f"{s}[{markdown_escape(text)}](https://space.bilibili.com/{rid})"
-                case RichTextNodeTypeEmoji(emoji=Emoji(icon_url=icon_url), text=text):
+                case RichTextNodeTypeEmoji(emoji=RichTextNodeTypeEmoji.Emoji(icon_url=icon_url), text=text):
                     s = f"{s}![{markdown_escape(text)}]({icon_url})"
                 case RichTextNodeTypeWeb(text=text, jump_url=jump_url):
                     s = f"{s}[{markdown_escape(text)}]({jump_url})"
@@ -563,7 +604,7 @@ class DynamicItem(BaseModel):
         for p in self.pictures:
             s = f"{s}\n![]({p})"
         match self.modules.module_dynamic.additional:
-            case Additional.AdditionalTypeReserve(reserve=reserve):
+            case Additional.Reserve(reserve=reserve):
                 if reserve.jump_url:
                     s = f"{s}\n[{markdown_escape(reserve.title)}]({reserve.jump_url})"
                 else:
@@ -572,16 +613,16 @@ class DynamicItem(BaseModel):
 
     @cached_property
     def text(self) -> str:
-        match self.modules.module_dynamic.major:
-            case MajorNull() | MajorDraw() | MajorCommon():
+        match self.modules.module_dynamic.major and self.modules.module_dynamic.major.root:
+            case Major.Null() | Major.Draw() | Major.Common():
                 return self.modules.module_dynamic.desc.text
-            case MajorOpus(opus=opus):
-                opus: Opus
+            case Major.Opus(opus=opus):
+                opus: Major.Opus.Info
                 return opus.summary.text
-            case MajorLiveRcmd(live_rcmd=live_rcmd):
-                live_rcmd: LiveRcmd
+            case Major.LiveRcmd(live_rcmd=live_rcmd):
+                live_rcmd: Major.LiveRcmd.Info
                 return live_rcmd.content.live_play_info.title
-            case MajorArchive(archive=archive):
+            case Major.Archive(archive=archive):
                 return archive.title + '\n\n' + archive.desc
             case None:
                 if self.type == 'DYNAMIC_TYPE_FORWARD':
@@ -590,34 +631,34 @@ class DynamicItem(BaseModel):
 
     @cached_property
     def jump_url(self) -> str:
-        match self.modules.module_dynamic.major:
-            case MajorCommon(common=common):
-                common: Common
+        match self.modules.module_dynamic.major and self.modules.module_dynamic.major.root:
+            case Major.Common(common=common):
+                common: Major.Common.Info
                 return common.jump_url
-            case MajorOpus(opus=opus):
-                opus: Opus
+            case Major.Opus(opus=opus):
+                opus: Major.Opus.Info
                 return "https:" + opus.jump_url
-            case MajorLiveRcmd(live_rcmd=live_rcmd):
-                live_rcmd: LiveRcmd
+            case Major.LiveRcmd(live_rcmd=live_rcmd):
+                live_rcmd: Major.LiveRcmd.Info
                 return f"https://live.bilibili.com/{live_rcmd.content.live_play_info.room_id}"
-            case MajorArchive(archive=archive):
+            case Major.Archive(archive=archive):
                 return "https:" + archive.jump_url
         return f"https://t.bilibili.com/{self.id_str}"
 
     @cached_property
     def pictures(self) -> list[str]:
-        match self.modules.module_dynamic.major:
-            case MajorOpus(opus=opus):
-                opus: Opus
+        match self.modules.module_dynamic.major and self.modules.module_dynamic.major.root:
+            case Major.Opus(opus=opus):
+                opus: Major.Opus.Info
                 return [pic.url for pic in opus.pics]
-            case MajorArchive(archive=archive):
+            case Major.Archive(archive=archive):
                 return [archive.cover]
         return []
 
     @cached_property
     def pub_date(self):
         match self.modules.module_author:
-            case ModuleAuthor(pub_ts=pubtime):
+            case Module.Author(pub_ts=pubtime):
                 return pubtime
             case _:
                 return datetime.now()
