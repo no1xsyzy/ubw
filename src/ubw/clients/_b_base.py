@@ -1,9 +1,11 @@
 import abc
+import asyncio
 import hashlib
 import logging
 import re
 import time
 from contextvars import ContextVar
+from datetime import timedelta
 from typing import Literal, TypeVar
 from urllib.parse import urlencode, quote
 
@@ -247,6 +249,45 @@ class BilibiliClientABC(BaseModel, abc.ABC):
             offset = d.offset
             for item in d.items:
                 yield item
+
+    async def two_way_iter_user_dynamic(self, uid, *, poll_interval: timedelta = timedelta(seconds=60)):
+        f"""
+        :param uid: 想要获取动态的UID
+        :param poll_interval: （必须使用关键词）抓取未来方向动态的时间间隔，接受 timedelta 格式。
+        :return: 一对 async iterator (past, future)，可分别使用 async for 获取信息。对于past，将从当前往回搜索，需自行注意循环速度。
+        future 则持续 yield 动态，需注意潜在的阻塞。
+        """
+        d = await self.get_user_dynamic(uid)
+
+        async def past(dd):
+            has_more = dd.has_more
+            offset = dd.offset
+            while has_more:
+                for item in dd.items:
+                    yield item
+                dd = await self.get_user_dynamic(uid, offset)
+                has_more = dd.has_more
+                offset = dd.offset
+
+        async def future(dd):
+            while True:
+                future_p = max(it.pub_date for it in dd.items) if dd.items else None
+                jj = []
+                fetch_more = True
+                offset = ""
+                while fetch_more:
+                    dd = await self.get_user_dynamic(uid, offset=offset)
+                    extends = dd.items if future_p is None else [it for it in dd.items if it.pub_date > future_p]
+                    jj.extend(extends)
+                    if len(extends) < len(dd.items):
+                        fetch_more = False
+                    else:
+                        offset = dd.offset
+                for item in sorted(jj, key=lambda it: it.pub_date):
+                    yield item
+                await asyncio.sleep(poll_interval.total_seconds())
+
+        return past(d), future(d)
 
     async def get_video_pagelist(self, bvid):
         from bilibili_api import video
