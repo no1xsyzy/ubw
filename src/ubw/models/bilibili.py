@@ -525,6 +525,13 @@ class DynamicItem(BaseModel):
             case MajorOpus(opus=opus):
                 opus: Opus
                 return opus.summary.rich_text_nodes
+            case MajorArchive(archive=archive):
+                return [  # reconstruct
+                    RichTextNodeTypeBv(type='RICH_TEXT_NODE_TYPE_BV', orig_text=archive.title, text=archive.title,
+                                       jump_url="https:" + archive.jump_url, rid=archive.bvid),
+                    RichTextNodeTypeText(type='RICH_TEXT_NODE_TYPE_TEXT', text="\n\n" + archive.desc,
+                                         orig_text="\n\n" + archive.desc),
+                ]
             case None:
                 if self.type == 'DYNAMIC_TYPE_FORWARD':
                     return self.modules.module_dynamic.desc.rich_text_nodes
@@ -603,6 +610,8 @@ class DynamicItem(BaseModel):
             case MajorOpus(opus=opus):
                 opus: Opus
                 return [pic.url for pic in opus.pics]
+            case MajorArchive(archive=archive):
+                return [archive.cover]
         return []
 
     @cached_property
