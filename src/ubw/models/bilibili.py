@@ -185,11 +185,6 @@ class PlayUrl(BaseModel):
     stream: list[Stream]
 
 
-class PlayUrlInfo(BaseModel):
-    conf_json: str
-    playurl: PlayUrl | None
-
-
 class RoomPlayInfo(BaseModel):
     all_special_types: list[int]
     is_portrait: bool
@@ -201,6 +196,10 @@ class RoomPlayInfo(BaseModel):
     short_id: int
     uid: int
     playurl_info: PlayUrlInfo | None
+
+    class PlayUrlInfo(BaseModel):
+        conf_json: str
+        playurl: PlayUrl | None
 
 
 class LikeIcon(BaseModel):
@@ -265,11 +264,6 @@ class RichTextNodeTypeLottery(RichTextNodeBase):
     rid: str
 
 
-class Goods(BaseModel):
-    jump_url: str
-    type: int
-
-
 class RichTextNodeTypeGoods(RichTextNodeBase):
     """可能是UP主的推荐"""
     type: Literal['RICH_TEXT_NODE_TYPE_GOODS']
@@ -277,6 +271,10 @@ class RichTextNodeTypeGoods(RichTextNodeBase):
     jump_url: str
     icon_name: str
     goods: Goods
+
+    class Goods(BaseModel):
+        jump_url: str
+        type: int
 
 
 class RichTextNodeTypeTopic(RichTextNodeBase):
@@ -396,9 +394,62 @@ Major = Annotated[Union[
 ], Field(discriminator='type')]
 
 
+class Additional(RootModel):
+    root: Annotated[Union[
+        AdditionalTypeReserve,
+        AdditionalTypeGoods,
+        AdditionalTypeCommon,
+        AdditionalTypeVote,
+        AdditionalTypeMatch,
+        AdditionalTypeUgc,
+        AdditionalTypeUpowerLottery,
+    ], Field(discriminator='type')]
+
+    class BaseAdditional(BaseModel):
+        type: str
+
+    class AdditionalTypeReserve(BaseAdditional):
+        """视频预约"""
+        type: Literal['ADDITIONAL_TYPE_RESERVE']
+        reserve: Reserve
+
+        class Reserve(BaseModel):
+            jump_url: str
+            title: str
+
+    class AdditionalTypeGoods(BaseAdditional):
+        type: Literal['ADDITIONAL_TYPE_GOODS']
+        goods: GoodsAdditional
+
+        class GoodsItem(BaseModel):
+            cover: str
+            id: int
+            jump_url: str
+            name: str
+
+        class GoodsAdditional(BaseModel):
+            items: list[Additional.AdditionalTypeGoods.GoodsItem]
+
+    class AdditionalTypeCommon(BaseAdditional):
+        type: Literal['ADDITIONAL_TYPE_COMMON']
+
+    class AdditionalTypeVote(BaseAdditional):
+        type: Literal['ADDITIONAL_TYPE_VOTE']
+
+    class AdditionalTypeMatch(BaseAdditional):
+        type: Literal['ADDITIONAL_TYPE_MATCH']
+
+    class AdditionalTypeUgc(BaseAdditional):
+        type: Literal['ADDITIONAL_TYPE_UGC']
+
+    class AdditionalTypeUpowerLottery(BaseAdditional):
+        type: Literal['ADDITIONAL_TYPE_UPOWER_LOTTERY']
+
+
 class ModuleDynamic(BaseModel):
     major: Major | None = None
     desc: RichText | None = None
+    additional: Additional | None = None
 
 
 class ModuleTag(BaseModel):
@@ -406,8 +457,8 @@ class ModuleTag(BaseModel):
 
 
 class ModuleCollection(BaseModel):
-    module_dynamic: ModuleDynamic | None = None
     module_author: ModuleAuthor | None = None
+    module_dynamic: ModuleDynamic | None = None
     module_tag: ModuleTag | None = None
 
 
@@ -500,6 +551,16 @@ class DynamicItem(BaseModel):
                     s = f"{s}[{markdown_escape(text)}]({jump_url})"
                 case RichTextNodeTypeVote(text=text):
                     s = f"{s}[投票：{markdown_escape(text)}]"
+                case _:
+                    assert_never(n)
+        for p in self.pictures:
+            s = f"{s}\n![]({p})"
+        match self.modules.module_dynamic.additional:
+            case Additional.AdditionalTypeReserve(reserve=reserve):
+                if reserve.jump_url:
+                    s = f"{s}\n[{markdown_escape(reserve.title)}]({reserve.jump_url})"
+                else:
+                    s = f"{s}\n{markdown_escape(reserve.title)}"
         return s
 
     @cached_property
