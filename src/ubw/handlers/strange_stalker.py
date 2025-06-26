@@ -69,7 +69,7 @@ class StrangeStalkerHandler(BaseHandler):
 
     async def on_interact_word(self, client, model):
         if model.data.uid not in self.uids:
-            return
+            return None
         return await super().on_interact_word(client, model)
 
     async def on_anchor_helper_danmu(self, client, model):

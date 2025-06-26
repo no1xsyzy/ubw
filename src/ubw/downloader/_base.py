@@ -36,6 +36,7 @@ class BaseDownloader(BaseModel):
             return await self._download_file(url, target, get_kwargs=get_kwargs, session=session)
         except Exception as e:
             logger.exception('exception in download_file()', exc_info=e)
+            return []
         except BaseException as e:
             logger.exception('exception in download_file()', exc_info=e)
             raise
@@ -54,7 +55,7 @@ class BaseDownloader(BaseModel):
         return [target]
 
     async def gather_download(self, downloads: list[Coroutine[Any, Any, PathList]]) -> PathList:
-        gathered: tuple[PathList, ...] = await asyncio.gather(*downloads)
+        gathered: list[PathList] = await asyncio.gather(*downloads)
         return [x for xx in gathered for x in xx]
 
     async def close(self):

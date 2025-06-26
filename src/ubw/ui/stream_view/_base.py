@@ -202,6 +202,7 @@ class ThresholdPalette(RootModel[list[tuple[int, str]]]):
         for i, s in self.root:
             if val >= i:
                 return s
+        return ''
 
 
 def demo(ui: BaseStreamView, interval=0.5):  # pragma: no cover

@@ -61,5 +61,6 @@ def sync(f):
             return asyncio.run(f(*args, **kwargs))
         except KeyboardInterrupt:
             print("...user abort...", file=sys.stderr)
+            return None
 
     return wrapper

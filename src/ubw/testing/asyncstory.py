@@ -79,10 +79,11 @@ class AsyncPatcher:
 
     def __getattr__(self, item):
         story: AsyncStoryline | None = self.__story()
-        if story is not None:
-            subp = story.add_async_patch(self.__target + "." + item)
-            setattr(self, item, subp)
-            return subp
+        if story is None:
+            return None
+        subp = story.add_async_patch(self.__target + "." + item)
+        setattr(self, item, subp)
+        return subp
 
     def __activate(self):
         obj, attribute = _get_target(self.__target)
@@ -110,10 +111,11 @@ class AsyncPatcher:
 
     async def __call__(self, *args, **kwargs):
         story: AsyncStoryline | None = self.__story()
-        if story is not None:
-            fut = asyncio.Future()
-            await story.put(Call(self, args, kwargs, fut))
-            return await fut
+        if story is None:
+            return None
+        fut = asyncio.Future()
+        await story.put(Call(self, args, kwargs, fut))
+        return await fut
 
     @property
     def __class__(self):
@@ -141,10 +143,11 @@ class SyncPatcher:
 
     def __getattr__(self, item):
         story: AsyncStoryline | None = self.__story()
-        if story is not None:
-            subp = story.add_sync_patch(self.__target + "." + item)
-            setattr(self, item, subp)
-            return subp
+        if story is None:
+            return None
+        subp = story.add_sync_patch(self.__target + "." + item)
+        setattr(self, item, subp)
+        return subp
 
     def __activate(self):
         obj, attribute = _get_target(self.__target)
@@ -172,9 +175,10 @@ class SyncPatcher:
 
     def __call__(self, *args, **kwargs):
         story: AsyncStoryline | None = self.__story()
-        if story is not None:
-            story.put_nowait(Call(self, args, kwargs, None))
-            return self.__returner(*args, **kwargs)
+        if story is None:
+            return None
+        story.put_nowait(Call(self, args, kwargs, None))
+        return self.__returner(*args, **kwargs)
 
     @property
     def __class__(self):
@@ -198,10 +202,11 @@ class SyncMock:
 
     def __getattr__(self, item):
         story: AsyncStoryline | None = self.__story()
-        if story is not None:
-            subp = story.add_sync_mock()
-            setattr(self, item, subp)
-            return subp
+        if story is None:
+            return None
+        subp = story.add_sync_mock()
+        setattr(self, item, subp)
+        return subp
 
     def __enter__(self):
         return self
@@ -211,9 +216,10 @@ class SyncMock:
 
     def __call__(self, *args, **kwargs):
         story: AsyncStoryline | None = self.__story()
-        if story is not None:
-            story.put_nowait(Call(self, args, kwargs, None))
-            return self.__returner(*args, **kwargs)
+        if story is None:
+            return None
+        story.put_nowait(Call(self, args, kwargs, None))
+        return self.__returner(*args, **kwargs)
 
     @property
     def __class__(self):
@@ -236,10 +242,11 @@ class AsyncMock:
 
     def __getattr__(self, item):
         story: AsyncStoryline | None = self.__story()
-        if story is not None:
-            subp = story.add_async_mock()
-            setattr(self, item, subp)
-            return subp
+        if story is None:
+            return None
+        subp = story.add_async_mock()
+        setattr(self, item, subp)
+        return subp
 
     def __setattr__(self, key, value):
         object.__setattr__(self, key, value)
@@ -252,10 +259,11 @@ class AsyncMock:
 
     async def __call__(self, *args, **kwargs):
         story: AsyncStoryline | None = self.__story()
-        if story is not None:
-            fut = asyncio.Future()
-            await story.put(Call(self, args, kwargs, fut))
-            return await fut
+        if story is None:
+            return None
+        fut = asyncio.Future()
+        await story.put(Call(self, args, kwargs, fut))
+        return await fut
 
     @property
     def __class__(self):
@@ -384,10 +392,11 @@ class AsyncStoryline:
         def waiting(call: Call | None):
             if call is None:
                 f.set_exception(RuntimeError)
-                return
+                return None
             if checker(call):
                 f.set_result(call)
                 return True
+            return None
 
         self._waiting_list.append(waiting)
         return await f

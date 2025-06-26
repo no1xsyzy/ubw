@@ -31,6 +31,7 @@ class VideoDownloader(BaseDownloader):
         for p in c:
             if p.is_file():
                 return p
+        return None
 
     async def download_bvid(self, bvid) -> PathList:
         pages = await self.bilibili_client.get_video_pagelist(bvid)
