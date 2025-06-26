@@ -1,7 +1,7 @@
 import asyncio
 import base64
 import json
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, assert_never
 from unittest.mock import AsyncMock, Mock, patch
 
 import aiohttp
@@ -112,6 +112,7 @@ async def test_wsweb():
         else:
             checkpoint_g.reach()
             await asyncio.Future()  # wait forever, only to be stopped from outside
+            assert_never("unreachable")
 
     websocket.side_effect = ws
 
