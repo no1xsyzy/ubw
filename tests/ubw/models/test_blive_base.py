@@ -11,14 +11,14 @@ TAC = TypeAdapter(Color)
 
 
 def test_color():
-    assert TAC.validate_python('#abc') == Color((0xAA, 0xBB, 0xCC))
-    assert TAC.validate_python('#ABC') == Color((0xAA, 0xBB, 0xCC))
-    assert TAC.validate_python('#aabbcc') == Color((0xAA, 0xBB, 0xCC))
-    assert TAC.validate_python('#AABBCC') == Color((0xAA, 0xBB, 0xCC))
-    assert TAC.validate_python('#aabbccdd') == Color((0xAA, 0xBB, 0xCC, 0xDD))
-    assert TAC.validate_python('#AABBCCDD') == Color((0xAA, 0xBB, 0xCC, 0xDD))
-    assert TAC.validate_python(0xAABBCC) == Color((0xAA, 0xBB, 0xCC))
-    color = Color((0xAA, 0xBB, 0xCC))
+    assert TAC.validate_python('#abc') == Color.model_validate((0xAA, 0xBB, 0xCC))
+    assert TAC.validate_python('#ABC') == Color.model_validate((0xAA, 0xBB, 0xCC))
+    assert TAC.validate_python('#aabbcc') == Color.model_validate((0xAA, 0xBB, 0xCC))
+    assert TAC.validate_python('#AABBCC') == Color.model_validate((0xAA, 0xBB, 0xCC))
+    assert TAC.validate_python('#aabbccdd') == Color.model_validate((0xAA, 0xBB, 0xCC, 0xDD))
+    assert TAC.validate_python('#AABBCCDD') == Color.model_validate((0xAA, 0xBB, 0xCC, 0xDD))
+    assert TAC.validate_python(0xAABBCC) == Color.model_validate((0xAA, 0xBB, 0xCC))
+    color = Color.model_validate((0xAA, 0xBB, 0xCC))
     assert color.hashcolor == '#aabbcc'
     assert color.red == 0xAA
     assert color.green == 0xBB
@@ -26,7 +26,7 @@ def test_color():
     assert color.alpha is None
 
     try:
-        Color(())
+        Color.model_validate(())
     except ValidationError as e:
         assert e.errors()[0]['msg'] == 'Value error, `()` is not a color'
 
