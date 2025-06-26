@@ -456,17 +456,17 @@ class Additional(RootModel):
     class Reserve(BaseAdditional):
         """视频预约"""
         type: Literal['ADDITIONAL_TYPE_RESERVE']
-        reserve: Reserve
+        reserve: ReserveData
 
-        class Reserve(BaseModel):
+        class ReserveData(BaseModel):
             jump_url: str
             title: str
 
     class Goods(BaseAdditional):
         type: Literal['ADDITIONAL_TYPE_GOODS']
-        goods: Goods
+        goods: GoodsData
 
-        class Goods(BaseModel):
+        class GoodsData(BaseModel):
             items: list[GoodsItem]
 
             class GoodsItem(BaseModel):
