@@ -3,6 +3,7 @@ from ._base import *
 
 class RingStatusChangeData(BaseModel):
     status: int
+    reserve_type: int = 0
 
 
 class RingStatusChangeCommand(CommandModel):
