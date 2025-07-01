@@ -37,8 +37,7 @@ from .guard_leader_notice import GuardLeaderNoticeCommand
 from .hot_buy_num import HotBuyNumCommand
 from .hot_rank_settlement import HotRankSettlementCommand, HotRankSettlementV2Command
 from .hot_room_notify import HotRoomNotifyCommand
-from .interact_word import InteractWordCommand
-from .interact_word_v2 import InteractWordV2Command
+from .interact_word import InteractWordCommand, InteractWordV2Command
 from .like_guide_user import LikeGuideUserCommand
 from .like_info import LikeInfoV3UpdateCommand, LikeInfoV3ClickCommand, LikeInfoV3NoticeCommand
 from .little_message_box import LittleMessageBoxCommand
@@ -59,8 +58,7 @@ from .notice_msg import NoticeMsgCommand
 from .official_room_event import OfficialRoomEventCommand
 from .online_rank_count import OnlineRankCountCommand
 from .online_rank_top3 import OnlineRankTop3Command
-from .online_rank_v2 import OnlineRankV2Command
-from .online_rank_v3 import OnlineRankV3Command
+from .online_rank_v2 import OnlineRankV2Command, OnlineRankV3Command
 from .other_slice_loading_result import OtherSliceLoadingResultCommand
 from .other_slice_setting_changed import OtherSliceSettingChangedCommand
 from .pk import (

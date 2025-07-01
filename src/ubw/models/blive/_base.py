@@ -27,7 +27,7 @@ __all__ = (
     # common types
     'Scatter', 'MedalInfo', 'Color', 'Uinfo', 'UinfoLow', 'UserInfo', 'GroupMedal',
     # common validator
-    'strange_dict', 'convert_ns', 'Json',
+    'strange_dict', 'protobuf_decoder', 'convert_ns', 'Json',
 )
 
 

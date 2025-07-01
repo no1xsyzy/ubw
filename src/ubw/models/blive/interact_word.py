@@ -1,6 +1,7 @@
 from typing import ClassVar
 
 from ._base import *
+from ..proto import all_pb2
 
 
 class FansMedal(BaseModel):
@@ -40,7 +41,7 @@ class InteractWordData(BaseModel):
     contribution_v2: ContributionV2 | None = None
     core_user_type: int
     dmscore: int | None = None
-    fans_medal: FansMedal | None
+    fans_medal: FansMedal | None = None
     identities: list[int] | None
     is_spread: int
     msg_type: int
@@ -90,3 +91,13 @@ class InteractWordCommand(CommandModel):
             user=(self.data.uid, self.data.uname),
             raw=self,
         )
+
+
+class InteractWordV2Data(BaseModel):
+    dmscore: int
+    pb: Annotated[InteractWordData, protobuf_decoder(all_pb2.InteractWord, InteractWordData)]
+
+
+class InteractWordV2Command(CommandModel):
+    cmd: Literal['INTERACT_WORD_V2']
+    data: InteractWordV2Data

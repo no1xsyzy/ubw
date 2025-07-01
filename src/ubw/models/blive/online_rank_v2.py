@@ -1,4 +1,5 @@
 from ._base import *
+from ..proto import all_pb2
 
 
 class OnlineRankV2Info(BaseModel):
@@ -20,3 +21,12 @@ class OnlineRankV2Data(BaseModel):
 class OnlineRankV2Command(CommandModel):
     cmd: Literal['ONLINE_RANK_V2']
     data: OnlineRankV2Data
+
+
+class OnlineRankV3Data(BaseModel):
+    pb: Annotated[OnlineRankV2Data, protobuf_decoder(all_pb2.GoldRankBroadcast, OnlineRankV2Data)]
+
+
+class OnlineRankV3Command(CommandModel):
+    cmd: Literal['ONLINE_RANK_V3']
+    data: OnlineRankV3Data

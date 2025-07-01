@@ -25,7 +25,9 @@ dependencies = [
     "tinydb-serialization (>=2.2.0,<3.0.0)",
     "aiotinydb (>=2.0.0,<3.0.0)",
     "pyinstaller (>=6.13.0,<7.0.0)",
-    "bilibili-api-python (>=17.2.1,<18.0.0)"
+    "bilibili-api-python (>=17.2.1,<18.0.0)",
+    "esprima (>=4.0.1,<5.0.0)",
+    "protobuf (>=3.20.0,<3.21.0)"
 ]
 
 [tool.poetry.group.dev.dependencies]
