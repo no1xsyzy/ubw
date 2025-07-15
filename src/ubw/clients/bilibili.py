@@ -110,5 +110,43 @@ class BilibiliCookieClient(BilibiliClientABC):
         return client_session
 
 
+class BilibiliUserdataClient(BilibiliClientABC):
+    auth_type: Literal['userdata'] = 'userdata'
+    data_entry: str
+
+    _data: dict | None = None
+
+    async def _ensure_data(self):
+        if self._data is not None:
+            return
+        async with tiny_database('users') as db:
+            user = Query()
+            data = db.get(user.name == self.data_entry)
+            if data is None:
+                pass  # TODO: login
+            assert isinstance(data, Document)
+            self._data = dict(data)
+
+    async def make_session(self):
+        await self._ensure_data()
+        cookie = http.cookies.SimpleCookie()
+        for name, key in [('SESSDATA', 'sessdata')]:
+            if key in self._data:
+                cookie[name] = self._data[key]
+                cookie[name]['domain'] = ".bilibili.com"
+                cookie[name]['path'] = "/"
+                cookie[name]['httponly'] = name == 'SESSDATA'
+
+        headers = CIMultiDict(self.headers)
+        headers.setdefault('User-Agent', self.user_agent)
+        timeout = aiohttp.ClientTimeout(total=10)
+        return aiohttp.ClientSession(headers=headers, cookies=cookie, timeout=timeout)
+
+    async def make_credential(self) -> Credential:
+        await self._ensure_data()
+        Credential.from_cookies(self._data)
+        return Credential(**self._data)
+
+
 BilibiliClient = Annotated[
     BilibiliCookieClient | BilibiliUnauthorizedClient | MockBilibiliClient, Field(discriminator='auth_type')]

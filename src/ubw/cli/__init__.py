@@ -292,6 +292,13 @@ def print_config():
     print(main.config)
 
 
+@app.command()
+def print_dirs():
+    from ubw.userdata import user_data_path, user_config_path
+    print(f"{user_data_path   = }")
+    print(f"{user_config_path = }")
+
+
 @app.callback()
 def main(
         cd: Annotated[Path, typer.Option('--config', '-c')] = "config.toml",
