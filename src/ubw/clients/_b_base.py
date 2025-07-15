@@ -56,24 +56,26 @@ class BilibiliClientABC(BaseModel, abc.ABC):
     try_limit: int = 3
 
     _session: aiohttp.ClientSession | None = None
+    _credential: Credential | None = None
     _mixin_key: str | None = None
 
     @abc.abstractmethod
-    def make_session(self):
+    async def make_session(self) -> aiohttp.ClientSession:
         ...
 
-    def get_sessdata(self) -> str:
-        return ""
+    @abc.abstractmethod
+    async def make_credential(self) -> Credential:
+        pass
 
-    @property
-    def session(self):
+    async def get_session(self) -> aiohttp.ClientSession:
         if self._session is None:
-            self._session = self.make_session()
+            self._session = await self.make_session()
         return self._session
 
-    @session.setter
-    def session(self, v):
-        self._session = v
+    async def get_credential(self) -> Credential:
+        if self._credential is None:
+            self._credential = await self.make_credential()
+        return self._credential
 
     async def close(self):
         if self._session is not None:
@@ -88,7 +90,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
 
     async def _get_model(self, data_model: type[_T], url, **kwargs) -> _T:
         try:
-            async with self.session.get(url, **kwargs) as res:
+            async with (await self.get_session()).get(url, **kwargs) as res:
                 j = await res.json()
                 try:  # process ValidationError here to tell linter that j is created
                     data = Response[data_model].model_validate(j)
@@ -122,7 +124,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
 
     async def _get_raw(self, url, **kwargs) -> dict:
         try:
-            async with self.session.get(url, **kwargs) as res:
+            async with (await self.get_session()).get(url, **kwargs) as res:
                 data = await res.json()
                 if data['code'] == 0:
                     logger.debug(f"successfully get {url!r} {kwargs!r}")
@@ -137,26 +139,26 @@ class BilibiliClientABC(BaseModel, abc.ABC):
             raise
 
     async def get_info_by_room(self, room_id: int) -> InfoByRoom:
-        credential = Credential(sessdata=self.get_sessdata())
+        credential = await self.get_credential()
         from bilibili_api import live
         r = live.LiveRoom(room_display_id=room_id, credential=credential)
         return InfoByRoom.model_validate(await r.get_room_info())
 
     async def get_info_by_room_raw(self, room_id: int):
-        credential = Credential(sessdata=self.get_sessdata())
+        credential = await self.get_credential()
         from bilibili_api import live
         r = live.LiveRoom(room_display_id=room_id, credential=credential)
         return await r.get_room_info()
 
     async def get_danmaku_server(self, room_id: int) -> DanmuInfo:
-        credential = Credential(sessdata=self.get_sessdata())
+        credential = await self.get_credential()
         from bilibili_api import live
         r = live.LiveRoom(room_display_id=room_id, credential=credential)
         return DanmuInfo.model_validate(await r.get_danmu_info())
 
     async def get_emoticons(self, room_id: int, platform: str = 'pc') -> RoomEmoticons:
-        async with self.session.get(EMOTICON_URL,
-                                    params={'platform': platform, 'id': room_id}) as res:
+        async with (await self.get_session()).get(EMOTICON_URL,
+                                                  params={'platform': platform, 'id': room_id}) as res:
             data = Response[RoomEmoticons].model_validate(await res.json())
             if data.code == 0:
                 return data.data
@@ -164,7 +166,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
                 raise BilibiliApiError(data.message)
 
     async def get_finger_spi(self, ) -> FingerSPI:
-        async with self.session.get(FINGER_SPI_URL) as res:
+        async with (await self.get_session()).get(FINGER_SPI_URL) as res:
             data = Response[FingerSPI].model_validate(await res.json())
             if data.code == 0:
                 return data.data
@@ -172,7 +174,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
                 raise BilibiliApiError(data.message)
 
     async def get_room_play_info(self, room_id: int, quality: int = 10000) -> RoomPlayInfo:
-        async with self.session.get(ROOM_PLAY_INFO_URL, params={
+        async with (await self.get_session()).get(ROOM_PLAY_INFO_URL, params={
             'build': 6215200,
             'device_name': "VTR-AL00",
             'platform': 'android',
@@ -197,8 +199,8 @@ class BilibiliClientABC(BaseModel, abc.ABC):
                 raise BilibiliApiError(data.message)
 
     async def get_dynamic(self, dynamic_id: int | str, features: list[str] = ()) -> Dynamic:
-        async with self.session.get('https://api.bilibili.com/x/polymer/web-dynamic/v1/detail',
-                                    params={'id': dynamic_id, 'features': ','.join(features)}, ) as res:
+        async with (await self.get_session()).get('https://api.bilibili.com/x/polymer/web-dynamic/v1/detail',
+                                                  params={'id': dynamic_id, 'features': ','.join(features)}, ) as res:
             data = Response[Dynamic].model_validate(await res.json())
             if data.code == 0:
                 return data.data
@@ -207,7 +209,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
                 raise BilibiliApiError(data.message)
 
     async def get_account_info(self, uid: int, ) -> AccountInfo:
-        credential = Credential(sessdata=self.get_sessdata())
+        credential = await self.get_credential()
         u = user.User(uid=uid, credential=credential)
         return AccountInfo.model_validate(await u.get_user_info())
 
@@ -228,7 +230,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
         return params
 
     async def get_nav(self) -> Nav:
-        async with self.session.get("https://api.bilibili.com/x/web-interface/nav") as res:
+        async with (await self.get_session()).get("https://api.bilibili.com/x/web-interface/nav") as res:
             data = Response[Nav].model_validate(await res.json())
             if data.code == 0:
                 return data.data
@@ -236,7 +238,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
                 raise BilibiliApiError(data.message)
 
     async def get_user_dynamic(self, uid, offset="") -> OffsetList[DynamicItem]:
-        credential = Credential(sessdata=self.get_sessdata())
+        credential = await self.get_credential()
         u = user.User(uid=uid, credential=credential)
         return TypeAdapter(OffsetList[DynamicItem]).validate_python(await u.get_dynamics_new(offset=offset))
 
@@ -291,18 +293,18 @@ class BilibiliClientABC(BaseModel, abc.ABC):
 
     async def get_video_pagelist(self, bvid):
         from bilibili_api import video
-        credential = Credential(sessdata=self.get_sessdata())
+        credential = await self.get_credential()
         v = video.Video(bvid=bvid, credential=credential)
         return TypeAdapter(list[VideoP]).validate_python(await v.get_pages())
 
     async def get_video_download(self, bvid, cid):
         from bilibili_api import video
-        credential = Credential(sessdata=self.get_sessdata())
+        credential = await self.get_credential()
         v = video.Video(bvid=bvid, credential=credential)
         return VideoPlayInfo.model_validate(await v.get_download_url(cid=cid))
 
     async def get_video_download_raw(self, bvid, cid):
         from bilibili_api import video
-        credential = Credential(sessdata=self.get_sessdata())
+        credential = await self.get_credential()
         v = video.Video(bvid=bvid, credential=credential)
         return await v.get_download_url(cid=cid)

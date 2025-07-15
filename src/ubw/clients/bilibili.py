@@ -2,18 +2,21 @@ import functools
 import http.cookies
 import logging
 import os
-import warnings
 from pathlib import Path
 from typing import Annotated, assert_never
 
 import aiofiles
 import aiohttp
+from bilibili_api import Credential
 from multidict import CIMultiDict
 from pydantic import Field
+from tinydb import Query
+from tinydb.table import Document
 from yarl import URL
 
 from ._b_base import *
 from .testing import MockBilibiliClient
+from ..userdata import tiny_database
 
 logger = logging.getLogger('ubw.clients.bilibili')
 
@@ -31,6 +34,9 @@ class BilibiliUnauthorizedClient(BilibiliClientABC):
         logger.debug(f'created aiohttp session with BilibiliUnauthorizedClient {client_session!r}')
         return client_session
 
+    def make_credential(self) -> Credential:
+        return Credential()
+
 
 class BilibiliCookieClient(BilibiliClientABC):
     auth_type: Literal['cookie'] = 'cookie'
@@ -42,10 +48,14 @@ class BilibiliCookieClient(BilibiliClientABC):
     def _cookies(self):
         return http.cookies.SimpleCookie()
 
-    def get_sessdata(self) -> str:
-        return self._cookies.get('SESSDATA').value
+    async def make_credential(self) -> Credential:
+        await self._ensure_cookie()
+        return Credential(sessdata=self._cookies.get('SESSDATA').value)
 
-    async def read_cookie(self, use: Literal['env', 'config', 'default'] = 'default'):
+    async def _ensure_cookie(self, use: Literal['env', 'config', 'default'] = 'default', force_reread=False):
+        if self._cookie_read and not force_reread:
+            return
+
         match use:
             case 'env':
                 s = os.environ.get('UBW_COOKIE_FILE')
@@ -83,14 +93,8 @@ class BilibiliCookieClient(BilibiliClientABC):
                 self._cookies[name]['httponly'] = httponly
         self._cookie_read = True
 
-    async def __aenter__(self):
-        await self.read_cookie()
-        return await super().__aenter__()
-
-    def make_session(self, *, default_cookies=True, timeout=None, warn_unread_cookie=True, **kwargs):
-        if not self._cookie_read and warn_unread_cookie:
-            warnings.warn("read_cookie() is not called, there might be no cookies and not authenticated, "
-                          "consider call read_cookie() before using or specify warn_unread_cookie=False")
+    async def make_session(self, *, default_cookies=True, timeout=None, warn_unread_cookie=True, **kwargs):
+        await self._ensure_cookie()
         headers = CIMultiDict(self.headers)
         headers.setdefault('User-Agent', self.user_agent)
 

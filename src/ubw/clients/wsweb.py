@@ -125,7 +125,7 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
         if self.bilibili_client_owner:
             await self.bilibili_client.__aenter__()
 
-        self._session = self.bilibili_client.make_session()
+        self._session = await self.bilibili_client.make_session()
 
         try:
             await self._network_coroutine()

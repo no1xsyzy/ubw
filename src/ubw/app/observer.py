@@ -55,8 +55,6 @@ class ObserverApp(InitLoopFinalizeApp):
 
     async def _init(self):
         acc_info = None
-        if self.bilibili_client_owner:
-            await self.bilibili_client.read_cookie()  # checkpoint1
         if self.owned_ui:
             await self.ui.start()
         if self.room_id == 0:
