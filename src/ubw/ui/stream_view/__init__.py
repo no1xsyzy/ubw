@@ -1,3 +1,5 @@
+from contextlib import contextmanager
+from contextvars import ContextVar
 from typing import Annotated, Union
 
 from ._base import *
@@ -17,3 +19,22 @@ __all__ = (
 )
 
 StreamView = Annotated[Union[SimpleStreamView, LiveStreamView, Richy, Web], Field(discriminator='uic')]
+
+global_stream_view: ContextVar[StreamView | None] = ContextVar('global_stream_view', default=None)
+
+
+def get_global_stream_view():
+    sv = global_stream_view.get()
+    if sv is None:
+        sv = Richy()
+        global_stream_view.set(sv)
+    return sv
+
+
+@contextmanager
+def set_global_stream_view(sv):
+    tok = global_stream_view.set(sv)
+    try:
+        yield
+    finally:
+        global_stream_view.reset(tok)
