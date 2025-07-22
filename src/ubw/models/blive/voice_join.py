@@ -1,4 +1,5 @@
 from ._base import *
+from .. import CommandModel
 
 
 class VoiceJoinStatusData(BaseModel):
@@ -49,4 +50,18 @@ class VoiceJoinRoomCountInfoData(BaseModel):
 class VoiceJoinRoomCountInfoCommand(CommandModel):
     cmd: Literal['VOICE_JOIN_ROOM_COUNT_INFO']
     data: VoiceJoinRoomCountInfoData
+    room_id: int
+
+
+class VoiceJoinSwitch(BaseModel):
+    room_id: int
+    room_status: int
+    root_status: int
+    conn_type: int
+    anchor_uid: int
+
+
+class VoiceJoinSwitchCommand(CommandModel):
+    cmd: Literal['VOICE_JOIN_SWITCH', 'VOICE_JOIN_SWITCH_V2']
+    data: VoiceJoinSwitch
     room_id: int

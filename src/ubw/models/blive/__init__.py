@@ -131,7 +131,9 @@ from .user_toast_msg import UserToastMsgCommand
 from .user_toast_msg_v2 import UserToastMsgV2Command
 from .video_connection import VideoConnectionMsgCommand, VideoConnectionJoinEndCommand, VideoConnectionJoinStartCommand
 from .voice_chat_update import VoiceChatUpdateCommand
-from .voice_join import VoiceJoinStatusCommand, VoiceJoinListCommand, VoiceJoinRoomCountInfoCommand
+from .voice_join import (
+    VoiceJoinStatusCommand, VoiceJoinListCommand, VoiceJoinRoomCountInfoCommand, VoiceJoinSwitchCommand,
+)
 from .warning import WarningCommand
 from .watched_change import WatchedChangeCommand
 from .wealth_notify import WealthNotifyCommand
@@ -268,7 +270,7 @@ AnnotatedCommandModel = Annotated[Union[
     UserToastMsgV2Command,
     VoiceChatUpdateCommand,
     VideoConnectionMsgCommand, VideoConnectionJoinEndCommand, VideoConnectionJoinStartCommand,
-    VoiceJoinStatusCommand, VoiceJoinListCommand, VoiceJoinRoomCountInfoCommand,
+    VoiceJoinStatusCommand, VoiceJoinListCommand, VoiceJoinRoomCountInfoCommand, VoiceJoinSwitchCommand,
     WarningCommand,
     WatchedChangeCommand,
     WealthNotifyCommand,
@@ -406,7 +408,7 @@ __all__ = (
     'UserToastMsgV2Command',
     'VideoConnectionMsgCommand', 'VideoConnectionJoinEndCommand', 'VideoConnectionJoinStartCommand',
     'VoiceChatUpdateCommand',
-    'VoiceJoinStatusCommand', 'VoiceJoinListCommand', 'VoiceJoinRoomCountInfoCommand',
+    'VoiceJoinStatusCommand', 'VoiceJoinListCommand', 'VoiceJoinRoomCountInfoCommand', 'VoiceJoinSwitchCommand',
     'WarningCommand',
     'WatchedChangeCommand',
     'WealthNotifyCommand',
