@@ -24,7 +24,7 @@ logger = logging.getLogger('ubw.clients.bilibili')
 class BilibiliUnauthorizedClient(BilibiliClientABC):
     auth_type: Literal['no'] = 'no'
 
-    def make_session(self, timeout=None, **kwargs):
+    async def make_session(self, timeout=None, **kwargs):
         headers = CIMultiDict(self.headers)
         headers.setdefault('User-Agent', self.user_agent)
         cookie_jar = aiohttp.CookieJar()
@@ -34,7 +34,7 @@ class BilibiliUnauthorizedClient(BilibiliClientABC):
         logger.debug(f'created aiohttp session with BilibiliUnauthorizedClient {client_session!r}')
         return client_session
 
-    def make_credential(self) -> Credential:
+    async def make_credential(self) -> Credential:
         return Credential()
 
 
