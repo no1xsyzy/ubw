@@ -2,7 +2,7 @@ from functools import cached_property
 from itertools import count
 
 from rich.abc import RichRenderable
-from rich.console import Console, Group
+from rich.console import Console, Group, ConsoleRenderable
 from rich.json import JSON
 from rich.markup import escape
 from rich.panel import Panel
@@ -67,7 +67,7 @@ class Richy(BaseStreamView):
                             s += f" \\[{mark}{price}]"
                 case Emoji(codepoint=cp):
                     s += f"{cp}\N{VS16}"
-        res = [Text.from_markup(f"[{self.get_importance_style(record.importance)}]{s}")]
+        res: list[ConsoleRenderable] = [Text.from_markup(f"[{self.get_importance_style(record.importance)}]{s}")]
         for k, v in d.items():
             res.append(Panel.fit(JSON.from_data(v), title=f'[{k}]'))
         group = Group(*res, fit=True)
