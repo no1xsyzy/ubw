@@ -29,6 +29,8 @@ class SerializationMiddleware(_SyncSerializationMiddleware, AIOMiddleware):
 
 logger = logging.getLogger('userdata')
 
+PD_PARAM = {'appname': 'ubw', 'roaming': True, 'ensure_exists': True}
+
 
 def get_path():
     env = os.environ.get('UBW_ROOT', default=None)
@@ -37,9 +39,6 @@ def get_path():
 
     import sys
     main = Path(sys.argv[0]).resolve()
-    print(f'{main = }')
-    print(f'{[*main.parents] = }')
-    print(f'{sys.prefix = }')
     if main.name == '__main__.py':
         portable_root = main.parent.parent.parent
     else:
@@ -51,13 +50,11 @@ def get_path():
     if os.environ.get('UBW_PORTABLE') or (portable_root / '.portable').is_file():
         return portable_root / 'ubw_data', portable_root
 
-    return (Path(platformdirs.user_data_dir('ubw', roaming=True)).resolve(),
-            Path(platformdirs.user_config_dir('ubw', roaming=True)).resolve())
+    return (Path(platformdirs.user_data_dir(**PD_PARAM)).resolve(),
+            Path(platformdirs.user_config_dir(**PD_PARAM)).resolve())
 
 
 user_data_path, user_config_path = get_path()
-user_data_path.mkdir(parents=True, exist_ok=True)
-user_config_path.mkdir(parents=True, exist_ok=True)
 
 
 @functools.cache
