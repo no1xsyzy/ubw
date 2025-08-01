@@ -1,0 +1,22 @@
+VerticalScroll {
+}
+
+HorizontalGroup {
+    align: center middle;
+    border: white;
+}
+
+Digits {
+    align: center middle;
+    width: auto;
+}
+
+Label {
+    align: center middle;
+    content-align: center middle;
+    height: 3;
+}
+
+Markdown {
+    width: 1fr;
+}

@@ -11,6 +11,8 @@ from .living_status import LivingStatusHandler
 from .saver import SaverHandler
 from .strange_stalker import StrangeStalkerHandler
 from .testing import MockHandler
+from .vod import VodHandler
+from .vodt import VodTextualHandler
 from .warn_nebd import WarnNoEntranceButDanmakuHandler
 from .wocpian import PianHandler
 
@@ -24,6 +26,8 @@ Handler = Annotated[
         StrangeStalkerHandler,
         PianHandler,
         LivingStatusHandler,
+        VodHandler,
+        VodTextualHandler,
         WarnNoEntranceButDanmakuHandler,
         MockHandler,
     ],
