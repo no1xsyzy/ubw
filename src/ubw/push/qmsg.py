@@ -29,7 +29,7 @@ class QMsgPusher(BaseModel):
             if j['success']:
                 logger.debug("QMsg success")
             else:
-                logger.info("QMsg fail %s", j['reason'])
+                logger.warning("QMsg fail %s", j['reason'])
         except Exception as e:
             logger.exception('QMsg error', exc_info=e)
 
