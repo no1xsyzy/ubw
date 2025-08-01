@@ -39,7 +39,7 @@ class Richy(BaseStreamView):
         m = count(1)
         for seg in record.segments:
             match seg:
-                case PlainText(text=text) | Picture(alt=text):
+                case PlainText(text=text):
                     s += escape(text)
                 case Anchor(text=text, href=href):
                     s += f"[blue u link={href}]{text}[/]"
@@ -67,6 +67,11 @@ class Richy(BaseStreamView):
                             s += f" \\[{mark}{price}]"
                 case Emoji(codepoint=cp):
                     s += f"{cp}\N{VS16}"
+                case Picture(url=url, alt=alt):
+                    if alt:
+                        s += escape(alt)
+                    else:
+                        s += f"Pic.{escape(alt)}({escape(url)})"
         res: list[ConsoleRenderable] = [Text.from_markup(f"[{self.get_importance_style(record.importance)}]{s}")]
         for k, v in d.items():
             res.append(Panel.fit(JSON.from_data(v), title=f'[{k}]'))
