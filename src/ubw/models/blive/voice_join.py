@@ -1,5 +1,4 @@
 from ._base import *
-from .. import CommandModel
 
 
 class VoiceJoinStatusData(BaseModel):
