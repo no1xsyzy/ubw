@@ -89,6 +89,7 @@ class ObserverApp(InitLoopFinalizeApp):
                         Anchor(text="置顶动态", href=item.jump_url),
                         PlainText(text=" "),
                         PlainText(text=item.text),
+                        *(Picture(url=pic, alt="") for pic in item.pictures),
                     ], time=item.pub_date))
                     if not init:
                         await self._deal_with_push(f"{self.name} 有新置顶动态", item)
@@ -99,6 +100,7 @@ class ObserverApp(InitLoopFinalizeApp):
                         Anchor(text="发布视频", href=item.jump_url),
                         PlainText(text=" "),
                         PlainText(text=item.text),
+                        *(Picture(url=pic, alt="") for pic in item.pictures),
                     ], time=item.pub_date))
                     if not init:
                         await self._deal_with_push(f"{self.name} 发布视频", item)
@@ -107,6 +109,7 @@ class ObserverApp(InitLoopFinalizeApp):
                         Anchor(text="直播动态", href=item.jump_url),
                         PlainText(text=" "),
                         PlainText(text=item.text),
+                        *(Picture(url=pic, alt="") for pic in item.pictures),
                     ], time=item.pub_date))
                 elif item.is_forward:
                     segments = [
@@ -129,6 +132,7 @@ class ObserverApp(InitLoopFinalizeApp):
                         Anchor(text="发布动态", href=item.jump_url),
                         PlainText(text=" "),
                         PlainText(text=item.text),
+                        *(Picture(url=pic, alt="") for pic in item.pictures),
                     ], time=item.pub_date))
                     if not init:
                         await self._deal_with_push(f"{self.name} 发布动态", item)
