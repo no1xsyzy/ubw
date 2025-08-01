@@ -144,7 +144,6 @@ class BilibiliUserdataClient(BilibiliClientABC):
 
     async def make_credential(self) -> Credential:
         await self._ensure_data()
-        Credential.from_cookies(self._data)
         return Credential(**self._data)
 
 
