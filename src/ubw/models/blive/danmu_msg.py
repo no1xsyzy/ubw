@@ -185,7 +185,7 @@ def parse_medal_info(v3):
 
 
 def parse_group_medal(v17):
-    if v17 is None:
+    if not v17:
         return None
     else:
         return GroupMedal(
