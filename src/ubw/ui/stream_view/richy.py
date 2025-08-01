@@ -1,3 +1,4 @@
+import warnings
 from functools import cached_property
 from itertools import count
 
@@ -11,6 +12,8 @@ from rich.text import Text
 from ._base import *
 
 StickyKey = str
+
+_warned_seg_type = set()
 
 
 class Richy(BaseStreamView):
@@ -72,6 +75,10 @@ class Richy(BaseStreamView):
                         s += escape(alt)
                     else:
                         s += f"Pic.{escape(alt)}({escape(url)})"
+                case _:
+                    if seg.type not in _warned_seg_type:
+                        warnings.warn(f"Unknown segment of type `{seg.type}`")
+                        _warned_seg_type.add(seg.type)
         res: list[ConsoleRenderable] = [Text.from_markup(f"[{self.get_importance_style(record.importance)}]{s}")]
         for k, v in d.items():
             res.append(Panel.fit(JSON.from_data(v), title=f'[{k}]'))
