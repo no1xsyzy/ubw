@@ -3,7 +3,7 @@ import os
 import re
 import sys
 import typing
-from datetime import timedelta
+from datetime import timedelta, datetime
 from operator import itemgetter
 from typing import Literal
 
@@ -23,6 +23,7 @@ owner = itemgetter('name', 'mid', 'face')
 DEBUG_VODT = os.environ.get('DEBUG_VODT')
 
 FORMAT_TEXT = (
+    """{vod_time!s:.19} -- """
     """[{demander_uname}](https://space.bilibili.com/{demander_uid})"""
     """点播了"""
     """[《{title}》({bvid})](https://www.bilibili.com/video/{bvid}/)"""
@@ -46,6 +47,7 @@ class VodInfo:
     owner_uname: str
     owner_uid: int
     owner_face: str
+    vod_time: datetime
 
 
 class UI(App):
@@ -128,10 +130,12 @@ class VodTextualHandler(BaseHandler):
             demander_uid = message.data.uid
             demander_face = message.data.user_info.face
             owner_uname, owner_uid, owner_face = owner(detail['View']['owner'])
-            self._ui.add_item(
-                VodInfo(bvid=bvid, duration=duration, title=title,
-                        demander_uname=demander_uname, demander_uid=demander_uid, demander_face=demander_face,
-                        owner_uname=owner_uname, owner_uid=owner_uid, owner_face=owner_face))
+            self._ui.add_item(VodInfo(
+                bvid=bvid, duration=duration, title=title,
+                demander_uname=demander_uname, demander_uid=demander_uid, demander_face=demander_face,
+                owner_uname=owner_uname, owner_uid=owner_uid, owner_face=owner_face,
+                vod_time=message.ct,
+            ))
 
 
 async def main():
