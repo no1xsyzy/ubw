@@ -42,6 +42,8 @@ class CodecItem(BaseModel):
     attr_name: str
     hdr_type: int
 
+    drm: bool = False
+
 
 class FormatItem(BaseModel):
     format_name: str
