@@ -8,8 +8,10 @@ class InteractTemplate(BaseModel):
 
 
 class MultiConn(BaseModel):
-    price: int
-    price_text: str
+    price: int = 0
+    price_text: str = "0"
+    show_score: int = 1
+    support_full_zoom: int = 2
 
 
 class BizExtraData(BaseModel):
@@ -28,6 +30,7 @@ class Member(BaseModel):
     fans_num: int
     display_name: str
     biz_extra_data: BizExtraData
+    join_time_ns: int = 0  # ns? 0?
 
 
 class MultiConn1(BaseModel):
@@ -57,6 +60,9 @@ class Data(BaseModel):
     session_start_at_ts: int
     room_start_at: datetime
     room_start_at_ts: int
+    trace_id: str | None = None
+    biz_extra_data: BizExtraData | None = None
+    channel_users: list[int]
 
 
 class UniversalEventGiftV2Command(CommandModel):

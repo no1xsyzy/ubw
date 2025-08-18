@@ -48,6 +48,10 @@ class AnchorLotStartData(BaseModel):
     join_type_text: str = ""
     sponsor_title: str = ""
 
+    award_per_capita: int = 0
+    icon_name: str = "天选时刻"
+    join_total: int = 0
+
 
 class AnchorLotStartCommand(CommandModel):
     """天选时刻开始"""
@@ -82,6 +86,7 @@ class AnchorLotAwardData(BaseModel):
     url: str
     web_url: str
     sponsor_title: str = ""
+    award_per_capita: int = 0
 
 
 class AnchorLotAwardCommand(CommandModel):

@@ -12,6 +12,8 @@ class LiveCommand(CommandModel):
     live_time: datetime | None = None
     roomid: int
 
+    special_types: list[int] | None = None  # only observed [50]
+
     def summarize(self) -> Summary:
         return Summary(
             t=self.live_time or self.ct,

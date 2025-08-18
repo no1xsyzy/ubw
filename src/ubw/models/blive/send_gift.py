@@ -46,6 +46,17 @@ class FaceEffectV2(BaseModel):
     type: int
 
 
+class CandidateFaceEffect(BaseModel):
+    effect_id: int
+    gender: int
+    source: int
+
+
+class FaceEffect(BaseModel):
+    candidate_face_effects: list[CandidateFaceEffect]
+    face_effect_type: int
+
+
 class GiftInfo(BaseModel):
     effect_id: int
     has_imaged_gift: int
@@ -140,6 +151,15 @@ class GiftData(BaseModel):
     face_effect_v2: FaceEffectV2 | None = None
 
     gift_info: GiftInfo | None = None
+
+    face_effect: FaceEffect | None = None
+
+    @field_validator('face_effect', mode='before')
+    @classmethod
+    def face_effect_empty_dict_is_none(cls, v):
+        if v == {}:
+            return None
+        return v
 
 
 class GiftDanmu(BaseModel):
