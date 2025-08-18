@@ -36,6 +36,12 @@ class RelationTail(BaseModel):
     tail_type: int
 
 
+class ControlInfo(BaseModel):
+    text: str
+    text_color: str
+    type: int
+
+
 class InteractWordData(BaseModel):
     contribution: Contribution | None = None
     contribution_v2: ContributionV2 | None = None
@@ -63,6 +69,8 @@ class InteractWordData(BaseModel):
     uinfo: Uinfo | None = None
 
     relation_tail: RelationTail | None = None
+
+    control_info: ControlInfo | None = None
 
     trigger_time_ns = field_validator('trigger_time', mode='before')(convert_ns)
 
