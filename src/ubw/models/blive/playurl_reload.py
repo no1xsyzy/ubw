@@ -31,6 +31,14 @@ class GQnDescItem(BaseModel):
     media_base_desc: MediaBaseDesc | None
 
 
+class AudioCodecs(BaseModel):
+    base: str
+
+
+class VideoCodecs(BaseModel):
+    base: str
+
+
 class CodecItem(BaseModel):
     codec_name: str
     current_qn: int
@@ -43,6 +51,10 @@ class CodecItem(BaseModel):
     hdr_type: int
 
     drm: bool = False
+
+    drm_key_systems: None = None
+    audio_codecs: AudioCodecs | None = None
+    video_codecs: VideoCodecs | None = None
 
 
 class FormatItem(BaseModel):
