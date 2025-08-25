@@ -121,6 +121,7 @@ from .super_chat_message import SuperChatCommand
 from .super_chat_message_delete import SuperChatMessageDeleteCommand
 from .super_chat_message_jpn import SuperChatMessageJpnCommand
 from .sys_msg import SysMsgCommand
+from .tip_card import TipCardCommand
 from .trading_score import TradingScoreCommand
 from .universal_event_gift import UniversalEventGiftCommand
 from .universal_event_gift_v2 import UniversalEventGiftV2Command
@@ -260,6 +261,7 @@ AnnotatedCommandModel = Annotated[Union[
     SuperChatMessageDeleteCommand,
     SuperChatMessageJpnCommand,
     SysMsgCommand,
+    TipCardCommand,
     TradingScoreCommand,
     UniversalEventGiftCommand,
     UniversalEventGiftV2Command,
@@ -398,6 +400,7 @@ __all__ = (
     'SuperChatMessageDeleteCommand',
     'SuperChatMessageJpnCommand',
     'SysMsgCommand',
+    'TipCardCommand',
     'TradingScoreCommand',
     'UniversalEventGiftCommand',
     'UniversalEventGiftV2Command',
