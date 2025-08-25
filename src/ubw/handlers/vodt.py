@@ -88,24 +88,25 @@ class UI(App):
         self.queue.remove(to_remove)
         self.mutate_reactive(UI.queue)
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
+    async def on_button_pressed(self, event: Button.Pressed) -> None:
         """Event handler called when a button is pressed."""
         button_id = event.button.id
         match button_id.split("_"):
             case ['remove', bvid]:
                 self.remove_item(bvid)
 
-    def on_mount(self):
+    async def on_mount(self):
         if DEBUG_VODT:
-            self._some_task = asyncio.create_task(self.appender())
+            async def appender():
+                demander = "橘枳橼", 2351778, "https://i2.hdslb.com/bfs/garb/open/7bfb44777ed5882f125a484ed6f2e3599a7c55c3.png"
+                up = "暗视者ShadowVisual", 13583619, "https://i2.hdslb.com/bfs/face/a29503c5c118512aba752fe30b22f4b5b8b610d3.jpg"
+                from itertools import count
+                for i in count():
+                    await asyncio.sleep(0 if i < 4 else 1 if i < 10 else 20)
+                    self.add_item(VodInfo(f'BV{i}', timedelta(seconds=120 * 2 ** i), f"title_{i}", *demander, *up))
 
-    async def appender(self):
-        demander = "橘枳橼", 2351778, "https://i2.hdslb.com/bfs/garb/open/7bfb44777ed5882f125a484ed6f2e3599a7c55c3.png"
-        up = "暗视者ShadowVisual", 13583619, "https://i2.hdslb.com/bfs/face/a29503c5c118512aba752fe30b22f4b5b8b610d3.jpg"
-        from itertools import count
-        for i in count():
-            await asyncio.sleep(0 if i < 4 else 1 if i < 10 else 20)
-            self.add_item(VodInfo(f'BV{i}', timedelta(seconds=120 * 2 ** i), f"title_{i}", *demander, *up))
+            # NEVER use it, saving reference to keep task run
+            setattr(self, '@debug_appender@', asyncio.create_task(appender()))
 
 
 class VodTextualHandler(BaseHandler):
