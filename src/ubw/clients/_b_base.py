@@ -321,7 +321,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
     async def iter_live_danmaku(self, room_id, history=False, connect=True):
         if history:
             for danmaku in (await self.get_history_danmaku(room_id))['room']:
-                yield {'cmd': 'HISTORY_DANMU', 'info': danmaku}
+                yield {'cmd': 'X_HISTORY_DANMU', 'info': danmaku}
         if connect:
             from ubw.clients import WSWebCookieLiveClient
             q = asyncio.Queue()
@@ -333,5 +333,8 @@ class BilibiliClientABC(BaseModel, abc.ABC):
             live_client = WSWebCookieLiveClient(bilibili_client=self, bilibili_client_owner=False, room_id=room_id)
             live_client.add_handler(PseudoHandler())
             await live_client.start()
-            while True:
-                yield q.get()
+            try:
+                while True:
+                    yield await q.get()
+            finally:
+                await live_client.stop_and_close()
