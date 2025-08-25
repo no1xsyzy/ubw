@@ -135,55 +135,6 @@ class FingerSPI(BaseModel):
     b_4: str
 
 
-class QnDesc(BaseModel):
-    attr_desc: None
-    desc: str
-    hdr_desc: str
-    qn: int
-
-
-class P2PData(BaseModel):
-    m_p2p: bool
-    m_servers: list[str] | None
-    p2p: bool
-    p2p_type: int
-
-
-class UrlInfo(BaseModel):
-    extra: str
-    host: str
-    stream_ttl: int
-
-
-class Codec(BaseModel):
-    codec_name: str
-    accept_qn: list[int]
-    attr_name: str
-    base_url: str
-    current_qn: int
-    dolby_type: int
-    hdr_qn: None
-    url_info: list[UrlInfo]
-
-
-class Format(BaseModel):
-    format_name: str
-    codec: list[Codec]
-
-
-class Stream(BaseModel):
-    protocol_name: str
-    format: list[Format]
-
-
-class PlayUrl(BaseModel):
-    cid: int
-    dolby_qn: None
-    g_qn_desc: list[QnDesc]
-    p2p_data: P2PData
-    stream: list[Stream]
-
-
 class RoomPlayInfo(BaseModel):
     all_special_types: list[int]
     is_portrait: bool
@@ -197,8 +148,68 @@ class RoomPlayInfo(BaseModel):
     playurl_info: PlayUrlInfo | None
 
     class PlayUrlInfo(BaseModel):
-        conf_json: str
+        conf_json: Json[Conf]
         playurl: PlayUrl | None
+
+        class Conf(BaseModel):
+            cdn_rate: int
+            report_interval_sec: int
+
+        class PlayUrl(BaseModel):
+            cid: int
+            dolby_qn: None
+            g_qn_desc: list[QnDesc]
+            p2p_data: P2PData
+            stream: list[Stream]
+
+            class QnDesc(BaseModel):
+                attr_desc: None
+                desc: str
+                hdr_desc: str
+                qn: int
+                hdr_type: int
+                media_base_desc: MediaBaseDesc | None
+
+                class MediaBaseDesc(BaseModel):
+                    detail_desc: DetailDesc
+                    brief_desc: BriefDesc
+
+                    class DetailDesc(BaseModel):
+                        desc: str
+                        tag: list[str]
+
+                    class BriefDesc(BaseModel):
+                        desc: str
+                        badge: str
+
+            class P2PData(BaseModel):
+                m_p2p: bool
+                m_servers: list[str] | None
+                p2p: bool
+                p2p_type: int
+
+            class Stream(BaseModel):
+                protocol_name: str
+                format: list[Format]
+
+                class Format(BaseModel):
+                    format_name: str
+                    codec: list[Codec]
+
+                    class Codec(BaseModel):
+                        codec_name: str
+                        accept_qn: list[int]
+                        attr_name: str
+                        base_url: str
+                        current_qn: int
+                        dolby_type: int
+                        hdr_qn: None
+                        url_info: list[UrlInfo]
+
+                        class UrlInfo(BaseModel):
+                            extra: str
+                            host: str
+                            stream_ttl: int
 
 
 class LikeIcon(BaseModel):
