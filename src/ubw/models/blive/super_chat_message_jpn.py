@@ -40,7 +40,7 @@ class Data(BaseModel):
     background_price_color: Color
     end_time: datetime
     gift: Gift
-    id: str
+    id: str | int
     is_ranked: int
     medal_info: MedalInfo | None
     message: str
@@ -53,17 +53,18 @@ class Data(BaseModel):
     "秒"
     token: str
     ts: datetime
-    uid: str
+    uid: str | int
     user_info: UserInfo
 
     group_medal: GroupMedal | None = None
     is_mystery: bool = False
     medal_info: MedalInfo | None = None
 
-    uinfo: UinfoLow | None = None
+    # uinfo: UinfoLow | None = None
+    uinfo: Uinfo | None = None
 
 
 class SuperChatMessageJpnCommand(CommandModel):
     cmd: Literal['SUPER_CHAT_MESSAGE_JPN']
-    roomid: int
+    roomid: int | None = None
     data: Data

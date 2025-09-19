@@ -226,6 +226,7 @@ class UinfoGuardLeader(BaseModel):
 class UheadFrame(BaseModel):
     id: int
     frame_img: str
+    frame_dynamic_img: str = ""
 
 
 class Uinfo(BaseModel):

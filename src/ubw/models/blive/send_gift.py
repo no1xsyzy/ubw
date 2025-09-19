@@ -53,7 +53,7 @@ class CandidateFaceEffect(BaseModel):
 
 
 class FaceEffect(BaseModel):
-    candidate_face_effects: list[CandidateFaceEffect]
+    candidate_face_effects: list[CandidateFaceEffect] | None = None
     face_effect_type: int
 
 

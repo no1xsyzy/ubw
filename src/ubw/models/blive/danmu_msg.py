@@ -72,6 +72,9 @@ class DanmakuInfoModeInfoExtra(BaseModel):
 
     master_player_hidden: Literal[False] = False
 
+    is_mirror: bool = False
+    is_collaboration_member: bool = False
+
 
 class DanmakuInfoModeInfo(BaseModel):
     mode: int | None = None

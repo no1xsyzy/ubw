@@ -4,9 +4,9 @@ from ._base import *
 class ShoppingBubble(BaseModel):
     name: str
     priority: int
-    show_banner: int
+    show_banner: int = Field(validation_alias=AliasChoices('show_banner', 'showBanner'))
     tag: str
-    goods_list: list[int]
+    goods_list: list[int] = Field(validation_alias=AliasChoices('goods_list', 'goodsList'))
 
 
 class ShoppingBubblesStyleData(BaseModel):

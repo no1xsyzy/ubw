@@ -1,10 +1,19 @@
 from ._base import *
 
 
+class ReloadPlayurl(BaseModel):
+    need: bool
+    scatter: int
+    qn: int
+
+
 class ReloadOption(BaseModel):
     reload_stream_name: list[None]
     reload_format: list[None]
     scatter: int
+    qn: int = 0
+    fallback: bool = False
+    reload_playurl: ReloadPlayurl | None = None
 
 
 class DetailDesc(BaseModel):
@@ -32,11 +41,11 @@ class GQnDescItem(BaseModel):
 
 
 class AudioCodecs(BaseModel):
-    base: str
+    base: str | None = None
 
 
 class VideoCodecs(BaseModel):
-    base: str
+    base: str | None = None
 
 
 class CodecItem(BaseModel):
@@ -86,6 +95,7 @@ class Playurl(BaseModel):
 class Data(BaseModel):
     reload_option: ReloadOption
     playurl: Playurl
+    room_id: int | None = None
 
 
 class PlayurlReloadCommand(CommandModel):
