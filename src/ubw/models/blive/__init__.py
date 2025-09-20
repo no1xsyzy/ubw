@@ -14,6 +14,10 @@ from .benefit_status import BenefitStatusCommand
 from .card_msg import CardMsgCommand
 from .change_room_info import ChangeRoomInfoCommand
 from .chg_rank_refresh import ChgRankRefreshCommand
+from .collaboration_live_info import CollaborationLiveInfoCommand
+from .collaboration_live_online import CollaborationLiveOnlineCommand
+from .collaboration_live_popularity import CollaborationLivePopularityCommand
+from .collaboration_live_watched import CollaborationLiveWatchedCommand
 from .combo_end import ComboEndCommand
 from .combo_send import ComboSendCommand
 from .common_animation import CommonAnimationCommand
@@ -21,7 +25,7 @@ from .common_notice_danmaku import CommonNoticeDanmakuCommand
 from .confirm_auto_follow import ConfirmAutoFollowCommand
 from .cut_off import CutOffCommand
 from .danmu_aggregation import DanmuAggregationCommand
-from .danmu_msg import DanmakuCommand, Danmaku371111Command, Danmaku402220Command
+from .danmu_msg import DanmakuCommand, Danmaku371111Command, Danmaku402220Command, DanmakuMirrorCommand
 from .dm_interaction import DmInteractionCommand
 from .entry_effect import EntryEffectCommand, EntryEffectMustReceiveCommand
 from .full_screen_special_effect import FullScreenSpecialEffectCommand
@@ -157,6 +161,10 @@ AnnotatedCommandModel = Annotated[Union[
     CardMsgCommand,
     ChangeRoomInfoCommand,
     ChgRankRefreshCommand,
+    CollaborationLiveInfoCommand,
+    CollaborationLiveOnlineCommand,
+    CollaborationLivePopularityCommand,
+    CollaborationLiveWatchedCommand,
     ComboEndCommand,
     ComboSendCommand,
     CommonAnimationCommand,
@@ -164,7 +172,7 @@ AnnotatedCommandModel = Annotated[Union[
     ConfirmAutoFollowCommand,
     CutOffCommand,
     DanmuAggregationCommand,
-    DanmakuCommand, Danmaku371111Command, Danmaku402220Command,
+    DanmakuCommand, Danmaku371111Command, Danmaku402220Command, DanmakuMirrorCommand,
     DmInteractionCommand,
     EntryEffectCommand, EntryEffectMustReceiveCommand,
     FullScreenSpecialEffectCommand,
@@ -296,6 +304,10 @@ __all__ = (
     'CardMsgCommand',
     'ChangeRoomInfoCommand',
     'ChgRankRefreshCommand',
+    'CollaborationLiveInfoCommand',
+    'CollaborationLiveOnlineCommand',
+    'CollaborationLivePopularityCommand',
+    'CollaborationLiveWatchedCommand',
     'ComboEndCommand',
     'ComboSendCommand',
     'CommonAnimationCommand',
@@ -303,7 +315,7 @@ __all__ = (
     'ConfirmAutoFollowCommand',
     'CutOffCommand',
     'DanmuAggregationCommand',
-    'DanmakuCommand', 'Danmaku371111Command', 'Danmaku402220Command',
+    'DanmakuCommand', 'Danmaku371111Command', 'Danmaku402220Command', 'DanmakuMirrorCommand',
     'DmInteractionCommand',
     'EntryEffectCommand', 'EntryEffectMustReceiveCommand',
     'FullScreenSpecialEffectCommand',

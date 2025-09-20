@@ -282,3 +282,7 @@ class Danmaku371111Command(DanmakuCommand):
 
 class Danmaku402220Command(DanmakuCommand):
     cmd: Literal['DANMU_MSG:4:0:2:2:2:0']
+
+
+class DanmakuMirrorCommand(DanmakuCommand):
+    cmd: Literal['DANMU_MSG_MIRROR']
