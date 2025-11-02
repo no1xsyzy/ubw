@@ -1,5 +1,3 @@
-from typing import Any
-
 from ._base import *
 
 
@@ -7,16 +5,17 @@ class CommonNoticeDanmakuSegmentBase(BaseModel):
     type: int
     text: str | None = None
 
-    background_color: Any = None
-    background_color_dark: Any = None
-    font_bold: Any = None
-    font_color: Any = None
-    font_color_dark: Any = None
-    highlight_font_color: Any = None
-    highlight_font_color_dark: Any = None
-    img_height: Any = None
-    img_width: Any = None
-    img_url: Any = None
+    background_color: list[Color] | None = None
+    background_color_dark: None = None
+    font_bold: None = None
+    font_color: Color | None = None
+    font_color_dark: None = None
+    highlight_font_color: None = None
+    highlight_font_color_dark: None = None
+    img_height: None = None
+    img_width: None = None
+    img_url: None = None
+    uri: str | None = None
 
 
 class CommonNoticeDanmakuSegment1(CommonNoticeDanmakuSegmentBase):
@@ -29,7 +28,6 @@ class CommonNoticeDanmakuSegment2(CommonNoticeDanmakuSegmentBase):
 
 class CommonNoticeDanmakuSegment3(CommonNoticeDanmakuSegmentBase):
     type: Literal[3]
-    uri: str
 
 
 CommonNoticeDanmakuSegment = Annotated[
