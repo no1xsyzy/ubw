@@ -50,6 +50,7 @@ from .live import LiveCommand
 from .live_ani_res_update import LiveAniResUpdateCommand
 from .live_interactive_game import LiveInteractiveGameCommand
 from .live_multi_view_change import LiveMultiViewChangeCommand
+from .live_multi_view_event_change import LiveMultiViewEventChangeCommand
 from .live_multi_view_new_info import LiveMultiViewNewInfo
 from .live_open_platform_game import LiveOpenPlatformGameCommand
 from .live_panel_change import LivePanelChangeCommand
@@ -199,6 +200,7 @@ AnnotatedCommandModel = Annotated[Union[
     LiveAniResUpdateCommand,
     LiveInteractiveGameCommand,
     LiveMultiViewChangeCommand,
+    LiveMultiViewEventChangeCommand,
     LiveMultiViewNewInfo,
     LiveOpenPlatformGameCommand,
     LivePanelChangeCommand,
@@ -343,6 +345,7 @@ __all__ = (
     'LiveAniResUpdateCommand',
     'LiveInteractiveGameCommand',
     'LiveMultiViewChangeCommand',
+    'LiveMultiViewEventChangeCommand',
     'LiveMultiViewNewInfo',
     'LiveOpenPlatformGameCommand',
     'LivePanelChangeCommand',
