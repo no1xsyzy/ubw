@@ -21,6 +21,7 @@ from .collaboration_live_watched import CollaborationLiveWatchedCommand
 from .combo_end import ComboEndCommand
 from .combo_send import ComboSendCommand
 from .common_animation import CommonAnimationCommand
+from .common_big_event import CommonBigEventCommand
 from .common_notice_danmaku import CommonNoticeDanmakuCommand
 from .confirm_auto_follow import ConfirmAutoFollowCommand
 from .cut_off import CutOffCommand
@@ -168,6 +169,7 @@ AnnotatedCommandModel = Annotated[Union[
     ComboEndCommand,
     ComboSendCommand,
     CommonAnimationCommand,
+    CommonBigEventCommand,
     CommonNoticeDanmakuCommand,
     ConfirmAutoFollowCommand,
     CutOffCommand,
@@ -311,6 +313,7 @@ __all__ = (
     'ComboEndCommand',
     'ComboSendCommand',
     'CommonAnimationCommand',
+    'CommonBigEventCommand',
     'CommonNoticeDanmakuCommand',
     'ConfirmAutoFollowCommand',
     'CutOffCommand',
