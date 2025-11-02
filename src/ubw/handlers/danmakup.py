@@ -95,6 +95,36 @@ class DanmakuPHandler(BaseHandler):
                 PlainText(text=msg),
             ], time=message.ct))
 
+    async def on_danmu_msg_mirror(self, client, message: models.DanmakuMirrorCommand):
+        uname = message.info.uname
+        msg = message.info.msg
+        uid = message.info.uid
+        room_id = client.room_id
+        try:
+            face = message.info.mode_info.user.base.face
+        except AttributeError:
+            face = ''
+        trivial_rate = self.trivial_rate(message.info)
+
+        if trivial_rate < self.ignore_rate:
+            pass
+        elif trivial_rate < self.dim_rate:
+            await self.ui.add_record(Record(segments=[
+                ColorSeeSee(text=f"[{room_id}] "),
+                PlainText(text=f"[跨房]"),
+                User(name=uname, uid=uid, face=face),
+                PlainText(text=f": "),
+                PlainText(text=msg),
+            ], time=message.ct, importance=0))
+        else:
+            await self.ui.add_record(Record(segments=[
+                ColorSeeSee(text=f"[{room_id}] "),
+                PlainText(text=f"[跨房]"),
+                User(name=uname, uid=uid, face=face),
+                PlainText(text=f": "),
+                PlainText(text=msg),
+            ], time=message.ct))
+
     async def on_room_change(self, client, message):
         title = message.data.title
         parent_area_name = message.data.parent_area_name
