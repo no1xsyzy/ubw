@@ -4,6 +4,7 @@ import re
 from datetime import datetime, timedelta
 from typing import Annotated
 
+import aiohttp
 from pydantic import Field
 from typing_extensions import Doc
 
@@ -149,6 +150,12 @@ class ObserverApp(InitLoopFinalizeApp):
         try:
             await self._fetch_print_update(False)
             self._fail_count = 0
+            return
+        except (asyncio.TimeoutError, aiohttp.ClientConnectorError) as e:
+            logger.warning(f'ConnErr {e!r}')
+            self._fail_count += 1
+            if self._fail_count > 5:
+                raise
         except Exception as e:
             logger.exception("exception in _fetch_print_update", exc_info=e)
             self._fail_count += 1
