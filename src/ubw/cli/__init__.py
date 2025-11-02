@@ -1,4 +1,6 @@
 import asyncio
+import copy
+import importlib
 from pathlib import Path
 from typing import Annotated
 
@@ -18,7 +20,18 @@ def init_sentry(cd):
 
 def init_logging(cd):
     import logging.config
-    logging.config.dictConfig(cd['logging'])
+
+    # suppress with module names
+    logging_config_dict = copy.deepcopy(cd['logging'])
+    if 'handlers' in logging_config_dict:
+        for handler in logging_config_dict['handlers'].values():
+            handler: dict
+            if handler['class'] == 'rich.logging.RichHandler' and 'tracebacks_suppress_module' in handler:
+                extends = [importlib.import_module(mod) for mod in handler.pop('tracebacks_suppress_module', ())]
+                if extends:
+                    handler.setdefault('tracebacks_suppress', []).extend(extends)
+
+    logging.config.dictConfig(logging_config_dict)
 
 
 def load_config(c: Path):
