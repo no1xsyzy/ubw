@@ -9,6 +9,16 @@ class Room(BaseModel):
     jump_url: str
 
 
+class MatchInfo(BaseModel):
+    match_status: int
+    home_team_name: str
+    away_team_name: str
+    home_team_icon: str
+    away_team_icon: str
+    home_team_score: int
+    away_team_score: int
+
+
 class RelationView(BaseModel):
     order_id: int
     view_type: int
@@ -25,7 +35,7 @@ class RelationView(BaseModel):
     use_view_vt: bool
     anchor_face: str
     match_live_room: bool
-    match_info: None
+    match_info: MatchInfo | None
     duration: int
     up_name: str
     pub_date: str
