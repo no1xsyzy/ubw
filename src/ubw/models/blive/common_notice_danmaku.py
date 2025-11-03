@@ -9,9 +9,9 @@ class CommonNoticeDanmakuSegmentBase(BaseModel):
     background_color_dark: None = None
     font_bold: None = None
     font_color: Color | None = None
-    font_color_dark: None = None
-    highlight_font_color: None = None
-    highlight_font_color_dark: None = None
+    font_color_dark: Color | None = None
+    highlight_font_color: Color | None = None
+    highlight_font_color_dark: Color | None = None
     img_height: None = None
     img_width: None = None
     img_url: None = None
