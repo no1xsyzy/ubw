@@ -7,14 +7,14 @@ class CommonNoticeDanmakuSegmentBase(BaseModel):
 
     background_color: list[Color] | None = None
     background_color_dark: None = None
-    font_bold: None = None
-    font_color: Color | None = None
-    font_color_dark: Color | None = None
-    highlight_font_color: Color | None = None
-    highlight_font_color_dark: Color | None = None
-    img_height: None = None
-    img_width: None = None
-    img_url: None = None
+    font_bold: bool | None = None
+    font_color: Color | Literal[''] | None = None
+    font_color_dark: Color | Literal[''] | None = None
+    highlight_font_color: Color | Literal[''] | None = None
+    highlight_font_color_dark: Color | Literal[''] | None = None
+    img_height: int | None = None
+    img_width: int | None = None
+    img_url: str | None = None
     uri: str | None = None
 
 
