@@ -3,6 +3,7 @@
 from ._base import *
 from .activity_banner_change import ActivityBannerChangeCommand
 from .activity_banner_change_v2 import ActivityBannerChangeV2Command
+from .ad_game_card_refresh import AdGameCardRefreshCommand
 from .admin_shield_keyword import AdminShieldKeywordCommand
 from .anchor_broadcast import AnchorBroadcastCommand
 from .anchor_ecommerce_status import AnchorEcommerceStatusCommand
@@ -152,6 +153,7 @@ from .x import XHeartbeatCommand, XStartCommand, XStopCommand
 
 AnnotatedCommandModel = Annotated[Union[
     ActivityBannerChangeCommand, ActivityBannerChangeV2Command,
+    AdGameCardRefreshCommand,
     AdminShieldKeywordCommand,
     AnchorBroadcastCommand,
     AnchorEcommerceStatusCommand,
@@ -297,6 +299,7 @@ AnnotatedCommandModel = Annotated[Union[
 
 __all__ = (
     'ActivityBannerChangeCommand', 'ActivityBannerChangeV2Command',
+    'AdGameCardRefreshCommand',
     'AdminShieldKeywordCommand',
     'AnchorBroadcastCommand',
     'AnchorEcommerceStatusCommand',
