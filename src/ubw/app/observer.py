@@ -77,10 +77,10 @@ class ObserverApp(InitLoopFinalizeApp):
         self._live_client.add_handler(self._live_handler)
         await self._live_handler.start(self._live_client)
         await self._live_client.start()
-        await self._fetch_print_update(True)
+        await self._fetch_print_update(init=True)
         await self.ui.add_record(Record(segments=[PlainText(text=" ===== 以上为历史消息 ===== ")]))
 
-    async def _fetch_print_update(self, init):
+    async def _fetch_print_update(self, *, init=False):
         s = await self.bilibili_client.get_user_dynamic(self.uid)
         this_got = {item.id_str for item in s.items}
         for item in sorted(s.items, key=key):
@@ -148,7 +148,7 @@ class ObserverApp(InitLoopFinalizeApp):
     async def _loop(self):
         await asyncio.sleep(self.dynamic_poll_interval * (self.exponential_delay_base ** self._fail_count))
         try:
-            await self._fetch_print_update(False)
+            await self._fetch_print_update()
             self._fail_count = 0
             return
         except (asyncio.TimeoutError, aiohttp.ClientConnectorError) as e:
