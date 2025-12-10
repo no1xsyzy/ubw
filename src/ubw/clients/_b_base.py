@@ -6,6 +6,7 @@ import re
 import time
 from contextvars import ContextVar
 from datetime import timedelta
+from functools import lru_cache
 from typing import Literal, TypeVar
 from urllib.parse import urlencode, quote
 
@@ -42,6 +43,12 @@ __all__ = ('BilibiliApiError', 'BilibiliClientABC', 'Literal', 'USER_AGENT',)
 logger = logging.getLogger('ubw.clients._b_base')
 _try_count = ContextVar('try_count', default=1)
 _T = TypeVar('_T')
+
+
+@lru_cache
+def _get_type_adapter(type_):
+    logger.info(f'creating type adapter for {type_}, {_get_type_adapter.cache_info()}')
+    return TypeAdapter(type_)
 
 
 class BilibiliApiError(Exception):
@@ -240,7 +247,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
     async def get_user_dynamic(self, uid, offset="") -> OffsetList[DynamicItem]:
         credential = await self.get_credential()
         u = user.User(uid=uid, credential=credential)
-        return TypeAdapter(OffsetList[DynamicItem]).validate_python(await u.get_dynamics_new(offset=offset))
+        return _get_type_adapter(OffsetList[DynamicItem]).validate_python(await u.get_dynamics_new(offset=offset))
 
     async def iter_user_dynamic(self, uid):
         has_more = True
@@ -295,7 +302,7 @@ class BilibiliClientABC(BaseModel, abc.ABC):
         from bilibili_api import video
         credential = await self.get_credential()
         v = video.Video(bvid=bvid, credential=credential)
-        return TypeAdapter(list[VideoP]).validate_python(await v.get_pages())
+        return _get_type_adapter(list[VideoP]).validate_python(await v.get_pages())
 
     async def get_video_download(self, bvid, cid):
         from bilibili_api import video
