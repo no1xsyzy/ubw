@@ -222,7 +222,7 @@ class LikeIcon(BaseModel):
 class DynamicBasic(BaseModel):
     comment_id_str: str
     comment_type: int
-    like_icon: LikeIcon
+    like_icon: LikeIcon | None
     rid_str: str
     jump_url: str = ""
 
