@@ -15,18 +15,19 @@ fi
 
 jq -s '.[0]' "$IN_FILE" >${TMP_NAME}.json
 
-datamodel-codegen --input ${TMP_NAME}.json --output ${TMP_NAME}.py --input-file-type json
+datamodel-codegen \
+  --target-python-version "3.12" \
+  --additional-imports "._base.*" \
+  --class-name "${CAPITAL_CASE}CommandInfo" \
+  --input-file-type "json" --input "${TMP_NAME}.json" \
+  --output-model-type "pydantic_v2.BaseModel" --output "${TMP_NAME}.py"
 
 cat >"$OUT_FILE" <<EOF
-from ._base import *
+$(cat ${TMP_NAME}.py)
 
 
-$(cat ${TMP_NAME}.py | head -n-8 | tail -n+10)
-
-
-class ${CAPITAL_CASE}Command(CommandModel):
+class ${CAPITAL_CASE}Command(${CAPITAL_CASE}CommandInfo, CommandModel):
     cmd: Literal['${UPPER_SNAKE}']
-    data: Data
 EOF
 
 rm -f "${TMP_NAME}.json" "${TMP_NAME}.py"
