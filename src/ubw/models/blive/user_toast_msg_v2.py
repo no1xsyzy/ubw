@@ -27,6 +27,7 @@ class EffectInfo(BaseModel):
     face_effect_id: int
     room_gift_effect_id: int
     room_group_effect_id: int
+    ship_effect_id: int = 590
 
 
 class Option(BaseModel):

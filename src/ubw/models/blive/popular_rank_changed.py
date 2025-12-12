@@ -12,6 +12,7 @@ class PopularRankChangedData(BaseModel):
     url_by_type: str
     rank_by_type: int
     default_url: str
+    rank_type: int = 1
 
 
 class PopularRankChangedCommand(CommandModel):

@@ -6,6 +6,7 @@ from ._base import *
 class Data(BaseModel):
     num: int
     text: str
+    text_large: str = ""
 
 
 class Model(BaseModel):

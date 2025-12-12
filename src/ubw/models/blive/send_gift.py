@@ -154,6 +154,9 @@ class GiftData(BaseModel):
 
     face_effect: FaceEffect | None = None
 
+    benefits: None = None
+    effect_config: None = None
+
     @field_validator('face_effect', mode='before')
     @classmethod
     def face_effect_empty_dict_is_none(cls, v):

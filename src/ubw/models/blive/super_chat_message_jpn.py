@@ -16,6 +16,11 @@ class MedalInfo(BaseModel):
     medal_name: str
     special: str
     target_id: int
+    medal_color_start: int = 0
+    medal_color_end: int = 0
+    medal_color_border: int = 0
+    is_lighted: int = 0
+    guard_level: int = 0
 
 
 class UserInfo(BaseModel):
@@ -30,6 +35,7 @@ class UserInfo(BaseModel):
     title: str
     uname: str
     user_level: int
+    name_color: Color
 
 
 class Data(BaseModel):

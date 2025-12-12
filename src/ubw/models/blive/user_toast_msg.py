@@ -35,6 +35,7 @@ class UserToastMsgData(BaseModel):
 
     room_gift_effect_id: int = 0
     source: int = 0
+    ship_effect_id: int = 590
 
 
 class UserToastMsgCommand(CommandModel):
