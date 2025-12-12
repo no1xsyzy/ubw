@@ -47,7 +47,7 @@ _T = TypeVar('_T')
 
 @lru_cache
 def _get_type_adapter(type_):
-    logger.info(f'creating type adapter for {type_}, {_get_type_adapter.cache_info()}')
+    logger.debug(f'creating type adapter for {type_}, {_get_type_adapter.cache_info()}')
     return TypeAdapter(type_)
 
 
