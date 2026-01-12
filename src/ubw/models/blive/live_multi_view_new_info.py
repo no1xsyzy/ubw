@@ -43,6 +43,15 @@ class RelationView(BaseModel):
     sub_name: str = ""
 
 
+class GatherRoom(BaseModel):
+    order_id: int
+    gather_title: str
+    exposure_mode: int
+    icon: str
+    gather_id: int
+    gather_type: int
+
+
 class Data(BaseModel):
     title: str
     room_id: int
@@ -55,7 +64,7 @@ class Data(BaseModel):
     room_list: list[Room] | None
     relation_view: list[RelationView] | None
     view_pattern: int
-    gather_room_list: list[None] | None
+    gather_room_list: list[GatherRoom] | None
 
 
 class LiveMultiViewNewInfo(BaseModel):

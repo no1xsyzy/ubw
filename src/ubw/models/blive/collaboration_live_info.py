@@ -23,7 +23,7 @@ class MultiView(BaseModel):
     sub_bg_color: Color
     sub_text_color: Color
     view_type: int
-    relation_view: list[RelationViewItem]
+    relation_view: list[RelationViewItem] | None = None
     view_pattern: int
 
     expand_guide_text: str = "\u5207\u6362\u623f\u95f4\uff0c\u652f\u6301\u76f8\u5e94\u4e3b\u64ad"
