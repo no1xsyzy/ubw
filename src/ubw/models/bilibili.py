@@ -13,6 +13,7 @@ __all__ = (
     'Dynamic', 'DynamicItem', 'AccountInfo',
     'Nav',
     'VideoP', 'VideoPlayInfo',
+    'FavList',
 )
 
 DataV = TypeVar('DataV')
@@ -610,8 +611,26 @@ class DynamicItem(BaseModel):
                     s = f"{s}[{markdown_escape(text)}]({jump_url})"
                 case RichTextNodeTypeVote(text=text):
                     s = f"{s}[投票：{markdown_escape(text)}]"
-                case _:
-                    assert_never(n)
+                case RichTextNodeTypeTopic(text=text, jump_url=jump_url):
+                    s = f"{s}[{markdown_escape(text)}]({jump_url})"
+                case RichTextNodeTypeAv(text=text):
+                    s = f"{s}{markdown_escape(text)}"
+                case RichTextNodeTypeNone(text=text):
+                    s = f"{s}{markdown_escape(text)}"
+                case RichTextNodeTypeCv():
+                    s = f"{s}{markdown_escape(text)}"
+                case RichTextNodeTypeMail():
+                    s = f"{s}{markdown_escape(text)}"
+                case RichTextNodeTypeOgvEp():
+                    s = f"{s}{markdown_escape(text)}"
+                case RichTextNodeTypeOgvSeason():
+                    s = f"{s}{markdown_escape(text)}"
+                case RichTextNodeTypeTaobao():
+                    s = f"{s}{markdown_escape(text)}"
+                case RichTextNodeTypeViewPicture():
+                    s = f"{s}{markdown_escape(text)}"
+                case _ as unreachable:
+                    assert_never(unreachable)
         for p in self.pictures:
             s = f"{s}\n![]({p})"
         match self.modules.module_dynamic.additional:
@@ -744,3 +763,20 @@ class Dash(BaseModel):
 
 class VideoPlayInfo(BaseModel):
     dash: Dash
+
+
+class FavInfo(BaseModel):
+    title: str
+    media_count: int
+
+
+class FavMedia(BaseModel):
+    page: int
+    bvid: str
+    title: str
+
+
+class FavList(BaseModel):
+    info: FavInfo
+    medias: list[FavMedia]
+    has_more: bool
