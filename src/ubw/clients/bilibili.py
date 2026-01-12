@@ -65,8 +65,8 @@ class BilibiliCookieClient(BilibiliClientABC):
                 s = os.environ.get('UBW_COOKIE_FILE')
                 if s is None:
                     s = self.cookie_file
-            case _:
-                assert_never(f"{use=}, expected 'env', 'config' or 'default'")
+            case _ as unreachable:
+                assert_never(unreachable)
 
         if s is None:
             raise ValueError('no cookie file provided, use UBW_COOKIE_FILE or config.toml to specify')
