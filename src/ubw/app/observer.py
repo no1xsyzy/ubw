@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from typing import Annotated
 
 import aiohttp
+import bilibili_api
 from pydantic import Field
 from typing_extensions import Doc
 
@@ -28,6 +29,8 @@ class ObserverApp(InitLoopFinalizeApp):
 
     # high config
     uid: int
+    watch_live: bool = True
+    watch_dynamic: bool = True
 
     # low config
     dynamic_poll_interval: float = 60
@@ -63,24 +66,28 @@ class ObserverApp(InitLoopFinalizeApp):
                     acc_info or (acc_info := await self.bilibili_client.get_account_info(self.uid))).live_room_id
         if self.name == "":
             self.name = (acc_info or (acc_info := await self.bilibili_client.get_account_info(self.uid))).name
-        self._live_client = WSWebCookieLiveClient(
-            room_id=self.room_id,
-            bilibili_client=self.bilibili_client, bilibili_client_owner=False,
-        )
-        self._live_handler = ObserverHandler(
-            room_id=self.room_id,
-            ui=self.ui, owned_ui=False,
-            bilibili_client=self.bilibili_client, bilibili_client_owner=False,
-            server_chan=self.server_chan, owned_server_chan=False,
-            qmsg=self.qmsg, owned_qmsg=False,
-        )
-        self._live_client.add_handler(self._live_handler)
-        await self._live_handler.start(self._live_client)
-        await self._live_client.start()
+
+        if self.watch_live:
+            self._live_client = WSWebCookieLiveClient(
+                room_id=self.room_id,
+                bilibili_client=self.bilibili_client, bilibili_client_owner=False,
+            )
+            self._live_handler = ObserverHandler(
+                room_id=self.room_id,
+                ui=self.ui, owned_ui=False,
+                bilibili_client=self.bilibili_client, bilibili_client_owner=False,
+                server_chan=self.server_chan, owned_server_chan=False,
+                qmsg=self.qmsg, owned_qmsg=False,
+            )
+            self._live_client.add_handler(self._live_handler)
+            await self._live_handler.start(self._live_client)
+            await self._live_client.start()
         await self._fetch_print_update(init=True)
         await self.ui.add_record(Record(segments=[PlainText(text=" ===== 以上为历史消息 ===== ")]))
 
     async def _fetch_print_update(self, *, init=False):
+        if not self.watch_dynamic:
+            return
         s = await self.bilibili_client.get_user_dynamic(self.uid)
         this_got = {item.id_str for item in s.items}
         for item in sorted(s.items, key=key):
@@ -156,6 +163,14 @@ class ObserverApp(InitLoopFinalizeApp):
             self._fail_count += 1
             if self._fail_count > 5:
                 raise
+        except bilibili_api.exceptions.NetworkException as e:
+            if e.status == 412:
+                # 触发风控！指数退避！
+                logger.warning(f"获取动态时触发412风控！指数退避！改为{self.dynamic_poll_interval}秒")
+                self.dynamic_poll_interval *= 2
+            self._fail_count += 1
+            if self._fail_count > 5:
+                raise
         except Exception as e:
             logger.exception("exception in _fetch_print_update", exc_info=e)
             self._fail_count += 1
@@ -163,16 +178,18 @@ class ObserverApp(InitLoopFinalizeApp):
                 raise
 
     async def _finalize(self):
-        if self._live_client is not None:
-            await self._live_client.stop()
-        if self._live_handler is not None:
-            await self._live_handler.stop()
+        if self.watch_live:
+            if self._live_client is not None:
+                await self._live_client.stop()
+            if self._live_handler is not None:
+                await self._live_handler.stop()
         if self.owned_ui:
             await self.ui.stop()
 
     async def close(self):
-        if self._live_client is not None:
-            await self._live_client.close()
+        if self.watch_live:
+            if self._live_client is not None:
+                await self._live_client.close()
         if self.bilibili_client_owner:
             await self.bilibili_client.close()
         if self.server_chan is not None and self.owned_server_chan:
