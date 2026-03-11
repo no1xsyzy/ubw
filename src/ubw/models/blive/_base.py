@@ -171,8 +171,8 @@ class OfficialInfo(BaseModel):
 
 
 class UinfoBase(BaseModel):
-    name: str
-    face: str = ''
+    name: str | None = None
+    face: str | None = None
     name_color: Color | None = None
     is_mystery: bool = False
     risk_ctrl_info: RiskCtrlInfo | None = None
@@ -230,7 +230,7 @@ class UheadFrame(BaseModel):
 
 
 class Uinfo(BaseModel):
-    uid: int
+    uid: int | None = None
     base: UinfoBase | None = None
     medal: UinfoMedal | None = None
     wealth: UinfoWealth | None = None

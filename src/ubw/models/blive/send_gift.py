@@ -65,6 +65,36 @@ class GiftInfo(BaseModel):
     gif: str | None = None
 
 
+class H265Conf(BaseModel):
+    mp4: str
+    mp4_crc32: int
+    mp4_file_size: int
+    mp4_json: str
+    mp4_md5: str
+
+
+class EffectConfig(BaseModel):
+    bind_gift_ids: list[int]
+    h265_conf: dict[str, H265Conf]
+    horizontal_mp4: str
+    horizontal_mp4_crc32: int
+    horizontal_mp4_file_size: int
+    horizontal_mp4_md5: str
+    id: int
+    online_time: datetime
+    plan_platform: list[int]
+    type: int
+    vertical_mp4: str
+    vertical_mp4_crc32: int
+    vertical_mp4_file_size: int
+    vertical_mp4_md5: str
+    web_mp4: str
+    web_mp4_crc32: int
+    web_mp4_file_size: int
+    web_mp4_json: str
+    web_mp4_md5: str
+
+
 class GiftData(BaseModel):
     """礼物消息
     :var giftName: 礼物名
@@ -155,7 +185,7 @@ class GiftData(BaseModel):
     face_effect: FaceEffect | None = None
 
     benefits: None = None
-    effect_config: None = None
+    effect_config: EffectConfig | None = None
 
     @field_validator('face_effect', mode='before')
     @classmethod

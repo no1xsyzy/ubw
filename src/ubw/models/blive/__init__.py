@@ -32,6 +32,7 @@ from .dm_interaction import DmInteractionCommand
 from .entry_effect import EntryEffectCommand, EntryEffectMustReceiveCommand
 from .full_screen_special_effect import FullScreenSpecialEffectCommand
 from .gift_board_red_dot import GiftBoardRedDotCommand
+from .gift_combo import GiftComboCommand
 from .gift_panel_plan import GiftPanelPlanCommand
 from .gift_star_process import GiftStarProcessCommand
 from .goto_buy_flow import GotoBuyFlowCommand
@@ -182,6 +183,7 @@ AnnotatedCommandModel = Annotated[Union[
     EntryEffectCommand, EntryEffectMustReceiveCommand,
     FullScreenSpecialEffectCommand,
     GiftBoardRedDotCommand,
+    GiftComboCommand,
     GiftPanelPlanCommand,
     GiftStarProcessCommand,
     GotoBuyFlowCommand,
@@ -329,6 +331,7 @@ __all__ = (
     'FullScreenSpecialEffectCommand',
     'GiftBoardRedDotCommand',
     'GiftPanelPlanCommand',
+    'GiftComboCommand',
     'GiftStarProcessCommand',
     'GotoBuyFlowCommand',
     'GuardAchievementRoomCommand',
