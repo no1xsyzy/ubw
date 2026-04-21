@@ -41,6 +41,7 @@ class VodInfo:
     bvid: str
     duration: timedelta
     title: str
+    cover: str
     demander_uname: str
     demander_uid: int
     demander_face: str
@@ -48,6 +49,7 @@ class VodInfo:
     owner_uid: int
     owner_face: str
     vod_time: datetime
+    original_text: str
 
 
 class UI(App):
@@ -98,12 +100,23 @@ class UI(App):
     async def on_mount(self):
         if DEBUG_VODT:
             async def appender():
-                demander = "橘枳橼", 2351778, "https://i2.hdslb.com/bfs/garb/open/7bfb44777ed5882f125a484ed6f2e3599a7c55c3.png"
-                up = "暗视者ShadowVisual", 13583619, "https://i2.hdslb.com/bfs/face/a29503c5c118512aba752fe30b22f4b5b8b610d3.jpg"
                 from itertools import count
                 for i in count():
                     await asyncio.sleep(0 if i < 4 else 1 if i < 10 else 20)
-                    self.add_item(VodInfo(f'BV{i}', timedelta(seconds=120 * 2 ** i), f"title_{i}", *demander, *up))
+                    self.add_item(VodInfo(
+                        bvid=f'BV{i}',
+                        duration=timedelta(seconds=120 * 2 ** i),
+                        title=f"title_{i}",
+                        cover="//i2.hdslb.com/bfs/archive/3ff8fbeda9f35fa250aa3f5465384c41735343bd.jpg@672w_378h_1c.avif",
+                        demander_uname="橘枳橼",
+                        demander_uid=2351778,
+                        demander_face="https://i2.hdslb.com/bfs/garb/open/7bfb44777ed5882f125a484ed6f2e3599a7c55c3.png",
+                        owner_uname="暗视者ShadowVisual",
+                        owner_uid=13583619,
+                        owner_face="https://i2.hdslb.com/bfs/face/a29503c5c118512aba752fe30b22f4b5b8b610d3.jpg",
+                        vod_time=datetime.now().astimezone(),
+                        original_text=f'BV{i}',
+                    ))
 
             # NEVER use it, saving reference to keep task run
             setattr(self, '@debug_appender@', asyncio.create_task(appender()))
@@ -124,18 +137,19 @@ class VodTextualHandler(BaseHandler):
     async def on_super_chat_message(self, client: LiveClientABC, message: models.SuperChatCommand):
         bclient: BilibiliClient = client.bilibili_client
         for bvid in re.findall(r"BV\w{10}", message.data.message):
-            detail = await Video(bvid, await bclient.get_credential()).get_detail()
+            detail = await Video(bvid, credential=await bclient.get_credential()).get_detail()
             duration = timedelta(seconds=detail['View']['duration'])
+            cover = detail['View']['pic']
             title = detail['View']['title']
             demander_uname = message.data.user_info.uname
             demander_uid = message.data.uid
             demander_face = message.data.user_info.face
             owner_uname, owner_uid, owner_face = owner(detail['View']['owner'])
             self._ui.add_item(VodInfo(
-                bvid=bvid, duration=duration, title=title,
+                bvid=bvid, duration=duration, title=title, cover=cover,
                 demander_uname=demander_uname, demander_uid=demander_uid, demander_face=demander_face,
                 owner_uname=owner_uname, owner_uid=owner_uid, owner_face=owner_face,
-                vod_time=message.ct,
+                vod_time=message.ct, original_text=message.data.message,
             ))
 
 
