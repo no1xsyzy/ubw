@@ -37,7 +37,6 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
 
     # runtime stuff
     _websocket: aiohttp.ClientWebSocketResponse | None = None
-    _heartbeat_timer_task: asyncio.Task | None = None
     _session: aiohttp.ClientSession | None = None
 
     async def start(self):
@@ -149,14 +148,28 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
                 async with self._session.ws_connect(
                         f"wss://{host_server.host}:{host_server.wss_port}/sub",
                         headers={'User-Agent': USER_AGENT},
-                        receive_timeout=self.heartbeat_interval + 5,
                 ) as websocket:
                     self._websocket = websocket
                     await self._on_ws_connect()
 
                     # 处理消息
                     message: aiohttp.WSMessage
-                    async for message in websocket:
+                    last_heartbeat = 0
+                    while True:
+                        now = asyncio.get_event_loop().time()
+                        timeout = self.heartbeat_interval + last_heartbeat - now
+                        if timeout < 0:
+                            await self._send_heartbeat()
+                            timeout = self.heartbeat_interval
+                            last_heartbeat = now
+                        try:
+                            message = await websocket.receive(timeout=timeout)
+                        except asyncio.TimeoutError:
+                            continue
+                        if message.type != aiohttp.WSMsgType.BINARY:  # pragma: no cover
+                            logger.warning('room=%d unknown websocket message type=%s(%s), data=%s',
+                                           self.room_id, message.type, message.type.name, message.data)
+                            break
                         await self._on_ws_message(message)
                         # 至少成功处理1条消息
                         retry_count = 0
@@ -178,27 +191,24 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
             # 准备重连
             retry_count += 1
             logger.warning('room=%d is reconnecting, retry_count=%d', self.room_id, retry_count)
-            await asyncio.sleep(1)
+            await asyncio.sleep(1.618 ** retry_count)
 
     async def _on_ws_connect(self):
         """
         websocket连接成功
         """
         await self._send_auth()
-        self._heartbeat_timer_task = asyncio.create_task(self._heartbeat_timer())
 
     async def _on_ws_close(self):
         """
         websocket连接断开
         """
-        if self._heartbeat_timer_task is not None:
-            self._heartbeat_timer_task.cancel('ws close')
-            self._heartbeat_timer_task = None
 
     async def _send_auth(self):
         """
         发送认证包
         """
+        logger.debug("room=%d _send_auth()", self.room_id)
         auth_params = {
             'uid': self._uid,
             'roomid': self.room_id,
@@ -220,18 +230,11 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
 
         await self._websocket.send_bytes(self._make_packet(auth_params, Operation.AUTH))
 
-    async def _heartbeat_timer(self):
-        while True:
-            await asyncio.sleep(self.heartbeat_interval)
-            if self._websocket is None or self._websocket.closed:  # pragma: no cover
-                self._heartbeat_timer_task = None
-                return
-            await self._send_heartbeat()
-
     async def _send_heartbeat(self):
         """
         发送心跳包
         """
+        logger.debug("room=%d _send_heartbeat()", self.room_id)
         if self._websocket is None or self._websocket.closed:  # pragma: no cover
             return
 
@@ -239,8 +242,10 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
             await self._websocket.send_bytes(self._make_packet({}, Operation.HEARTBEAT))
         except (ConnectionResetError, aiohttp.ClientConnectionError) as e:  # pragma: no cover
             logger.warning('room=%d _send_heartbeat() failed: %r', self.room_id, e)
+            raise
         except Exception:  # noqa
             logger.exception('room=%d _send_heartbeat() failed:', self.room_id)
+            raise
 
     @property
     def user_ident(self) -> str:
