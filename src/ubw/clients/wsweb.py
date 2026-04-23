@@ -54,6 +54,8 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
 
         task = self._task
         self._task = None
+        if task is None:
+            return
         task.cancel('stop')
         try:
             await task
@@ -67,6 +69,8 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
             return
 
         logger.debug('room=%s joining', self.room_id)
+        if self._task is None:
+            return
         await asyncio.shield(self._task)
 
     async def close(self):
