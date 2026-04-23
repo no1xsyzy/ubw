@@ -83,13 +83,11 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
             await self.bilibili_client.close()
 
     async def _init_room(self):
-        res = True
         cookies = self._session.cookie_jar.filter_cookies(yarl.URL('https://www.bilibili.com/'))
         self._uid = int(cookies['DedeUserID'].value)
         self._buvid3 = cookies['buvid3'].value
         if not await self._init_host_server():
-            res = False  # pragma: no cover
-        return res
+            raise InitError('init_room() failed')
 
     async def _init_host_server(self):
         logger.debug('room=%d _init_host_server() invoked', self.room_id)
@@ -141,8 +139,7 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
     async def _network_coroutine(self):
         # 如果之前未初始化则初始化
         if self._host_server_token is None:
-            if not await self._init_room():
-                raise InitError('init_room() failed')  # pragma: no cover
+            await self._init_room()
         retry_count = 0
         while True:
             try:
@@ -170,8 +167,7 @@ class WSWebCookieLiveClient(WSMessageParserMixin, LiveClientABC):
             except AuthError:
                 # 认证失败了，应该重新获取token再重连
                 logger.exception('room=%d auth failed, trying init_room() again', self.room_id)
-                if not await self._init_room():
-                    raise InitError('init_room() failed')  # pragma: no cover
+                await self._init_room()
             except ssl_.SSLError:  # noqa
                 logger.error('room=%d a SSLError happened, cannot reconnect', self.room_id)
                 raise
