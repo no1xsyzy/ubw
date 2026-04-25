@@ -2,11 +2,7 @@ import json
 from json import JSONDecoder
 from pathlib import Path
 
-from pydantic import TypeAdapter
-
 from ubw import models
-
-COMMAND_ADAPTER = TypeAdapter(models.AnnotatedCommandModel)
 
 
 def test_exports_not_over():
@@ -26,13 +22,13 @@ def test_with_history():
                 idx += 1
                 continue
             jj, idx = decoder.raw_decode(jsons, idx)
-            m = COMMAND_ADAPTER.validate_python(jj)
+            m = models.BLIVE_ADAPTER.validate_python(jj)
             c = m.__class__
             assert models.CommandModel in c.mro() and c is not models.CommandModel
 
 
 def test_summary_guard_achievement_room():
-    c = COMMAND_ADAPTER.validate_python({
+    c = models.BLIVE_ADAPTER.validate_python({
         'cmd': 'GUARD_ACHIEVEMENT_ROOM',
         'data': {
             'anchor_basemap_url': '<anchor_basemap_url>',
@@ -120,12 +116,12 @@ def test_summary_entry_effect():
         },
     }
 
-    s1 = COMMAND_ADAPTER.validate_python({
+    s1 = models.BLIVE_ADAPTER.validate_python({
         'cmd': 'ENTRY_EFFECT',
         'data': data,
     }).summary()
 
-    s2 = COMMAND_ADAPTER.validate_python({
+    s2 = models.BLIVE_ADAPTER.validate_python({
         'cmd': 'ENTRY_EFFECT_MUST_RECEIVE',
         'data': data,
     }).summary()
@@ -139,7 +135,7 @@ def test_danmu_msg():
     with open(Path(__file__).parent / 'danmu_msg.json') as f:
         j = json.load(f)
 
-    c = COMMAND_ADAPTER.validate_python(j)
+    c = models.BLIVE_ADAPTER.validate_python(j)
     s = c.summarize()
 
     assert s.msg == "......"
@@ -149,7 +145,7 @@ def test_danmu_msg():
     with open(Path(__file__).parent / 'danmu_msg2.json') as f:
         j = json.load(f)
 
-    c = COMMAND_ADAPTER.validate_python(j)
+    c = models.BLIVE_ADAPTER.validate_python(j)
     s = c.summarize()
 
     assert s.msg == "。"

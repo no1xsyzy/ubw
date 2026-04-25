@@ -34,7 +34,7 @@ class DanmakuCommand(CommandModel):
     # ... 其他字段
 ```
 
-适配器验证：`COMMAND_ADAPTER.validate_python(raw_dict) → CommandModel子类`
+适配器验证：`ubw.models.BLIVE_ADAPTER.validate_python(raw_dict) → CommandModel子类`
 
 ### 3. **处理器管道设计**
 
@@ -67,7 +67,7 @@ def warn_extra(self, info: ValidationInfo):
 
 # 在处理器中的使用
 extras = []
-model = COMMAND_ADAPTER.validate_python(command, context={'collect_extra': extras.append})
+model = ubw.models.BLIVE_ADAPTER.validate_python(command, context={'collect_extra': extras.append})
 # extras 现在包含 (模型路径, 未知字段) 元组
 ```
 
@@ -140,7 +140,6 @@ regex = ['pattern']
 - **关键测试**：`test_with_history()` 从 `output/unknown_cmd/` 加载原始JSON并验证
     - 确保新的B站消息不会破坏反序列化
     - 模型必须是 `CommandModel` 子类；具体类型根据 `cmd` 字段而异
-- 测试使用 `COMMAND_ADAPTER = TypeAdapter(models.AnnotatedCommandModel)` 进行灵活验证
 
 ## 跨组件通信
 

@@ -10,7 +10,7 @@ from typing import *
 
 import rich
 import sentry_sdk
-from pydantic import ValidationError, BaseModel, TypeAdapter
+from pydantic import ValidationError, BaseModel
 from rich.markup import escape
 
 from .. import models
@@ -24,8 +24,6 @@ __all__ = (
 )
 
 logger = logging.getLogger('ubw.handlers._base')
-
-ANNOTATED_COMMAND_ADAPTER = TypeAdapter(models.AnnotatedCommandModel)
 
 DEBUGGING_TOO_LONG = os.environ.get('DEBUGGING_TOO_LONG', '') == '1'
 
@@ -90,7 +88,7 @@ class BaseHandler(BaseModel):
 
             try:
                 extras = []
-                model: models.CommandModel = ANNOTATED_COMMAND_ADAPTER.validate_python(command, context={
+                model: models.CommandModel = models.BLIVE_ADAPTER.validate_python(command, context={
                     'collect_extra': extras.append})
                 for model_name, extra_dict in extras:
                     await self.on_xx_extra_field(client, command, model_name, extra_dict)
