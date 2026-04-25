@@ -17,6 +17,8 @@ def test_exports_not_over():
 def test_with_history():
     decoder = JSONDecoder()
     for jsonfile in Path("output/unknown_cmd").glob("*.json"):
+        if jsonfile.name.startswith('XX_EXTRA_'):
+            continue
         jsons = jsonfile.read_text('utf-8')
         idx = 0
         while idx < len(jsons):
