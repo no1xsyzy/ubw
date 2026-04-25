@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
+from pydantic import TypeAdapter
 
 from ._base import *
 from .activity_banner_change import ActivityBannerChangeCommand
 from .activity_banner_change_v2 import ActivityBannerChangeV2Command
 from .ad_game_card_refresh import AdGameCardRefreshCommand
+from .ad_game_card_show import AdGameCardShowCommand
 from .admin_shield_keyword import AdminShieldKeywordCommand
 from .anchor_broadcast import AnchorBroadcastCommand
 from .anchor_ecommerce_status import AnchorEcommerceStatusCommand
@@ -154,7 +156,7 @@ from .x import XHeartbeatCommand, XStartCommand, XStopCommand
 
 AnnotatedCommandModel = Annotated[Union[
     ActivityBannerChangeCommand, ActivityBannerChangeV2Command,
-    AdGameCardRefreshCommand,
+    AdGameCardRefreshCommand, AdGameCardShowCommand,
     AdminShieldKeywordCommand,
     AnchorBroadcastCommand,
     AnchorEcommerceStatusCommand,
@@ -299,9 +301,12 @@ AnnotatedCommandModel = Annotated[Union[
     XHeartbeatCommand, XStartCommand, XStopCommand,
 ], Field(discriminator='cmd')]
 
+BLIVE_ADAPTER = TypeAdapter[AnnotatedCommandModel](AnnotatedCommandModel)
+
 __all__ = (
+    'BLIVE_ADAPTER',
     'ActivityBannerChangeCommand', 'ActivityBannerChangeV2Command',
-    'AdGameCardRefreshCommand',
+    'AdGameCardRefreshCommand', 'AdGameCardShowCommand',
     'AdminShieldKeywordCommand',
     'AnchorBroadcastCommand',
     'AnchorEcommerceStatusCommand',
@@ -330,8 +335,8 @@ __all__ = (
     'EntryEffectCommand', 'EntryEffectMustReceiveCommand',
     'FullScreenSpecialEffectCommand',
     'GiftBoardRedDotCommand',
-    'GiftPanelPlanCommand',
     'GiftComboCommand',
+    'GiftPanelPlanCommand',
     'GiftStarProcessCommand',
     'GotoBuyFlowCommand',
     'GuardAchievementRoomCommand',
@@ -369,7 +374,6 @@ __all__ = (
     'OnlineRankV3Command',
     'OtherSliceLoadingResultCommand',
     'OtherSliceSettingChangedCommand',
-    'PreparingCommand',
     'PkBattleRankChangeCommand',
     'PkBattlePreCommand', 'PkBattlePreNewCommand',
     'PkBattleStartCommand', 'PkBattleStartNewCommand',
@@ -393,10 +397,11 @@ __all__ = (
     'PopularityRedPocketNewCommand', 'PopularityRedPocketV2NewCommand',
     'PopularityRedPocketStartCommand', 'PopularityRedPocketV2StartCommand',
     'PopularityRedPocketWinnerListCommand', 'PopularityRedPocketV2WinnerListCommand',
+    'PreparingCommand',
     'RankChangedCommand',
-    'RecommendCardCommand',
     'RankRemCommand',
     'RecallDanmuMsgCommand',
+    'RecommendCardCommand',
     'ReenterLiveRoomCommand',
     'RevenueRankChangedCommand',
     'RingStatusChangeCommand', 'RingStatusChangeCommandV2',
