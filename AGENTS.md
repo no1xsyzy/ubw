@@ -242,3 +242,14 @@ poetry run ubw app_run <app_name> -X 'key="value"'
 - **命令模型是半自动生成的** - 结构源自B站protobuf规范；自定义验证器手动添加
 - **测试预期向后兼容性** - 新命令应该能反序列化而不出错，即使字段是未知的
 - **处理器管道是可扩展的** - 添加新处理器不需要修改现有的；只需继承 `BaseHandler`
+
+### **修改现有模型以处理额外字段**
+
+当遇到 `XX_EXTRA_<full qualified name of Model>.json` 文件时，表示该模型有未知字段需要添加：
+
+1. 分析 `output/unknown_cmd/XX_EXTRA_<model_path>.json` 中的未知字段。
+2. 在对应的模型文件中添加这些字段，使用适当的类型和默认值（通常为 `str = ""` 或 `int = 0` 等）。
+3. 使用 `scripts/try_parse_unknown.py <CMD_NAME>` 验证相关命令的反序列化是否正确。
+
+例如，对于 `XX_EXTRA_ubw.models.blive.anchor_lot.AnchorLotAwardData.json`，添加 `promise_delivery_time: str = ""` 到
+`AnchorLotAwardData` 类，然后运行 `poetry run python scripts/try_parse_unknown.py ANCHOR_LOT_AWARD` 以确认修改正确。
