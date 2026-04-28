@@ -42,10 +42,12 @@ class GQnDescItem(BaseModel):
 
 class AudioCodecs(BaseModel):
     base: str | None = None
+    ext: list[str] = []
 
 
 class VideoCodecs(BaseModel):
     base: str | None = None
+    ext: list[str] = []
 
 
 class CodecItem(BaseModel):
@@ -64,6 +66,10 @@ class CodecItem(BaseModel):
     drm_key_systems: None = None
     audio_codecs: AudioCodecs | None = None
     video_codecs: VideoCodecs | None = None
+
+    session: str | None = None
+    is_pushing: bool | None = None
+    stream_resource_req: None = None
 
 
 class FormatItem(BaseModel):
@@ -90,6 +96,8 @@ class Playurl(BaseModel):
     stream: list[StreamItem]
     p2p_data: P2pData
     dolby_qn: None
+
+    hot: bool | None = None
 
 
 class Data(BaseModel):

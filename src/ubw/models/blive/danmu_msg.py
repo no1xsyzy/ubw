@@ -31,6 +31,16 @@ class DanmakuInfoModeInfoExtraIcon(BaseModel):
     prefix: DanmakuInfoModeInfoExtraIconPrefix
 
 
+class DanmakuInfoModeInfoExtraCard(BaseModel):
+    card_type: int
+    oid_str: str
+    oid_str_1: str
+    origin_oid_str: str
+    share_id: str
+    share_origin: str
+    from_: str = Field(alias='from', serialization_alias='from')
+    card_content: None
+
 class DanmakuInfoModeInfoExtra(BaseModel):
     send_from_me: bool | None = None
     mode: int | None = None
@@ -74,6 +84,12 @@ class DanmakuInfoModeInfoExtra(BaseModel):
 
     is_mirror: bool = False
     is_collaboration_member: bool = False
+
+    dm_score: int = 0
+    chronos_force_display: int = 0
+    card: DanmakuInfoModeInfoExtraCard | None = None
+    voice: None = None
+    background_type: int = 0
 
 
 class DanmakuInfoModeInfo(BaseModel):
