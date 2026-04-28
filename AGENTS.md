@@ -92,6 +92,8 @@ class Color(RootModel):
     # 支持格式："#AABBCC"、"rgba(170,187,204,255)"、0xAABBCC、(170,187,204)
 ```
 
+当颜色字段可能为空字符串时，使用 `Color | Literal['']` 以同时支持有效颜色和空字符串。
+
 #### 动态字段别名
 
 对于根据上下文变化的字段，使用 `AliasChoices`：

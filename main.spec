@@ -1,13 +1,16 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.building.api import PYZ, EXE, COLLECT
 from PyInstaller.building.build_main import Analysis
+from PyInstaller.utils.hooks import collect_submodules
+
+blive_modules = collect_submodules('ubw.models.blive')
 
 a = Analysis(
     ['main.py'],
     pathex=[],
     binaries=[('src/ubw/libmpv-2.dll', '.')],
     datas=[('src/ubw/handlers/check_in_words.txt', 'ubw/handlers')],
-    hiddenimports=['rich.logging', 'bilibili_api.clients.AioHTTPClient'],
+    hiddenimports=['rich.logging', 'bilibili_api.clients.AioHTTPClient'] + blive_modules,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
