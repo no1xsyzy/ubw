@@ -51,6 +51,7 @@ class AnchorLotStartData(BaseModel):
     award_per_capita: int = 0
     icon_name: str = "天选时刻"
     join_total: int = 0
+    promise_delivery_time: str = ""
 
 
 class AnchorLotStartCommand(CommandModel):
@@ -87,6 +88,7 @@ class AnchorLotAwardData(BaseModel):
     web_url: str
     sponsor_title: str = ""
     award_per_capita: int = 0
+    promise_delivery_time: str = ""
 
 
 class AnchorLotAwardCommand(CommandModel):
@@ -112,7 +114,7 @@ class AnchorLotCheckStatusData(BaseModel):
     id: int
     status: int
     uid: int
-    reject_danmu: None = None
+    reject_danmu: list[int] | None = None
     reject_reason: str = ''
     award_name_reject: str = ''
 

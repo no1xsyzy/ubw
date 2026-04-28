@@ -67,6 +67,6 @@ class Data(BaseModel):
     gather_room_list: list[GatherRoom] | None
 
 
-class LiveMultiViewNewInfo(BaseModel):
+class LiveMultiViewNewInfo(CommandModel):
     cmd: Literal['LIVE_MULTI_VIEW_NEW_INFO']
     data: Data

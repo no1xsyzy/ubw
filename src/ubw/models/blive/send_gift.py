@@ -1,6 +1,16 @@
 from ._base import *
 
 
+class Benefit(BaseModel):
+    effect_num: int = 0
+    effect_num_audience: int = 0
+    material_md5: str = ""
+    material_url: str = ""
+    unlock_text: str = ""
+    web_material_md5: str = ""
+    web_material_url: str = ""
+
+
 class BlindGift(BaseModel):
     blind_gift_config_id: int
     from_: int = Field(alias='from')
@@ -184,7 +194,7 @@ class GiftData(BaseModel):
 
     face_effect: FaceEffect | None = None
 
-    benefits: None = None
+    benefits: dict[str, Benefit | None] | None = None
     effect_config: EffectConfig | None = None
 
     @field_validator('face_effect', mode='before')

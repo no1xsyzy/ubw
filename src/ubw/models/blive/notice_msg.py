@@ -176,3 +176,5 @@ NoticeMsgCommand = Annotated[Union[
     NoticeMsgCommand6,
     NoticeMsgCommand9,
 ], Field(discriminator='msg_type')]
+
+__all__ = ('NoticeMsgCommand',)

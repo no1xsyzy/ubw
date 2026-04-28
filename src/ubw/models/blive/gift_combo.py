@@ -33,7 +33,7 @@ class Data(BaseModel):
     action: str
     crit_prob: int
     is_special_batch: int
-    magnification: int
+    magnification: float
     combo_stay_time: int
     combo_resources_id: int
     tag_image: str

@@ -19,9 +19,9 @@ class MultiView(BaseModel):
     room_id: int
     copy_writing: str
     bg_image: str
-    sub_slt_color: Color
-    sub_bg_color: Color
-    sub_text_color: Color
+    sub_slt_color: Color | Literal['']
+    sub_bg_color: Color | Literal['']
+    sub_text_color: Color | Literal['']
     view_type: int
     relation_view: list[RelationViewItem] | None = None
     view_pattern: int
