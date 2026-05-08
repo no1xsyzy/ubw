@@ -4,6 +4,7 @@ import re
 import sys
 import typing
 from datetime import timedelta, datetime
+from functools import cached_property
 from operator import itemgetter
 from typing import Literal
 
@@ -17,6 +18,7 @@ from textual.widgets import Footer, Header, Markdown, Button, Digits, Label
 from ubw import models
 from ubw.clients import LiveClientABC, BilibiliClient
 from ubw.handlers import BaseHandler
+from ._base import QueuedProcessorMixin
 
 owner = itemgetter('name', 'mid', 'face')
 
@@ -30,10 +32,6 @@ FORMAT_TEXT = (
     """（作者：[{owner_uname}](https://space.bilibili.com/{owner_uid})）"""
     """时长：{duration}"""
 )
-
-
-def exit_with_task(fut: asyncio.Task | asyncio.Future):
-    sys.exit(fut.cancelled() or fut.exception() is not None)
 
 
 @attr.define
@@ -122,17 +120,20 @@ class UI(App):
             setattr(self, '@debug_appender@', asyncio.create_task(appender()))
 
 
-class VodTextualHandler(BaseHandler):
+class VodTextualHandler(QueuedProcessorMixin, BaseHandler):
     cls: Literal['vodt'] = 'vodt'
 
     _ui_task: asyncio.Task | None = None
-
     _ui: UI
+
+    @cached_property
+    def _ui_lock(self):
+        return asyncio.Lock()
 
     async def start(self, client: LiveClientABC):
         self._ui = UI()
-        self._ui_task = asyncio.create_task(self._ui.run_async())
-        self._ui_task.add_done_callback(exit_with_task)
+        self._ui_task = task = asyncio.create_task(self._ui.run_async())
+        task.add_done_callback(lambda fut: sys.exit(fut.cancelled() or fut.exception() is not None))
 
     async def on_super_chat_message(self, client: LiveClientABC, message: models.SuperChatCommand):
         bclient: BilibiliClient = client.bilibili_client
@@ -145,12 +146,13 @@ class VodTextualHandler(BaseHandler):
             demander_uid = message.data.uid
             demander_face = message.data.user_info.face
             owner_uname, owner_uid, owner_face = owner(detail['View']['owner'])
-            self._ui.add_item(VodInfo(
-                bvid=bvid, duration=duration, title=title, cover=cover,
-                demander_uname=demander_uname, demander_uid=demander_uid, demander_face=demander_face,
-                owner_uname=owner_uname, owner_uid=owner_uid, owner_face=owner_face,
-                vod_time=message.ct, original_text=message.data.message,
-            ))
+            async with self._ui_lock:
+                self._ui.add_item(VodInfo(
+                    bvid=bvid, duration=duration, title=title, cover=cover,
+                    demander_uname=demander_uname, demander_uid=demander_uid, demander_face=demander_face,
+                    owner_uname=owner_uname, owner_uid=owner_uid, owner_face=owner_face,
+                    vod_time=message.ct, original_text=message.data.message,
+                ))
 
 
 async def main():

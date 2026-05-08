@@ -21,6 +21,7 @@ __all__ = (
     'Literal',
     'models',
     'rich', 'escape',
+    'QueuedProcessorMixin',
 )
 
 logger = logging.getLogger('ubw.handlers._base')
@@ -279,42 +280,48 @@ class BaseHandler(BaseModel):
 
 class QueuedProcessorMixin(BaseHandler):
     """通过添加一个队列来处理"""
-    _process_task: asyncio.Task | None = None
-    _allow_put: bool = False
+    __process_task: asyncio.Task | None = None
+    __queue_running: bool = False
 
     @cached_property
     def _queue(self) -> asyncio.Queue[tuple[LiveClientABC, dict] | Literal['END']]:
         return asyncio.Queue()
 
     async def start(self, client):
-        if self._process_task is None:
-            self._process_task = asyncio.create_task(self.t_process())
+        if self.__process_task is None:
+            self.__process_task = asyncio.create_task(self.t_process())
         await super().start(client)
 
     async def join(self):
-        await asyncio.gather(super().join(), self._process_task)
+        tasks: list[Awaitable] = [super().join()]
+        if self.__process_task is not None:
+            tasks.append(self.__process_task)
+        await asyncio.shield(asyncio.gather(*tasks))
 
     async def stop(self):
-        self._allow_put = False
-        task = self._process_task
-        self._process_task = None
+        task = self.__process_task
+        self.__process_task = None
         await self._queue.put('END')
-        await task
+        if task is not None:
+            await task
         await super().stop()
 
     async def handle(self, client: LiveClientABC, command: dict):
-        if not self._allow_put:
+        if not self.__queue_running:
             return
         await self._queue.put((client, command))
         qsize = self._queue.qsize()
         if qsize > 20:
-            logger.warning(f'CANNOT KEEP UP {qsize=} > 20')
+            logger.warning(f'CANNOT KEEP UP! {qsize=}>20')
 
     async def t_process(self):
-        self._allow_put = True
-        while True:
-            t = await self._queue.get()
-            if t == 'END':  #
-                return
-            client, command = t
-            await self.process_one(client, command)
+        self.__queue_running = True
+        try:
+            while True:
+                t = await self._queue.get()
+                if t == 'END':  #
+                    return
+                client, command = t
+                await self.process_one(client, command)
+        finally:
+            self.__queue_running = False
